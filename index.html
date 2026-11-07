@@ -157,24 +157,31 @@
   /* ===== STORY SECTION ===== */
   .story{
     position:relative;
-    background:url('story-bg.jpg') center/cover no-repeat;
+    background:var(--cream-alt);
     padding:90px 0;
   }
-  .story::after{content:"";position:absolute;inset:0;background:rgba(40,30,22,.12);}
   .story .wrap, .story .story-grid{position:relative;z-index:1;}
   .story-grid{
     display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;
   }
-  .story-eyebrow{color:rgba(246,243,236,.75);margin:0 0 14px;}
+  .story-eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
   .story h2{
     font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;
-    font-size:clamp(32px,4.6vw,48px);margin:0 0 26px;color:var(--cream);
+    font-size:clamp(32px,4.6vw,48px);margin:0 0 30px;color:var(--brown-dark);
   }
   .story h2 .script{font-size:1.15em;color:var(--gold);}
-  .story p{margin:0 0 20px;font-size:17px;font-family:'Cormorant Garamond',serif;color:var(--cream);line-height:1.7;}
+  .story p{margin:0 0 20px;font-size:17px;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1.7;}
+  .story-points{display:flex;flex-direction:column;gap:28px;margin:0 0 36px;}
+  .story-point{display:flex;gap:18px;align-items:flex-start;}
+  .story-point img{width:46px;height:46px;flex-shrink:0;margin-top:3px;}
+  .story-point h3{
+    font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19.5px;
+    color:var(--brown-dark);margin:0 0 7px;
+  }
+  .story-point p{margin:0;font-size:16.5px;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1.7;}
   .story-photos{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  .story-photos img{width:100%;height:150px;object-fit:cover;}
-  .story-sketch img{border:1px solid rgba(255,255,255,.2);}
+  .story-photos img{width:100%;height:150px;object-fit:cover;border-radius:4px;}
+  .story-sketch img{border:1px solid rgba(92,77,64,.15);border-radius:4px;}
   @media(max-width:860px){
     .story-grid{grid-template-columns:1fr;gap:34px;}
     .story-sketch{order:-1;}
@@ -214,8 +221,10 @@
   .tab-panel.active{display:grid;}
   .tab-panel h3{font-size:clamp(26px,3.6vw,34px);font-weight:500;margin:0 0 18px;color:var(--brown-dark);}
   .tab-panel .steps-label{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--taupe-dark);margin:0 0 10px;}
-  .tab-panel ol{margin:0 0 22px;padding-left:22px;}
-  .tab-panel ol li{margin-bottom:8px;}
+  .steps-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:13px;}
+  .steps-list li{display:flex;gap:13px;align-items:flex-start;}
+  .steps-list li img{width:30px;height:30px;flex-shrink:0;margin-top:2px;}
+  .steps-list li span{flex:1;padding-top:1px;}
   .tab-panel .note{font-size:17px;font-style:italic;color:var(--brown);margin:0 0 26px;}
   .tab-photo img{width:100%;height:420px;object-fit:cover;}
   @media(max-width:860px){
@@ -228,10 +237,9 @@
   /* ===== BOOK APPOINTMENT ===== */
   .appointment-wrap{max-width:var(--maxw);margin:0 auto;padding:40px 32px;}
   .appointment{
-    position:relative;background:url('appointment-bg.jpg') center/cover no-repeat;
+    position:relative;background:var(--brown-dark);
     padding:70px 56px;color:var(--white);border-radius:22px;overflow:hidden;
   }
-  .appointment::after{content:"";position:absolute;inset:0;background:rgba(60,48,38,.22);}
   .appointment-inner{position:relative;z-index:1;max-width:560px;margin:0;text-align:left;}
   .appointment-eyebrow{color:rgba(255,255,255,.8);margin:0 0 14px;}
   .appointment h2{
@@ -420,8 +428,29 @@
     <div class="story-copy">
       <p class="eyebrow story-eyebrow">Our Story</p>
       <h2>A Family Business, Built on <span class="script">Love</span></h2>
-      <p>Four years ago, Gilbert went looking for Kimberly's engagement ring and ran into everything couples dread about it: huge markups for a "brand name," salespeople pushing whatever was already in the case, and not one design that actually felt like them. Nothing about it was personal, and nothing about the pricing made sense.</p>
-      <p>So the search turned into something bigger. Hidden Gem Engagement Rings became a family project &mdash; Gilbert, Kimberly, and their daughters Olivia and Ellie &mdash; built around one idea: a ring should start with your story, not a catalog page. No markup for a name on the box, no pushy sales, no guessing what you're actually paying for. Just honest pricing and a design that means something to the two people it's for.</p>
+      <div class="story-points">
+        <div class="story-point">
+          <img src="icon-search.png" alt="">
+          <div>
+            <h3>Where It Started</h3>
+            <p>Four years ago, Gilbert went looking for Kimberly's engagement ring and ran into everything couples dread about it: huge markups for a "brand name," salespeople pushing whatever was already in the case, and not one design that actually felt like them. Nothing about it was personal, and nothing about the pricing made sense.</p>
+          </div>
+        </div>
+        <div class="story-point">
+          <img src="icon-family.png" alt="">
+          <div>
+            <h3>A Family Project</h3>
+            <p>So the search turned into something bigger. Hidden Gem Engagement Rings became a family project &mdash; Gilbert, Kimberly, and their daughters Olivia and Ellie &mdash; built around one idea: a ring should start with your story, not a catalog page.</p>
+          </div>
+        </div>
+        <div class="story-point">
+          <img src="icon-diamond.png" alt="">
+          <div>
+            <h3>Honest, From the Start</h3>
+            <p>No markup for a name on the box, no pushy sales, no guessing what you're actually paying for. Just honest pricing and a design that means something to the two people it's for.</p>
+          </div>
+        </div>
+      </div>
       <div class="story-photos">
         <img src="thumb-pear.jpg" alt="Pear-shaped diamond engagement ring, close up" loading="lazy">
         <img src="thumb-radiant.jpg" alt="Radiant-cut diamond engagement ring, close up" loading="lazy">
@@ -452,15 +481,15 @@
       <div>
         <h3>Already have inspiration photos, or a specific design in mind?</h3>
         <div class="steps-label">What happens next</div>
-        <ol>
-          <li>Submit your photos and inquiry.</li>
-          <li>Receive a custom quote.</li>
-          <li>Pay a 50% non-refundable deposit to begin.</li>
-          <li>Review your CAD rendering.</li>
-          <li>Approve production.</li>
-          <li>Receive photos and videos of your finished ring.</li>
-          <li>We ship your ring, or you can pick up locally in the Houston area.</li>
-        </ol>
+        <ul class="steps-list">
+          <li><img src="icon-inquiry.png" alt=""><span>Submit your photos and inquiry.</span></li>
+          <li><img src="icon-quote.png" alt=""><span>Receive a custom quote.</span></li>
+          <li><img src="icon-payment.png" alt=""><span>Pay a 50% non-refundable deposit to begin.</span></li>
+          <li><img src="icon-design.png" alt=""><span>Review your CAD rendering.</span></li>
+          <li><img src="icon-checkmark.png" alt=""><span>Approve production.</span></li>
+          <li><img src="icon-camera.png" alt=""><span>Receive photos and videos of your finished ring.</span></li>
+          <li><img src="icon-shipping.png" alt=""><span>We ship your ring, or you can pick up locally in the Houston area.</span></li>
+        </ul>
         <p class="note">We are always available! You can reach us via call, text or email.</p>
         <a class="btn" href="#appointment">Start My Design</a>
       </div>
@@ -471,12 +500,12 @@
       <div>
         <h3>Not sure exactly what you want yet?</h3>
         <div class="steps-label">What happens next</div>
-        <ol>
-          <li>Tell us what catches your eye &mdash; styles, stones, or pieces you love.</li>
-          <li>We'll put together a few design directions for you to react to.</li>
-          <li>We refine together until one feels right.</li>
-          <li>From there, it follows the same path: quote, deposit, CAD rendering, and production.</li>
-        </ol>
+        <ul class="steps-list">
+          <li><img src="icon-inspiration.png" alt=""><span>Tell us what catches your eye &mdash; styles, stones, or pieces you love.</span></li>
+          <li><img src="icon-design.png" alt=""><span>We'll put together a few design directions for you to react to.</span></li>
+          <li><img src="icon-conversation.png" alt=""><span>We refine together until one feels right.</span></li>
+          <li><img src="icon-quote.png" alt=""><span>From there, it follows the same path: quote, deposit, CAD rendering, and production.</span></li>
+        </ul>
         <p class="note">This is the most popular starting point &mdash; most people don't walk in with the exact design already in mind.</p>
         <a class="btn" href="#appointment">Find My Inspiration</a>
       </div>
@@ -487,12 +516,12 @@
       <div>
         <h3>Would you rather we guide the whole thing?</h3>
         <div class="steps-label">What happens next</div>
-        <ol>
-          <li>Book a one-on-one consultation with us, in person or by video call.</li>
-          <li>We'll ask about budget, style, and the person you're designing for.</li>
-          <li>We present a design built around what you told us.</li>
-          <li>You approve, and we handle the rest from stone to final piece.</li>
-        </ol>
+        <ul class="steps-list">
+          <li><img src="icon-consult.png" alt=""><span>Book a one-on-one consultation with us, in person or by video call.</span></li>
+          <li><img src="icon-conversation.png" alt=""><span>We'll ask about budget, style, and the person you're designing for.</span></li>
+          <li><img src="icon-design.png" alt=""><span>We present a design built around what you told us.</span></li>
+          <li><img src="icon-checkmark.png" alt=""><span>You approve, and we handle the rest from stone to final piece.</span></li>
+        </ul>
         <p class="note">Best for anyone who wants a true expert to steer, start to finish.</p>
         <a class="btn" href="#appointment">Book a Consultation</a>
       </div>
@@ -503,11 +532,11 @@
       <div>
         <h3>Want to spread out the cost?</h3>
         <div class="steps-label">How it works</div>
-        <ol>
-          <li>We'll walk through flexible deposit and payment plan options with you directly.</li>
-          <li>Every plan is built around your project's quote and timeline.</li>
-          <li>Nothing is finalized until a plan feels right for you.</li>
-        </ol>
+        <ul class="steps-list">
+          <li><img src="icon-financing.png" alt=""><span>We'll walk through flexible deposit and payment plan options with you directly.</span></li>
+          <li><img src="icon-clock.png" alt=""><span>Every plan is built around your project's quote and timeline.</span></li>
+          <li><img src="icon-checkmark.png" alt=""><span>Nothing is finalized until a plan feels right for you.</span></li>
+        </ul>
         <p class="note">Reach out and we'll talk through what's realistic for your budget &mdash; no pressure, no surprises.</p>
         <a class="btn" href="#appointment">Ask About Financing</a>
       </div>
