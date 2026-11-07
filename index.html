@@ -247,6 +247,14 @@
   .consult-form .alt-contact{font-size:15px;font-family:'Space Mono',monospace;color:var(--taupe-dark);}
   .consult-form .alt-contact a{color:var(--brown-dark);font-weight:700;border-bottom:1px solid var(--gold);}
   .form-honey{position:absolute;left:-9999px;opacity:0;}
+  .form-success{
+    grid-column:1 / -1;font-family:'Cormorant Garamond',serif;font-size:21px;font-style:italic;
+    color:var(--brown-dark);text-align:center;padding:30px 10px;margin:0;
+  }
+  .form-error{
+    grid-column:1 / -1;font-family:'Space Mono',monospace;font-size:14px;color:#9a3b3b;margin:14px 0 0;
+  }
+  .subscribe-success{font-family:'Jost',sans-serif;font-size:14px;color:var(--cream);margin:0;}
   @media(max-width:700px){
     .consult-form-card{padding:38px 24px;}
     .consult-form{grid-template-columns:1fr;}
@@ -305,7 +313,7 @@
   /* ===== TRUST ROW ===== */
   .trust{padding:70px 0;background:var(--cream);}
   .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;text-align:center;}
-  .trust-grid img{width:62px;height:62px;margin:0 auto 18px;}
+  .trust-grid img{width:84px;height:84px;margin:0 auto 18px;}
   .trust-grid h3{font-size:23px;font-weight:600;margin:0 0 6px;color:var(--brown-dark);}
   .trust-grid p{margin:0;color:var(--taupe-dark);}
   @media(max-width:700px){.trust-grid{grid-template-columns:1fr;gap:36px;}}
@@ -338,7 +346,6 @@
     <a class="logo-word" href="#top"><img src="logo-brown.png" alt="Hidden Gem"></a>
     <nav class="primary" id="primaryNav">
       <a href="#top">Home</a><span class="dot">&middot;</span>
-      <a href="#story">Custom Pieces</a><span class="dot">&middot;</span>
       <a href="#story">Our Story</a><span class="dot">&middot;</span>
       <a href="#appointment">Contact</a>
     </nav>
@@ -470,15 +477,14 @@
   <section class="appointment" id="appointment">
     <div class="appointment-inner">
       <h2>Book Your Appointment</h2>
-      <p>Ready to create a ring that tells your unique love story? Fill out the form below and we'll personally follow up to start your consultation. Our family is here to guide you through every step of designing your custom engagement ring, start to finish.</p>
-      <a class="btn ghost" href="#consult-form">Start My Inquiry</a>
+      <p>Ready to create a ring that tells your story? Fill out the form below and we'll personally follow up.</p>
     </div>
   </section>
 
   <div class="consult-form-card" id="consult-form">
     <h3>Tell Us About Your Vision</h3>
     <p class="form-intro">Share a few details below and we'll personally follow up &mdash; by phone, text, or email, whichever you prefer.</p>
-    <form class="consult-form" action="https://formsubmit.co/hello@hiddengemrings.com" method="POST">
+    <form class="consult-form" id="consultForm" action="https://formsubmit.co/hello@hiddengemrings.com" method="POST">
       <input type="hidden" name="_subject" value="New inquiry from Hidden Gem website">
       <input type="hidden" name="_template" value="table">
       <input type="hidden" name="_captcha" value="false">
@@ -583,55 +589,18 @@
 <section class="policies">
   <div class="wrap">
     <h2>Hidden Gem Policies</h2>
-    <div class="policies-top">Warranty</div>
     <div class="policies-list">
       <div class="policy-block">
-        <h3>1-Year Craftsmanship Warranty</h3>
-        <p>We proudly stand behind the quality of our craftsmanship. Your jewelry is covered for <b>one year</b> against manufacturing defects, including:</p>
-        <ul>
-          <li>Loose prongs due to craftsmanship</li>
-          <li>Stone tightening from normal wear</li>
-          <li>Manufacturing-related issues</li>
-        </ul>
-        <p>This warranty does not cover accidental damage, loss, theft, misuse, or normal wear over time.</p>
+        <h3>Warranty &amp; Care</h3>
+        <p>Every piece is covered for <b>one year</b> against manufacturing defects &mdash; loose prongs, stone tightening, and other craftsmanship issues (not accidental damage, loss, theft, or normal wear). We also offer <b>complimentary lifetime cleaning and inspection</b>; bring your piece in every <b>6&ndash;12 months</b> to keep it looking its best.</p>
       </div>
       <div class="policy-block">
-        <h3>Lifetime Complimentary Cleaning &amp; Inspection</h3>
-        <p>We want your Hidden Gem piece to last a lifetime. That's why we offer <b>complimentary lifetime cleanings and inspections</b> on all Hidden Gem jewelry. During your visit, we'll:</p>
-        <ul>
-          <li>Professionally clean your jewelry</li>
-          <li>Inspect your prongs and stone settings</li>
-          <li>Check for normal wear and recommend any needed maintenance</li>
-        </ul>
-        <p>We recommend bringing your jewelry in every <b>6&ndash;12 months</b> to help keep it looking beautiful and secure.</p>
+        <h3>Custom Orders &amp; Payment</h3>
+        <p>Every piece is made to order, so <b>all custom orders are final sale</b> once production begins. A <b>50% non-refundable deposit</b> starts production (remaining balance due before shipping or pickup); ask about financing if you'd rather spread out the cost. Most pieces are completed in <b>4&ndash;6 weeks</b>.</p>
       </div>
       <div class="policy-block">
-        <h3>Custom Orders</h3>
-        <p>Every Hidden Gem piece is made to order just for you. Because each design is custom made, <b>all custom orders are final sale</b> once production has begun.</p>
-      </div>
-      <div class="policy-block">
-        <h3>Production Timeline</h3>
-        <p>Most custom pieces are completed within <b>4&ndash;6 weeks</b> after your design is approved and your <b>50% non-refundable deposit</b> is received. Production times may vary depending on the design and stone availability.</p>
-      </div>
-      <div class="policy-block">
-        <h3>Payment</h3>
-        <p>A <b>50% non-refundable deposit</b> is required to begin production for cash and direct-pay orders. The remaining balance is due before your jewelry is shipped or picked up. Prefer to spread out the cost instead? Ask us about financing &mdash; see the Financing tab above.</p>
-      </div>
-      <div class="policy-block">
-        <h3>Shipping</h3>
-        <p>Every order is <b>fully insured</b> and shipped with an <b>adult signature required</b> to ensure your jewelry arrives safely.</p>
-      </div>
-      <div class="policy-block">
-        <h3>Returns &amp; Exchanges</h3>
-        <p>Because each piece is handcrafted specifically for you, we do not accept returns or exchanges on custom jewelry. If you experience any issues with your order, please contact us &mdash; we're always happy to help.</p>
-      </div>
-      <div class="policy-block">
-        <h3>Jewelry Care</h3>
-        <p>To keep your jewelry looking its best, we recommend removing it during heavy lifting, sports, swimming, gardening, and when using harsh chemicals. Regular cleanings and inspections will help preserve the beauty and longevity of your piece.</p>
-      </div>
-      <div class="policy-block">
-        <h3>Questions?</h3>
-        <p>We're here to help every step of the way. If you have any questions before, during, or after your purchase, don't hesitate to reach out. We look forward to creating something truly special with you.</p>
+        <h3>Shipping &amp; Returns</h3>
+        <p>Every order ships <b>fully insured</b> with an <b>adult signature required</b>. Because each piece is handcrafted for you, we don't accept returns or exchanges on custom jewelry &mdash; if anything's wrong with your order, reach out and we'll make it right.</p>
       </div>
     </div>
   </div>
@@ -671,7 +640,7 @@
     </div>
     <div>
       <h4>Subscribe to get our special offers</h4>
-      <form class="subscribe-form" action="https://formsubmit.co/hello@hiddengemrings.com" method="POST">
+      <form class="subscribe-form" id="newsletterForm" action="https://formsubmit.co/hello@hiddengemrings.com" method="POST">
         <input type="hidden" name="_subject" value="New newsletter signup from Hidden Gem website">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_next" value="https://hiddengemrings.com/thank-you.html">
@@ -716,6 +685,65 @@
       if(!wasOpen) item.classList.add('open');
     });
   });
+
+  // consultation form: submit quietly in the background, stay on this page
+  const consultForm = document.getElementById('consultForm');
+  if (consultForm) {
+    consultForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (consultForm.querySelector('[name="_honey"]').value) return; // bot trap
+      const submitBtn = consultForm.querySelector('button[type="submit"]');
+      const originalLabel = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      const data = {};
+      new FormData(consultForm).forEach((v, k) => { if (k !== '_next' && k !== '_honey') data[k] = v; });
+      try {
+        const res = await fetch('https://formsubmit.co/ajax/hello@hiddengemrings.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('send failed');
+        consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer.</p>';
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+        let errEl = consultForm.querySelector('.form-error');
+        if (!errEl) {
+          errEl = document.createElement('p');
+          errEl.className = 'form-error';
+          consultForm.appendChild(errEl);
+        }
+        errEl.textContent = "Something went wrong sending that. Please call/text (832) 474-6344 or email hello@hiddengemrings.com directly and we'll get right back to you.";
+      }
+    });
+  }
+
+  // newsletter form: same quiet background submit
+  const newsletterForm = document.getElementById('newsletterForm');
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = newsletterForm.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '...';
+      const data = {};
+      new FormData(newsletterForm).forEach((v, k) => { if (k !== '_next') data[k] = v; });
+      try {
+        const res = await fetch('https://formsubmit.co/ajax/hello@hiddengemrings.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('send failed');
+        newsletterForm.innerHTML = '<p class="subscribe-success">Thanks, you\'re on the list!</p>';
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Join';
+      }
+    });
+  }
 </script>
 
 </body></html>
