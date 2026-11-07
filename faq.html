@@ -1,0 +1,312 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>FAQ — Hidden Gem Rings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@400;500;600&family=Beau+Rivage&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F3EC;
+    --cream-alt:#EEEBE2;
+    --taupe:#A0948A;
+    --taupe-dark:#8A7F6E;
+    --brown:#6B5B4C;
+    --brown-dark:#5C4D40;
+    --ink:#5C534B;
+    --gold:#B99C5F;
+    --white:#FFFFFF;
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Cormorant Garamond', serif;
+    font-size:19px;
+    line-height:1.6;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
+  .eyebrow{
+    font-family:'Jost',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    font-size:13px;
+    font-weight:500;
+  }
+  .btn{
+    display:inline-block;
+    font-family:'Jost',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:13px;
+    font-weight:600;
+    padding:16px 34px;
+    background:var(--brown-dark);
+    color:var(--white);
+    border:1px solid var(--brown-dark);
+    cursor:pointer;
+    transition:background .25s ease, color .25s ease;
+  }
+  .btn:hover{background:transparent;color:var(--brown-dark);}
+  .script{font-family:'Beau Rivage',cursive;font-weight:400;}
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:var(--cream);
+    border-bottom:1px solid rgba(92,77,64,.12);
+  }
+  .nav-row{
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:var(--maxw);margin:0 auto;padding:22px 32px;
+    gap:20px;
+  }
+  .logo-word{display:block;}
+  .logo-word img{height:46px;width:auto;display:block;}
+  nav.primary{display:flex;align-items:center;gap:14px;font-family:'Jost',sans-serif;}
+  nav.primary a{
+    text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:500;
+    color:var(--ink);white-space:nowrap;
+  }
+  nav.primary a:hover{color:var(--gold);}
+  nav.primary a.current{color:var(--gold);}
+  nav.primary .dot{color:var(--taupe);}
+  .nav-cta{padding:10px 20px;font-size:11px;margin-left:10px;}
+  .header-icons{display:flex;gap:16px;align-items:center;flex-shrink:0;}
+  .header-icons a{color:var(--ink);opacity:.75;}
+  .header-icons a:hover{opacity:1;color:var(--gold);}
+  .menu-toggle{display:none;background:none;border:none;cursor:pointer;color:var(--brown-dark);}
+  @media(max-width:900px){
+    nav.primary{display:none;position:absolute;top:100%;left:0;right:0;background:var(--cream);
+      flex-direction:column;align-items:flex-start;padding:18px 32px 26px;border-bottom:1px solid rgba(92,77,64,.12);}
+    nav.primary.open{display:flex;}
+    nav.primary .dot{display:none;}
+    nav.primary a{padding:8px 0;}
+    .nav-cta{margin:10px 0 0;padding:12px 22px;}
+    .menu-toggle{display:block;}
+  }
+
+  /* ===== PAGE HEADING ===== */
+  .page-head{text-align:center;padding:80px 20px 50px;}
+  .page-head .eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
+  .page-head h1{
+    font-family:'Cormorant Garamond',serif;font-weight:500;
+    font-size:clamp(38px,6vw,60px);color:var(--brown-dark);margin:0 0 18px;
+  }
+  .page-head h1 .script{font-size:1.2em;color:var(--gold);}
+  .page-head p{max-width:600px;margin:0 auto;font-size:18px;color:var(--ink);}
+
+  /* ===== FAQ GROUPS ===== */
+  .faq-groups{max-width:860px;margin:0 auto;padding:0 32px 90px;}
+  .faq-group{margin-bottom:54px;}
+  .faq-group-title{
+    font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.14em;
+    font-size:13px;font-weight:600;color:var(--gold);margin:0 0 16px;
+  }
+  .faq-item{border-bottom:1px solid rgba(92,77,64,.18);}
+  .faq-q{
+    display:flex;justify-content:space-between;align-items:center;gap:20px;
+    padding:24px 4px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;
+    font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.2vw,21px);color:var(--brown-dark);font-weight:600;
+  }
+  .faq-q .chev{
+    flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--brown-dark);
+    display:flex;align-items:center;justify-content:center;color:var(--white);font-size:16px;
+    transition:transform .25s ease;
+  }
+  .faq-item.open .faq-q .chev{transform:rotate(180deg);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .faq-item.open .faq-a{max-height:400px;}
+  .faq-a-inner{padding:0 4px 24px;font-size:16.5px;color:var(--ink);line-height:1.7;}
+
+  /* ===== CTA BAND ===== */
+  .faq-cta{text-align:center;padding:60px 20px 100px;}
+  .faq-cta p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:21px;color:var(--brown);margin:0 0 24px;}
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--brown-dark);color:var(--cream);padding:60px 0 30px;}
+  .footer-grid{display:grid;grid-template-columns:1.1fr 1.1fr;gap:40px;}
+  footer h4{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:15px;margin:0 0 16px;color:var(--white);}
+  footer .footer-logo{margin:0 0 14px;}
+  footer .footer-logo img{height:40px;width:auto;}
+  footer p, footer a{font-size:16px;color:rgba(246,243,236,.85);}
+  .footer-bottom{max-width:var(--maxw);margin:40px auto 0;padding:20px 32px 0;border-top:1px solid rgba(255,255,255,.15);text-align:center;font-size:14px;color:rgba(246,243,236,.6);}
+  @media(max-width:800px){.footer-grid{grid-template-columns:1fr;gap:34px;}}
+</style>
+<header>
+  <div class="nav-row">
+    <a class="logo-word" href="index.html#top"><img src="logo-brown.png" alt="Hidden Gem"></a>
+    <nav class="primary" id="primaryNav">
+      <a href="index.html#top">Home</a><span class="dot">&middot;</span>
+      <a href="index.html#story">Our Story</a><span class="dot">&middot;</span>
+      <a href="index.html#operate">How We Operate</a><span class="dot">&middot;</span>
+      <a href="faq.html" class="current">FAQ</a>
+      <a class="btn nav-cta" href="index.html#consult-form">Book a Consultation</a>
+    </nav>
+    <div class="header-icons">
+      <a href="mailto:hello@hiddengemrings.com" aria-label="Email" title="Email us">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
+      </a>
+      <a href="https://wa.me/18324746344" aria-label="WhatsApp" title="Message us on WhatsApp">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.52 0-10 4.48-10 10 0 1.77.46 3.45 1.26 4.9L2 22l5.25-1.38A9.96 9.96 0 0 0 12.04 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.8 14.2c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.1-1.8-.12-.42-.13-.96-.3-1.64-.6-2.9-1.25-4.78-4.15-4.93-4.35-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.4.27-.3.58-.37.78-.37h.56c.18 0 .42-.07.65.5.24.58.8 2 .87 2.15.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.3.38-.44.5-.14.14-.3.3-.13.6.17.3.77 1.27 1.65 2.05 1.13 1.01 2.08 1.33 2.38 1.48.3.15.48.13.65-.08.18-.2.76-.88.97-1.19.2-.3.4-.25.68-.15.28.1 1.78.84 2.08 1 .3.14.5.22.58.33.08.13.08.73-.16 1.4z"/></svg>
+      </a>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<section class="page-head">
+  <p class="eyebrow">FAQ</p>
+  <h1>Questions, <span class="script">Answered</span></h1>
+  <p>Everything we're asked most, grouped so you can find your answer fast. Don't see yours? Just reach out.</p>
+</section>
+
+<div class="faq-groups">
+
+  <div class="faq-group">
+    <p class="faq-group-title">Getting Started</p>
+
+    <div class="faq-item open">
+      <button class="faq-q"><span>How does the process work from here?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Reach out through the consultation form, by phone, or by text. We'll talk through your style, budget, and the story behind the ring, then follow up with a personalized quote. From there: design approval, a 50% deposit (or financing) to begin production, a CAD rendering for you to approve, and progress photos before your ring ships.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Do I need to know exactly what I want before I reach out?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Not at all &mdash; most people don't. Tell us what catches your eye and we'll put together a few design directions for you to react to.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Can I bring my own design or inspiration photos?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Yes &mdash; bring anything: a photo, a sketch, even a description of the vibe you're going for. The more you share, the closer the first draft lands.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Can I see a 3D model of my ring before it's made?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Yes &mdash; every custom order includes a CAD rendering for you to review and approve before production starts, so you know exactly what you're getting before any metal is cut.</div></div>
+    </div>
+  </div>
+
+  <div class="faq-group">
+    <p class="faq-group-title">Diamonds &amp; Materials</p>
+
+    <div class="faq-item">
+      <button class="faq-q"><span>Why do you recommend lab-grown diamonds?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">A lab-grown diamond is chemically, physically, and optically identical to a natural one &mdash; just created in a lab instead of mined, at a fraction of the cost. We recommend it as the default so more of your budget goes toward the size and quality of the stone, not its origin story.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Is a lab-grown diamond a "real" diamond?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Yes. Same crystal structure, same hardness, same fire and brilliance. The only difference is where it was formed.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>What's the difference between diamond and moissanite?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Diamond is a natural or lab-grown mineral prized for its hardness and classic brilliance. Moissanite is a different gemstone altogether &mdash; more affordable and even more sparkle, but it doesn't hold the same rarity or resale value as diamond. We're happy to walk you through both side by side during your consultation.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>What metals do you offer?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Platinum, white gold, yellow gold, and rose gold &mdash; we'll help you pick the one that fits your style and how the ring will hold up day to day.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Can I get a custom design or engraving?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Yes &mdash; custom design and engraving are both available and can be added to any ring.</div></div>
+    </div>
+  </div>
+
+  <div class="faq-group">
+    <p class="faq-group-title">Paying</p>
+
+    <div class="faq-item">
+      <button class="faq-q"><span>How does financing work, and is it the better option for me?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Financing spreads the cost out over time instead of paying it all upfront, and it's the option most of our customers choose. We'll walk through the plan that fits your budget during your consultation &mdash; no pressure either way.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>What if I'd rather pay in full?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">You can pay in full and start production with a 50% non-refundable deposit instead, with the remaining balance due before shipping or pickup.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Is the deposit refundable?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">No &mdash; every piece is made to order, so once production begins the order is final sale and the deposit isn't refundable. We make sure your design is approved and exactly right before that point.</div></div>
+    </div>
+  </div>
+
+  <div class="faq-group">
+    <p class="faq-group-title">Timeline &amp; Delivery</p>
+
+    <div class="faq-item">
+      <button class="faq-q"><span>How long does a custom ring take?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Most custom rings are completed in 4&ndash;6 weeks from your deposit and approved design, though it can vary a bit depending on the stone and setting.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>How will I know my ring size is right?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">We'll walk you through getting an accurate size during your consultation, and the ring can be resized after the fact if anything feels off once it's on.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>What's included when it arrives?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Your ring arrives in the Hidden Gem box with its IGI certification, a Polaroid, a ring holder, and a commitment note &mdash; shipped fully insured with an adult signature required.</div></div>
+    </div>
+  </div>
+
+  <div class="faq-group">
+    <p class="faq-group-title">After the Sale</p>
+
+    <div class="faq-item">
+      <button class="faq-q"><span>What's your warranty/care coverage?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Every piece is covered for one year against manufacturing defects &mdash; loose prongs, stone tightening, and other craftsmanship issues (not accidental damage, loss, theft, or normal wear). You also get complimentary lifetime cleaning and inspection; bring it in every 6&ndash;12 months.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Can you also make the wedding band later?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Yes &mdash; your Hidden Gem box is built with room for a wedding band too, so when you're ready we can make that match the original piece.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>What if something needs to be resized or adjusted?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Reach out and we'll take care of it &mdash; resizing and adjustments are part of standing behind what we make.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q"><span>Do you work with other jewelry?</span><span class="chev">&#8250;</span></button>
+      <div class="faq-a"><div class="faq-a-inner">Engagement rings and wedding bands are our focus, but we're happy to talk through other custom pieces &mdash; just reach out and tell us what you have in mind.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<section class="faq-cta">
+  <p>Still have a question? We'd rather just talk it through.</p>
+  <a class="btn" href="index.html#consult-form">Book a Consultation</a>
+</section>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-logo"><img src="logo-white.png" alt="Hidden Gem"></div>
+      <p><a href="tel:+18324746344">(832) 474-6344</a></p>
+      <p><a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></p>
+    </div>
+    <div>
+      <h4>Hours</h4>
+      <p>Mon, Tue, Thu, Fri &mdash; 8:00&ndash;7:00</p>
+      <p>Wed, Sat, Sun &mdash; By appointment</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; <span id="year"></span> Hidden Gem Engagement Rings. All rights reserved.</div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const menuToggle = document.getElementById('menuToggle');
+  const primaryNav = document.getElementById('primaryNav');
+  menuToggle.addEventListener('click', () => primaryNav.classList.toggle('open'));
+
+  document.querySelectorAll('.faq-q').forEach(q=>{
+    q.addEventListener('click', ()=>{
+      const item = q.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      item.closest('.faq-group').querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+      if(!wasOpen) item.classList.add('open');
+    });
+  });
+</script>
+
+</body></html>
