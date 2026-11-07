@@ -48,11 +48,12 @@
     color:var(--white);
     border:1px solid var(--brown-dark);
     cursor:pointer;
-    transition:background .25s ease, color .25s ease;
+    transition:background .25s ease, color .25s ease, transform .2s ease, box-shadow .2s ease;
   }
-  .btn:hover{background:transparent;color:var(--brown-dark);}
+  .btn:hover{background:transparent;color:var(--brown-dark);transform:translateY(-2px);box-shadow:0 8px 18px rgba(92,77,64,.16);}
   .btn.ghost{background:transparent;color:var(--white);border-color:rgba(255,255,255,.7);}
   .btn.ghost:hover{background:var(--white);color:var(--brown-dark);}
+  @media(prefers-reduced-motion: reduce){.btn:hover{transform:none;}}
   .script{font-family:'Beau Rivage',cursive;font-weight:400;}
 
   /* ===== HEADER ===== */
@@ -138,6 +139,7 @@
     font-size:clamp(16px,2.4vw,26px);
     font-weight:400;
   }
+  .hero-cta{margin-top:32px;}
   .hero-socials{
     position:absolute;bottom:26px;right:32px;display:flex;gap:16px;z-index:1;
   }
@@ -146,13 +148,17 @@
 
   /* ===== TAGLINE BAND ===== */
   .tagline{
-    text-align:center;padding:64px 20px;background:var(--cream);
+    text-align:center;padding:60px 20px 68px;background:var(--cream);
   }
+  .tagline .ornament{margin:0 auto 22px;}
   .tagline p{
-    max-width:880px;margin:0 auto;
-    font-style:italic;font-size:clamp(20px,2.6vw,27px);
-    color:var(--brown);line-height:1.55;
+    max-width:720px;margin:0 auto;
+    font-style:normal;font-weight:500;font-size:clamp(19px,2.2vw,24px);
+    letter-spacing:.01em;
+    color:var(--brown-dark);line-height:1.65;
   }
+  .ornament{width:116px;margin:0 auto;}
+  .ornament img{width:100%;display:block;}
 
   /* ===== STORY SECTION ===== */
   .story{
@@ -161,19 +167,25 @@
     padding:90px 0;
   }
   .story .wrap, .story .story-grid{position:relative;z-index:1;}
+  .story-header{max-width:var(--maxw);margin:0 auto;padding:0 32px 40px;position:relative;z-index:1;}
+  .story-header .ornament{margin:0 0 20px;}
   .story-grid{
     display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;
   }
   .story-eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
   .story h2{
     font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;
-    font-size:clamp(32px,4.6vw,48px);margin:0 0 30px;color:var(--brown-dark);
+    font-size:clamp(28px,3.4vw,46px);margin:0;color:var(--brown-dark);
   }
   .story h2 .script{font-size:1.15em;color:var(--gold);}
   .story p{margin:0 0 20px;font-size:17px;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1.7;}
   .story-points{display:flex;flex-direction:column;gap:28px;margin:0 0 36px;}
   .story-point{display:flex;gap:18px;align-items:flex-start;}
-  .story-point img{width:46px;height:46px;flex-shrink:0;margin-top:3px;}
+  .story-point img{
+    width:46px;height:46px;flex-shrink:0;margin-top:3px;padding:9px;box-sizing:border-box;
+    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;box-shadow:0 2px 10px rgba(92,77,64,.10);
+  }
   .story-point h3{
     font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19.5px;
     color:var(--brown-dark);margin:0 0 7px;
@@ -198,40 +210,33 @@
   .covered{background:var(--cream-alt);padding:10px 0 70px;}
   .covered-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;max-width:var(--maxw);margin:0 auto;padding:0 32px;text-align:left;}
   .covered-item{display:flex;gap:18px;align-items:flex-start;}
-  .covered-item img{width:52px;height:52px;flex-shrink:0;}
+  .covered-item img{
+    width:52px;height:52px;flex-shrink:0;padding:10px;box-sizing:border-box;
+    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;box-shadow:0 2px 10px rgba(92,77,64,.10);
+  }
   .covered-item h3{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:19px;color:var(--brown-dark);margin:0 0 6px;}
   .covered-item p{margin:0;font-size:15.5px;color:var(--ink);line-height:1.6;}
   @media(max-width:860px){.covered-grid{grid-template-columns:1fr;gap:28px;}}
-  .tabs-bar{
-    display:flex;background:var(--cream-alt);
-    max-width:var(--maxw);margin:0 auto;
-    border-bottom:1px solid rgba(92,77,64,.15);
+  .operate-body{
+    max-width:var(--maxw);margin:36px auto 0;padding:0 32px 80px;
+    display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;
   }
-  .tab-btn{
-    flex:1;text-align:center;padding:24px 10px;
-    font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;
-    background:transparent;border:none;cursor:pointer;color:var(--ink);
-    border-bottom:3px solid transparent;
-    transition:background .2s ease;
+  .operate-steps-col .steps-label{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--taupe-dark);margin:0 0 14px;}
+  .steps-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:16px;}
+  .steps-list li{display:flex;gap:14px;align-items:flex-start;}
+  .steps-list li img{
+    width:36px;height:36px;flex-shrink:0;margin-top:2px;padding:7px;box-sizing:border-box;
+    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;box-shadow:0 2px 8px rgba(92,77,64,.10);
   }
-  .tab-btn.active{background:var(--cream-alt);border-bottom-color:var(--gold);color:var(--brown-dark);}
-  .tab-btn:hover{background:rgba(238,235,226,.6);}
-  .tab-panels{max-width:var(--maxw);margin:0 auto;padding:50px 32px 70px;background:var(--cream-alt);}
-  .tab-panel{display:none;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center;}
-  .tab-panel.active{display:grid;}
-  .tab-panel h3{font-size:clamp(26px,3.6vw,34px);font-weight:500;margin:0 0 18px;color:var(--brown-dark);}
-  .tab-panel .steps-label{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--taupe-dark);margin:0 0 10px;}
-  .steps-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:13px;}
-  .steps-list li{display:flex;gap:13px;align-items:flex-start;}
-  .steps-list li img{width:30px;height:30px;flex-shrink:0;margin-top:2px;}
-  .steps-list li span{flex:1;padding-top:1px;}
-  .tab-panel .note{font-size:17px;font-style:italic;color:var(--brown);margin:0 0 26px;}
-  .tab-photo img{width:100%;height:420px;object-fit:cover;}
+  .steps-list li span{flex:1;padding-top:3px;font-size:17px;color:var(--ink);line-height:1.5;}
+  .operate-steps-col .note{font-size:16.5px;font-style:italic;color:var(--brown);margin:0 0 26px;}
+  .operate-photo img{width:100%;height:440px;object-fit:cover;border-radius:4px;}
   @media(max-width:860px){
-    .tabs-bar{flex-wrap:wrap;}
-    .tab-btn{flex:1 1 50%;font-size:16px;padding:16px 8px;}
-    .tab-panel{grid-template-columns:1fr;}
-    .tab-photo img{height:280px;}
+    .operate-body{grid-template-columns:1fr;gap:34px;}
+    .operate-photo{order:-1;}
+    .operate-photo img{height:280px;}
   }
 
   /* ===== BOOK APPOINTMENT ===== */
@@ -300,6 +305,10 @@
   .form-error{
     grid-column:1 / -1;font-family:'Jost',sans-serif;font-size:14px;color:#9a3b3b;margin:14px 0 0;
   }
+  .form-trust{
+    grid-column:1 / -1;font-family:'Jost',sans-serif;font-size:12.5px;letter-spacing:.02em;
+    color:var(--taupe-dark);margin:16px 0 0;
+  }
   .subscribe-success{font-family:'Jost',sans-serif;font-size:14px;color:var(--cream);margin:0;}
   @media(max-width:700px){
     .consult-form-card{padding:38px 24px;}
@@ -312,7 +321,13 @@
   /* ===== TRUST ROW ===== */
   .trust{padding:70px 0;background:var(--cream);}
   .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;text-align:center;}
-  .trust-grid img{width:84px;height:84px;margin:0 auto 18px;}
+  .trust-grid img{
+    width:84px;height:84px;margin:0 auto 18px;padding:18px;box-sizing:border-box;
+    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;box-shadow:0 3px 14px rgba(92,77,64,.12);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .trust-grid > div:hover img{transform:translateY(-4px);box-shadow:0 8px 20px rgba(92,77,64,.16);}
   .trust-grid h3{font-size:23px;font-weight:600;margin:0 0 6px;color:var(--brown-dark);}
   .trust-grid p{margin:0;color:var(--taupe-dark);}
   @media(max-width:700px){.trust-grid{grid-template-columns:1fr;gap:36px;}}
@@ -393,7 +408,7 @@
       <a href="#story">Our Story</a><span class="dot">&middot;</span>
       <a href="#operate">How We Operate</a><span class="dot">&middot;</span>
       <a href="faq.html">FAQ</a>
-      <a class="btn nav-cta" href="#consult-form">Book a Consultation</a>
+      <a class="btn nav-cta" href="#consult-form">Get Started</a>
     </nav>
     <div class="header-icons">
       <a href="mailto:hello@hiddengemrings.com" aria-label="Email" title="Email us">
@@ -413,6 +428,7 @@
   <div class="hero-inner">
     <img class="hero-logo" src="logo-white.png" alt="Hidden Gem">
     <div class="sub">Engagement Rings</div>
+    <a class="btn ghost hero-cta" href="#consult-form">Start Your Ring Journey</a>
   </div>
   <div class="hero-socials">
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></a>
@@ -420,14 +436,18 @@
 </section>
 
 <section class="tagline">
+  <div class="ornament"><img src="ornament-flourish.png" alt=""></div>
   <p>We are committed to offering timeless designs, honest pricing, and a personalized experience from the very first conversation to the final piece.</p>
 </section>
 
 <section class="story" id="story">
+  <div class="story-header">
+    <p class="eyebrow story-eyebrow">Our Story</p>
+    <div class="ornament"><img src="ornament-flourish.png" alt=""></div>
+    <h2>A Family Business, Built on <span class="script">Love</span></h2>
+  </div>
   <div class="wrap story-grid">
     <div class="story-copy">
-      <p class="eyebrow story-eyebrow">Our Story</p>
-      <h2>A Family Business, Built on <span class="script">Love</span></h2>
       <div class="story-points">
         <div class="story-point">
           <img src="icon-search.png" alt="">
@@ -466,83 +486,24 @@
 <section class="pathways" id="operate">
   <div class="operate-intro">
     <p class="eyebrow operate-eyebrow">How We Operate</p>
+    <div class="ornament" style="margin:0 auto 20px auto;"><img src="ornament-flourish.png" alt=""></div>
     <h2>A Process Built Around <span class="script">You</span></h2>
-    <p>No matter where you're starting from, here's exactly what happens after you reach out &mdash; so there's nothing to guess at before you commit to anything.</p>
+    <p>Whether you already know exactly what you want, need some inspiration, or would rather we guide the whole thing &mdash; it starts the same simple way.</p>
   </div>
-  <div class="tabs-bar">
-    <button class="tab-btn active" data-tab="know">I Know What I Want</button>
-    <button class="tab-btn" data-tab="inspire">I Need Inspiration</button>
-    <button class="tab-btn" data-tab="guided">I'd Rather Be Guided</button>
-    <button class="tab-btn" data-tab="financing">Financing</button>
-  </div>
-  <div class="tab-panels">
 
-    <div class="tab-panel active" data-panel="know">
-      <div>
-        <h3>Already have inspiration photos, or a specific design in mind?</h3>
-        <div class="steps-label">What happens next</div>
-        <ul class="steps-list">
-          <li><img src="icon-inquiry.png" alt=""><span>Submit your photos and inquiry.</span></li>
-          <li><img src="icon-quote.png" alt=""><span>Receive a custom quote.</span></li>
-          <li><img src="icon-payment.png" alt=""><span>Pay a 50% non-refundable deposit to begin.</span></li>
-          <li><img src="icon-design.png" alt=""><span>Review your CAD rendering.</span></li>
-          <li><img src="icon-checkmark.png" alt=""><span>Approve production.</span></li>
-          <li><img src="icon-camera.png" alt=""><span>Receive photos and videos of your finished ring.</span></li>
-          <li><img src="icon-shipping.png" alt=""><span>We ship your ring, or you can pick up locally in the Houston area.</span></li>
-        </ul>
-        <p class="note">We are always available! You can reach us via call, text or email.</p>
-        <a class="btn" href="#appointment">Start My Design</a>
-      </div>
-      <div class="tab-photo"><img src="ringbox.jpg" alt="Hidden Gem ring box with a pear-shaped diamond engagement ring, resting on sand" loading="lazy"></div>
+  <div class="operate-body">
+    <div class="operate-steps-col">
+      <div class="steps-label">What happens next</div>
+      <ul class="steps-list">
+        <li><img src="icon-inquiry.png" alt=""><span>Share your name, email, and phone &mdash; it takes about 30 seconds.</span></li>
+        <li><img src="icon-conversation.png" alt=""><span>We call you to talk through your style, budget, and vision.</span></li>
+        <li><img src="icon-design.png" alt=""><span>We send a custom quote and design for your approval.</span></li>
+        <li><img src="icon-shipping.png" alt=""><span>Once approved, we create your ring and keep you updated until it's in your hands.</span></li>
+      </ul>
+      <p class="note">No pressure, no pushy sales &mdash; just a real conversation about what you're looking for.</p>
+      <a class="btn" href="#consult-form">Get Started</a>
     </div>
-
-    <div class="tab-panel" data-panel="inspire">
-      <div>
-        <h3>Not sure exactly what you want yet?</h3>
-        <div class="steps-label">What happens next</div>
-        <ul class="steps-list">
-          <li><img src="icon-inspiration.png" alt=""><span>Tell us what catches your eye &mdash; styles, stones, or pieces you love.</span></li>
-          <li><img src="icon-design.png" alt=""><span>We'll put together a few design directions for you to react to.</span></li>
-          <li><img src="icon-conversation.png" alt=""><span>We refine together until one feels right.</span></li>
-          <li><img src="icon-quote.png" alt=""><span>From there, it follows the same path: quote, deposit, CAD rendering, and production.</span></li>
-        </ul>
-        <p class="note">This is the most popular starting point &mdash; most people don't walk in with the exact design already in mind.</p>
-        <a class="btn" href="#appointment">Find My Inspiration</a>
-      </div>
-      <div class="tab-photo"><img src="inspire-photo.jpg" alt="Hand wearing a pear-shaped diamond ring among tropical fruit" loading="lazy"></div>
-    </div>
-
-    <div class="tab-panel" data-panel="guided">
-      <div>
-        <h3>Would you rather we guide the whole thing?</h3>
-        <div class="steps-label">What happens next</div>
-        <ul class="steps-list">
-          <li><img src="icon-consult.png" alt=""><span>Book a one-on-one consultation with us, in person or by video call.</span></li>
-          <li><img src="icon-conversation.png" alt=""><span>We'll ask about budget, style, and the person you're designing for.</span></li>
-          <li><img src="icon-design.png" alt=""><span>We present a design built around what you told us.</span></li>
-          <li><img src="icon-checkmark.png" alt=""><span>You approve, and we handle the rest from stone to final piece.</span></li>
-        </ul>
-        <p class="note">Best for anyone who wants a true expert to steer, start to finish.</p>
-        <a class="btn" href="#appointment">Book a Consultation</a>
-      </div>
-      <div class="tab-photo"><img src="guided-photo.jpg" alt="Couple holding hands showing their engagement ring and wedding band" style="object-position:50% 30%;" loading="lazy"></div>
-    </div>
-
-    <div class="tab-panel" data-panel="financing">
-      <div>
-        <h3>Want to spread out the cost?</h3>
-        <div class="steps-label">How it works</div>
-        <ul class="steps-list">
-          <li><img src="icon-financing.png" alt=""><span>We'll walk through flexible deposit and payment plan options with you directly.</span></li>
-          <li><img src="icon-clock.png" alt=""><span>Every plan is built around your project's quote and timeline.</span></li>
-          <li><img src="icon-checkmark.png" alt=""><span>Nothing is finalized until a plan feels right for you.</span></li>
-        </ul>
-        <p class="note">Reach out and we'll talk through what's realistic for your budget &mdash; no pressure, no surprises.</p>
-        <a class="btn" href="#appointment">Ask About Financing</a>
-      </div>
-      <div class="tab-photo"><img src="financing-photo.jpg" alt="Bride's hand with engagement ring resting on a lace gown" loading="lazy"></div>
-    </div>
-
+    <div class="operate-photo"><img src="ringbox.jpg" alt="Hidden Gem ring box with a pear-shaped diamond engagement ring, resting on sand" loading="lazy"></div>
   </div>
 </section>
 
@@ -576,14 +537,14 @@
   <section class="appointment" id="appointment">
     <div class="appointment-inner">
       <p class="eyebrow appointment-eyebrow">Get Started</p>
-      <h2>Book Your <span class="script">Appointment</span></h2>
-      <p>Ready to create a ring that tells your story? Fill out the form below and we'll personally follow up.</p>
+      <h2>Start Your Ring <span class="script">Journey</span></h2>
+      <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
     </div>
   </section>
 
   <div class="consult-form-card" id="consult-form">
-    <h3>Tell Us About Your Vision</h3>
-    <p class="form-intro">Share a few details below and we'll personally follow up &mdash; by phone, text, or email, whichever you prefer.</p>
+    <h3>We'll Call You</h3>
+    <p class="form-intro">Three fields, thirty seconds &mdash; we'll handle the rest on a quick call.</p>
     <form class="consult-form" id="consultForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
       <input type="text" name="_honey" class="form-honey" tabindex="-1" autocomplete="off">
 
@@ -595,40 +556,16 @@
         <label for="cf-email">Email</label>
         <input id="cf-email" type="email" name="Email" required autocomplete="email">
       </div>
-      <div class="field">
+      <div class="field full">
         <label for="cf-phone">Phone</label>
         <input id="cf-phone" type="tel" name="Phone" required autocomplete="tel">
       </div>
-      <div class="field">
-        <label for="cf-contact">Preferred Contact Method</label>
-        <select id="cf-contact" name="Preferred Contact Method">
-          <option value="Call">Call</option>
-          <option value="Text">Text</option>
-          <option value="Email">Email</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="cf-path">Where Are You Starting?</label>
-        <select id="cf-path" name="Starting Point">
-          <option value="I Know What I Want">I Know What I Want</option>
-          <option value="I Need Inspiration">I Need Inspiration</option>
-          <option value="I'd Rather Be Guided">I'd Rather Be Guided</option>
-          <option value="Financing">Ask About Financing</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="cf-budget">Approximate Budget (Optional)</label>
-        <input id="cf-budget" type="text" name="Budget" placeholder="e.g. $2,000&ndash;$4,000">
-      </div>
-      <div class="field full">
-        <label for="cf-message">Tell Us About Your Vision</label>
-        <textarea id="cf-message" name="Vision / Message" placeholder="Stone, style, timeline, the person you're designing for &mdash; anything that helps us get started." required></textarea>
-      </div>
 
       <div class="submit-row">
-        <button type="submit" class="btn">Send My Inquiry</button>
+        <button type="submit" class="btn">Start My Ring Journey</button>
         <span class="alt-contact">Prefer to just reach out? <a href="tel:+18324746344">Call/Text (832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.</span>
       </div>
+      <p class="form-trust">Takes about 30 seconds. We'll never share your information or spam you &mdash; just a real conversation about your ring.</p>
     </form>
   </div>
 </div>
@@ -693,14 +630,6 @@
   menuToggle.addEventListener('click', () => primaryNav.classList.toggle('open'));
 
   // tabs
-  document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
-    });
-  });
 
   // Posts a form to our own Cloudflare Worker (not a third-party form
   // product) which sends the email itself via the Resend API. Because we
@@ -752,7 +681,7 @@
         consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer.</p>';
       } catch (err) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Send My Inquiry';
+        submitBtn.textContent = 'Start My Ring Journey';
         showFormNotice(consultForm, 'form-error', 'That didn\'t go through. Please try again, or reach us directly: call/text <a href="tel:+18324746344">(832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.');
       }
     });

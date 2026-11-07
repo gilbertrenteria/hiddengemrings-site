@@ -50,8 +50,9 @@
     cursor:pointer;
     transition:background .25s ease, color .25s ease;
   }
-  .btn:hover{background:transparent;color:var(--brown-dark);}
+  .btn:hover{background:transparent;color:var(--brown-dark);transform:translateY(-2px);box-shadow:0 8px 18px rgba(92,77,64,.16);}
   .script{font-family:'Beau Rivage',cursive;font-weight:400;}
+  @media(prefers-reduced-motion: reduce){.btn:hover{transform:none;}}
 
   /* ===== HEADER ===== */
   header{
@@ -112,7 +113,11 @@
     padding:24px 4px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;
     font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.2vw,21px);color:var(--brown-dark);font-weight:600;
   }
-  .faq-q-icon{width:28px;height:28px;flex-shrink:0;}
+  .faq-q-icon{
+    width:30px;height:30px;flex-shrink:0;padding:6px;box-sizing:border-box;
+    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;box-shadow:0 2px 8px rgba(92,77,64,.08);
+  }
   .faq-q-text{flex:1;}
   .faq-q .chev{
     flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--brown-dark);
@@ -146,7 +151,7 @@
       <a href="index.html#story">Our Story</a><span class="dot">&middot;</span>
       <a href="index.html#operate">How We Operate</a><span class="dot">&middot;</span>
       <a href="faq.html" class="current">FAQ</a>
-      <a class="btn nav-cta" href="index.html#consult-form">Book a Consultation</a>
+      <a class="btn nav-cta" href="index.html#consult-form">Get Started</a>
     </nav>
     <div class="header-icons">
       <a href="mailto:hello@hiddengemrings.com" aria-label="Email" title="Email us">
@@ -275,7 +280,7 @@
 
 <section class="faq-cta">
   <p>Still have a question? We'd rather just talk it through.</p>
-  <a class="btn" href="index.html#consult-form">Book a Consultation</a>
+  <a class="btn" href="index.html#consult-form">Start Your Ring Journey</a>
 </section>
 
 <footer>
