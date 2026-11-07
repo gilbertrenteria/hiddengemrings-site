@@ -129,7 +129,7 @@
   /* ===== HERO ===== */
   .hero{
     position:relative;
-    min-height:640px;
+    min-height:clamp(720px,92vh,880px);
     background:url('hero-bg.jpg') center/cover no-repeat;
     display:flex;align-items:center;justify-content:center;
     text-align:center;
@@ -505,6 +505,53 @@
   </div>
 </section>
 
+<div class="appointment-wrap">
+  <section class="appointment" id="appointment">
+    <div class="appointment-inner">
+      <p class="eyebrow appointment-eyebrow">Get Started</p>
+      <h2>Start Your Ring <span class="script">Journey</span></h2>
+      <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
+    </div>
+  </section>
+
+  <div class="consult-form-card" id="consult-form">
+    <h3>We'll Call You</h3>
+    <p class="form-intro">A few quick taps, thirty seconds &mdash; we'll handle the rest on a quick call.</p>
+    <form class="consult-form" id="consultForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
+      <input type="text" name="_honey" class="form-honey" tabindex="-1" autocomplete="off">
+
+      <div class="field">
+        <label for="cf-name">Full Name</label>
+        <input id="cf-name" type="text" name="Name" required autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="cf-email">Email</label>
+        <input id="cf-email" type="email" name="Email" required autocomplete="email">
+      </div>
+      <div class="field full">
+        <label for="cf-phone">Phone</label>
+        <input id="cf-phone" type="tel" name="Phone" required autocomplete="tel">
+      </div>
+
+      <div class="field full">
+        <label id="cf-stage-label">Where Are You At?</label>
+        <div class="stage-options" role="radiogroup" aria-labelledby="cf-stage-label">
+          <button type="button" class="stage-opt" data-value="I Know What I Want">I Know What I Want</button>
+          <button type="button" class="stage-opt" data-value="I Need Some Inspiration">I Need Some Inspiration</button>
+          <button type="button" class="stage-opt" data-value="Just Getting Started">Just Getting Started</button>
+        </div>
+        <input type="hidden" name="Stage" id="cf-stage" value="">
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn">Start My Ring Journey</button>
+        <span class="alt-contact">Prefer to just reach out? <a href="tel:+18324746344">Call/Text (832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.</span>
+      </div>
+      <p class="form-trust">Takes about 30 seconds. We'll never share your information or spam you &mdash; just a real conversation about your ring.</p>
+    </form>
+  </div>
+</div>
+
 <section class="pathways" id="operate">
   <div class="operate-intro">
     <p class="eyebrow operate-eyebrow">How It Works</p>
@@ -553,53 +600,6 @@
     </div>
   </div>
 </section>
-
-<div class="appointment-wrap">
-  <section class="appointment" id="appointment">
-    <div class="appointment-inner">
-      <p class="eyebrow appointment-eyebrow">Get Started</p>
-      <h2>Start Your Ring <span class="script">Journey</span></h2>
-      <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
-    </div>
-  </section>
-
-  <div class="consult-form-card" id="consult-form">
-    <h3>We'll Call You</h3>
-    <p class="form-intro">A few quick taps, thirty seconds &mdash; we'll handle the rest on a quick call.</p>
-    <form class="consult-form" id="consultForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
-      <input type="text" name="_honey" class="form-honey" tabindex="-1" autocomplete="off">
-
-      <div class="field">
-        <label for="cf-name">Full Name</label>
-        <input id="cf-name" type="text" name="Name" required autocomplete="name">
-      </div>
-      <div class="field">
-        <label for="cf-email">Email</label>
-        <input id="cf-email" type="email" name="Email" required autocomplete="email">
-      </div>
-      <div class="field full">
-        <label for="cf-phone">Phone</label>
-        <input id="cf-phone" type="tel" name="Phone" required autocomplete="tel">
-      </div>
-
-      <div class="field full">
-        <label id="cf-stage-label">Where Are You At?</label>
-        <div class="stage-options" role="radiogroup" aria-labelledby="cf-stage-label">
-          <button type="button" class="stage-opt" data-value="I Know What I Want">I Know What I Want</button>
-          <button type="button" class="stage-opt" data-value="I Need Some Inspiration">I Need Some Inspiration</button>
-          <button type="button" class="stage-opt" data-value="Just Getting Started">Just Getting Started</button>
-        </div>
-        <input type="hidden" name="Stage" id="cf-stage" value="">
-      </div>
-
-      <div class="submit-row">
-        <button type="submit" class="btn">Start My Ring Journey</button>
-        <span class="alt-contact">Prefer to just reach out? <a href="tel:+18324746344">Call/Text (832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.</span>
-      </div>
-      <p class="form-trust">Takes about 30 seconds. We'll never share your information or spam you &mdash; just a real conversation about your ring.</p>
-    </form>
-  </div>
-</div>
 
 <div class="ornamental"></div>
 
