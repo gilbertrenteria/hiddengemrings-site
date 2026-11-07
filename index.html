@@ -484,11 +484,7 @@
   <div class="consult-form-card" id="consult-form">
     <h3>Tell Us About Your Vision</h3>
     <p class="form-intro">Share a few details below and we'll personally follow up &mdash; by phone, text, or email, whichever you prefer.</p>
-    <form class="consult-form" id="consultForm" action="https://formsubmit.co/hello@hiddengemrings.com" method="POST">
-      <input type="hidden" name="_subject" value="New inquiry from Hidden Gem website">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_captcha" value="false">
-      <input type="hidden" name="_next" value="https://hiddengemrings.com/thank-you.html">
+    <form class="consult-form" id="consultForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
       <input type="text" name="_honey" class="form-honey" tabindex="-1" autocomplete="off">
 
       <div class="field">
@@ -640,10 +636,7 @@
     </div>
     <div>
       <h4>Subscribe to get our special offers</h4>
-      <form class="subscribe-form" id="newsletterForm" action="https://formsubmit.co/hello@hiddengemrings.com" method="POST">
-        <input type="hidden" name="_subject" value="New newsletter signup from Hidden Gem website">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_next" value="https://hiddengemrings.com/thank-you.html">
+      <form class="subscribe-form" id="newsletterForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
         <input type="hidden" name="Form" value="Newsletter Signup">
         <input type="email" name="Email" placeholder="Your email address" required>
         <button type="submit">Join</button>
@@ -686,28 +679,30 @@
     });
   });
 
-  // posts a form via a no-cors beacon (stays on this page, no third-party flash).
-  // races it against a plain timer (not tied to fetch's own signal, which has a
-  // known misfire with no-cors + AbortSignal in some Chrome builds) so the UI
-  // never hangs forever on a dead connection. FormSubmit has been observed to
-  // take up to ~20s to respond even when healthy, so the timeout is generous.
-  // Note: a no-cors response is "opaque" -- resolving isn't proof of delivery,
-  // only proof the request didn't outright fail (even a down origin can
-  // resolve this way) -- so we never redirect through FormSubmit's own page as
-  // a fallback; if their service is down that stranded the visitor on a bare
-  // third-party error page instead of our site. The direct phone/email option
-  // stays visible as the real backstop either way.
-  function postFormQuietly(formData, timeoutMs) {
-    const req = fetch('https://formsubmit.co/hello@hiddengemrings.com', {
-      method: 'POST',
-      mode: 'no-cors',
-      body: formData
-    });
-    req.catch(() => {});
-    return Promise.race([
-      req,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
-    ]);
+  // Posts a form to our own Cloudflare Worker (not a third-party form
+  // product) which sends the email itself via the Resend API. Because we
+  // control the Worker's CORS response, this is a normal readable fetch --
+  // unlike a no-cors beacon, we get a real, honest ok:true/false back, so
+  // "success" here actually means the email was sent, not just "a request
+  // went out." A 20s timeout guards against a hung connection; on any
+  // failure we show our own message pointing to phone/email directly,
+  // never a redirect to someone else's page.
+  const FORM_ENDPOINT = 'https://long-bar-d49d.gilbertrenteria.workers.dev/';
+
+  function postForm(formData, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(FORM_ENDPOINT, { method: 'POST', body: formData, signal: controller.signal })
+      .then(async (res) => {
+        clearTimeout(timer);
+        let data;
+        try { data = await res.json(); } catch (e) { data = null; }
+        if (!res.ok || !data || !data.ok) {
+          throw new Error((data && data.error) || `Request failed (${res.status})`);
+        }
+        return data;
+      })
+      .catch((err) => { clearTimeout(timer); throw err; });
   }
 
   function showFormNotice(form, className, html) {
@@ -728,18 +723,14 @@
       const submitBtn = consultForm.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
-      const slowNotice = setTimeout(() => { submitBtn.textContent = 'Still sending...'; }, 6000);
       const data = new FormData(consultForm);
-      data.delete('_next');
       try {
-        await postFormQuietly(data, 25000);
-        clearTimeout(slowNotice);
-        consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer. If you don\'t hear from us within a day, please call or text <a href="tel:+18324746344">(832) 474-6344</a> so we don\'t miss you.</p>';
+        await postForm(data, 20000);
+        consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer.</p>';
       } catch (err) {
-        clearTimeout(slowNotice);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Send My Inquiry';
-        showFormNotice(consultForm, 'form-error', 'That\'s taking longer than it should. Please try again, or reach us directly: call/text <a href="tel:+18324746344">(832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.');
+        showFormNotice(consultForm, 'form-error', 'That didn\'t go through. Please try again, or reach us directly: call/text <a href="tel:+18324746344">(832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.');
       }
     });
   }
@@ -752,9 +743,8 @@
       btn.disabled = true;
       btn.textContent = '...';
       const data = new FormData(newsletterForm);
-      data.delete('_next');
       try {
-        await postFormQuietly(data, 25000);
+        await postForm(data, 20000);
         newsletterForm.innerHTML = '<p class="subscribe-success">Thanks, you\'re on the list!</p>';
       } catch (err) {
         btn.disabled = false;
