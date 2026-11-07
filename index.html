@@ -75,6 +75,8 @@
     color:var(--ink);white-space:nowrap;
   }
   nav.primary a:hover{color:var(--gold);}
+  nav.primary a.btn.nav-cta{color:var(--white);}
+  nav.primary a.btn.nav-cta:hover{color:var(--brown-dark);}
   nav.primary .dot{color:var(--taupe);}
   .header-icons{display:flex;gap:16px;align-items:center;flex-shrink:0;}
   .header-icons a{color:var(--ink);opacity:.75;}
@@ -309,6 +311,16 @@
     grid-column:1 / -1;font-family:'Jost',sans-serif;font-size:12.5px;letter-spacing:.02em;
     color:var(--taupe-dark);margin:16px 0 0;
   }
+  .stage-options{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
+  .stage-opt{
+    font-family:'Jost',sans-serif;font-size:13.5px;font-weight:500;
+    padding:11px 18px;border-radius:30px;border:1px solid rgba(92,77,64,.3);
+    background:var(--cream);color:var(--brown-dark);cursor:pointer;
+    transition:background .2s ease,color .2s ease,border-color .2s ease,transform .15s ease;
+  }
+  .stage-opt:hover{border-color:var(--gold);transform:translateY(-1px);}
+  .stage-opt.selected{background:var(--brown-dark);color:var(--white);border-color:var(--brown-dark);}
+  @media(prefers-reduced-motion: reduce){.stage-opt{transition:none;}.stage-opt:hover{transform:none;}}
   .subscribe-success{font-family:'Jost',sans-serif;font-size:14px;color:var(--cream);margin:0;}
   @media(max-width:700px){
     .consult-form-card{padding:38px 24px;}
@@ -406,7 +418,7 @@
     <nav class="primary" id="primaryNav">
       <a href="#top">Home</a><span class="dot">&middot;</span>
       <a href="#story">Our Story</a><span class="dot">&middot;</span>
-      <a href="#operate">How We Operate</a><span class="dot">&middot;</span>
+      <a href="#operate">How It Works</a><span class="dot">&middot;</span>
       <a href="faq.html">FAQ</a>
       <a class="btn nav-cta" href="#consult-form">Get Started</a>
     </nav>
@@ -485,7 +497,7 @@
 
 <section class="pathways" id="operate">
   <div class="operate-intro">
-    <p class="eyebrow operate-eyebrow">How We Operate</p>
+    <p class="eyebrow operate-eyebrow">How It Works</p>
     <div class="ornament" style="margin:0 auto 20px auto;"><img src="ornament-flourish.png" alt=""></div>
     <h2>A Process Built Around <span class="script">You</span></h2>
     <p>Whether you already know exactly what you want, need some inspiration, or would rather we guide the whole thing &mdash; it starts the same simple way.</p>
@@ -544,7 +556,7 @@
 
   <div class="consult-form-card" id="consult-form">
     <h3>We'll Call You</h3>
-    <p class="form-intro">Three fields, thirty seconds &mdash; we'll handle the rest on a quick call.</p>
+    <p class="form-intro">A few quick taps, thirty seconds &mdash; we'll handle the rest on a quick call.</p>
     <form class="consult-form" id="consultForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
       <input type="text" name="_honey" class="form-honey" tabindex="-1" autocomplete="off">
 
@@ -559,6 +571,16 @@
       <div class="field full">
         <label for="cf-phone">Phone</label>
         <input id="cf-phone" type="tel" name="Phone" required autocomplete="tel">
+      </div>
+
+      <div class="field full">
+        <label id="cf-stage-label">Where Are You At?</label>
+        <div class="stage-options" role="radiogroup" aria-labelledby="cf-stage-label">
+          <button type="button" class="stage-opt" data-value="I Know What I Want">I Know What I Want</button>
+          <button type="button" class="stage-opt" data-value="I Need Some Inspiration">I Need Some Inspiration</button>
+          <button type="button" class="stage-opt" data-value="Just Getting Started">Just Getting Started</button>
+        </div>
+        <input type="hidden" name="Stage" id="cf-stage" value="">
       </div>
 
       <div class="submit-row">
@@ -623,6 +645,15 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // consultation form: "Where Are You At?" tap-to-select chips
+  document.querySelectorAll('.stage-opt').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.stage-opt').forEach((b) => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('cf-stage').value = btn.dataset.value;
+    });
+  });
 
   // mobile menu
   const menuToggle = document.getElementById('menuToggle');
