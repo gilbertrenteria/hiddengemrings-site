@@ -689,7 +689,14 @@
   // posts a form via a no-cors beacon (stays on this page, no third-party flash).
   // races it against a plain timer (not tied to fetch's own signal, which has a
   // known misfire with no-cors + AbortSignal in some Chrome builds) so the UI
-  // never hangs; a stray late rejection after the timer wins is swallowed.
+  // never hangs forever on a dead connection. FormSubmit has been observed to
+  // take up to ~20s to respond even when healthy, so the timeout is generous.
+  // Note: a no-cors response is "opaque" -- resolving isn't proof of delivery,
+  // only proof the request didn't outright fail (even a down origin can
+  // resolve this way) -- so we never redirect through FormSubmit's own page as
+  // a fallback; if their service is down that stranded the visitor on a bare
+  // third-party error page instead of our site. The direct phone/email option
+  // stays visible as the real backstop either way.
   function postFormQuietly(formData, timeoutMs) {
     const req = fetch('https://formsubmit.co/hello@hiddengemrings.com', {
       method: 'POST',
@@ -703,9 +710,16 @@
     ]);
   }
 
-  // consultation form: submit quietly in the background, stay on this page;
-  // if that genuinely fails or times out, fall back to a real form submit
-  // (via FormSubmit's own page) so the inquiry is never silently lost.
+  function showFormNotice(form, className, html) {
+    let notice = form.querySelector('.' + className.split(' ')[0]);
+    if (!notice) {
+      notice = document.createElement('p');
+      form.appendChild(notice);
+    }
+    notice.className = className;
+    notice.innerHTML = html;
+  }
+
   const consultForm = document.getElementById('consultForm');
   if (consultForm) {
     consultForm.addEventListener('submit', async (e) => {
@@ -714,18 +728,22 @@
       const submitBtn = consultForm.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
+      const slowNotice = setTimeout(() => { submitBtn.textContent = 'Still sending...'; }, 6000);
       const data = new FormData(consultForm);
       data.delete('_next');
       try {
-        await postFormQuietly(data, 8000);
-        consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer.</p>';
+        await postFormQuietly(data, 25000);
+        clearTimeout(slowNotice);
+        consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer. If you don\'t hear from us within a day, please call or text <a href="tel:+18324746344">(832) 474-6344</a> so we don\'t miss you.</p>';
       } catch (err) {
-        HTMLFormElement.prototype.submit.call(consultForm);
+        clearTimeout(slowNotice);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send My Inquiry';
+        showFormNotice(consultForm, 'form-error', 'That\'s taking longer than it should. Please try again, or reach us directly: call/text <a href="tel:+18324746344">(832) 474-6344</a> or <a href="mailto:hello@hiddengemrings.com">email us</a>.');
       }
     });
   }
 
-  // newsletter form: same quiet background submit, same native fallback
   const newsletterForm = document.getElementById('newsletterForm');
   if (newsletterForm) {
     newsletterForm.addEventListener('submit', async (e) => {
@@ -736,10 +754,12 @@
       const data = new FormData(newsletterForm);
       data.delete('_next');
       try {
-        await postFormQuietly(data, 8000);
+        await postFormQuietly(data, 25000);
         newsletterForm.innerHTML = '<p class="subscribe-success">Thanks, you\'re on the list!</p>';
       } catch (err) {
-        HTMLFormElement.prototype.submit.call(newsletterForm);
+        btn.disabled = false;
+        btn.textContent = 'Join';
+        showFormNotice(newsletterForm, 'form-error', 'That didn\'t go through &mdash; please try again in a moment.');
       }
     });
   }
