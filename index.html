@@ -686,6 +686,18 @@
     });
   });
 
+  // posts a form via a no-cors beacon so it never hangs on a slow/blocked preflight
+  function postFormQuietly(formData, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch('https://formsubmit.co/hello@hiddengemrings.com', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData,
+      signal: controller.signal
+    }).finally(() => clearTimeout(timer));
+  }
+
   // consultation form: submit quietly in the background, stay on this page
   const consultForm = document.getElementById('consultForm');
   if (consultForm) {
@@ -696,15 +708,10 @@
       const originalLabel = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
-      const data = {};
-      new FormData(consultForm).forEach((v, k) => { if (k !== '_next' && k !== '_honey') data[k] = v; });
+      const data = new FormData(consultForm);
+      data.delete('_next');
       try {
-        const res = await fetch('https://formsubmit.co/ajax/hello@hiddengemrings.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('send failed');
+        await postFormQuietly(data, 8000);
         consultForm.innerHTML = '<p class="form-success">Thank you! We\'ve received your message and will personally follow up soon &mdash; by phone, text, or email, whichever you prefer.</p>';
       } catch (err) {
         submitBtn.disabled = false;
@@ -728,15 +735,10 @@
       const btn = newsletterForm.querySelector('button[type="submit"]');
       btn.disabled = true;
       btn.textContent = '...';
-      const data = {};
-      new FormData(newsletterForm).forEach((v, k) => { if (k !== '_next') data[k] = v; });
+      const data = new FormData(newsletterForm);
+      data.delete('_next');
       try {
-        const res = await fetch('https://formsubmit.co/ajax/hello@hiddengemrings.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('send failed');
+        await postFormQuietly(data, 8000);
         newsletterForm.innerHTML = '<p class="subscribe-success">Thanks, you\'re on the list!</p>';
       } catch (err) {
         btn.disabled = false;
