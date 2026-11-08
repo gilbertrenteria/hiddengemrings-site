@@ -200,6 +200,26 @@
     color:var(--brown-dark);margin:0 0 7px;
   }
   .story-point p{margin:0;font-size:16.5px;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1.7;}
+  .story-contrast{max-width:var(--maxw);margin:0 auto 54px;padding:0 32px;position:relative;z-index:1;}
+  .story-contrast-media{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 14px 34px rgba(92,77,64,.2);}
+  .story-contrast-media img{width:100%;height:380px;object-fit:cover;display:block;filter:saturate(.82) contrast(1.05);}
+  .story-contrast-media::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(0deg, rgba(28,22,17,.88) 0%, rgba(28,22,17,.5) 42%, rgba(28,22,17,.05) 68%, rgba(28,22,17,0) 100%);
+  }
+  .story-contrast-caption{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:34px 40px 30px;max-width:620px;}
+  .story-contrast-caption p{
+    font-family:'Cormorant Garamond',serif;color:var(--white);margin:0 0 8px;
+    font-size:clamp(17px,2.1vw,21px);line-height:1.5;
+  }
+  .story-contrast-caption .highlight{
+    font-style:italic;font-weight:600;font-size:clamp(19px,2.4vw,24px);color:var(--gold);margin:0;
+  }
+  @media(max-width:700px){
+    .story-contrast{padding:0 16px;margin-bottom:40px;}
+    .story-contrast-media img{height:280px;}
+    .story-contrast-caption{padding:24px 24px 22px;}
+  }
   .story-sketch img{border:1px solid rgba(92,77,64,.15);border-radius:4px;}
   .set-in-stone{margin-top:26px;}
   .set-in-stone-label{color:var(--taupe-dark);text-align:center;margin:0 0 14px;}
@@ -464,6 +484,15 @@
   <div class="story-header">
     <p class="eyebrow story-eyebrow">Our Story</p>
     <h2>A Family Business, Built on <span class="script">Love</span></h2>
+  </div>
+  <div class="story-contrast">
+    <div class="story-contrast-media">
+      <img src="story-opener.jpg" alt="A pear-cut diamond engagement ring and a gold wedding band resting on an ornate vintage tray with silk ribbon" loading="lazy">
+      <div class="story-contrast-caption">
+        <p>Every love story deserves a ring that's actually theirs &mdash; not something pulled from a case.</p>
+        <p class="highlight">We build something meaningful and unique to you &mdash; for about half the price.</p>
+      </div>
+    </div>
   </div>
   <div class="wrap story-grid">
     <div class="story-copy">
