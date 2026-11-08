@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Font Pairing Options — Hidden Gem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,500;1,9..144,400&family=Public+Sans:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&family=Work+Sans:wght@400;500;600&family=Italiana&family=Jost:wght@400;500;600&family=Bodoni+Moda:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F3EC; --cream-alt:#EEEBE2;
+    --taupe:#A0948A; --taupe-dark:#8A7F6E;
+    --brown:#6B5B4C; --brown-dark:#5C4D40;
+    --ink:#5C534B; --gold:#B99C5F; --white:#fff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);font-family:sans-serif;}
+  .intro{max-width:900px;margin:0 auto;padding:60px 32px 20px;text-align:center;}
+  .intro h1{font-family:Georgia,serif;font-size:26px;color:var(--brown-dark);margin:0 0 10px;}
+  .intro p{color:var(--ink);font-size:15px;line-height:1.6;}
+  .panel{padding:100px 32px;}
+  .panel-inner{max-width:720px;margin:0 auto;text-align:left;}
+  .panel .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:600;margin:0 0 16px;}
+  .panel h2{font-size:clamp(32px,4.4vw,52px);margin:0 0 24px;line-height:1.2;}
+  .panel p.body{font-size:17px;line-height:1.85;margin:0 0 26px;max-width:600px;}
+  .panel .btn{display:inline-block;padding:15px 32px;border-radius:2px;text-transform:uppercase;letter-spacing:.1em;font-size:13px;font-weight:600;text-decoration:none;}
+  .label-tag{display:inline-block;margin-bottom:34px;padding:7px 16px;border-radius:20px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-family:Georgia,serif;}
+
+  /* Option 1 : cream bg */
+  .opt1{background:var(--cream);}
+  .opt1 .label-tag{background:var(--taupe);color:var(--white);}
+  .opt1 .eyebrow{color:var(--taupe-dark);}
+  .opt1 h2{font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--brown-dark);}
+  .opt1 p.body{font-family:'Public Sans',sans-serif;color:var(--ink);}
+  .opt1 .btn{background:var(--brown-dark);color:var(--white);font-family:'Public Sans',sans-serif;}
+
+  /* Option 2: mushroom taupe band bg */
+  .opt2{background:var(--taupe);}
+  .opt2 .label-tag{background:var(--brown-dark);color:var(--cream);}
+  .opt2 .eyebrow{color:var(--cream);}
+  .opt2 h2{font-family:'Newsreader',serif;font-style:italic;font-weight:500;color:var(--white);}
+  .opt2 p.body{font-family:'Work Sans',sans-serif;color:rgba(255,255,255,.92);}
+  .opt2 .btn{background:var(--brown-dark);color:var(--white);font-family:'Work Sans',sans-serif;}
+
+  /* Option 3: deep chocolate brown band bg */
+  .opt3{background:var(--brown-dark);}
+  .opt3 .label-tag{background:var(--gold);color:var(--brown-dark);}
+  .opt3 .eyebrow{color:var(--gold);}
+  .opt3 h2{font-family:'Italiana',serif;font-weight:400;color:var(--cream);}
+  .opt3 p.body{font-family:'Jost',sans-serif;color:rgba(246,243,236,.85);}
+  .opt3 .btn{background:var(--gold);color:var(--brown-dark);font-family:'Jost',sans-serif;}
+
+  /* Option 4: cream-alt bg */
+  .opt4{background:var(--cream-alt);}
+  .opt4 .label-tag{background:var(--taupe-dark);color:var(--white);}
+  .opt4 .eyebrow{color:var(--taupe-dark);}
+  .opt4 h2{font-family:'Bodoni Moda',serif;font-style:italic;font-weight:500;color:var(--brown-dark);}
+  .opt4 p.body{font-family:'DM Sans',sans-serif;color:var(--ink);}
+  .opt4 .btn{background:var(--brown-dark);color:var(--white);font-family:'DM Sans',sans-serif;}
+</style>
+</head>
+<body>
+  <div class="intro">
+    <h1>Font Pairing Options</h1>
+    <p>Same copy, same colors — mushroom taupe and deep chocolate brown used to separate each option — four different type directions. Scroll to compare, then let me know which one (or mix) you like.</p>
+  </div>
+
+  <section class="panel opt1">
+    <div class="panel-inner">
+      <span class="label-tag">Option 1 &middot; Fraunces + Public Sans</span>
+      <p class="eyebrow">Our Story</p>
+      <h2>How It Began</h2>
+      <p class="body">We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
+      <a class="btn">Get Started</a>
+    </div>
+  </section>
+
+  <section class="panel opt2">
+    <div class="panel-inner">
+      <span class="label-tag">Option 2 &middot; Newsreader + Work Sans</span>
+      <p class="eyebrow">Our Story</p>
+      <h2>How It Began</h2>
+      <p class="body">We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
+      <a class="btn">Get Started</a>
+    </div>
+  </section>
+
+  <section class="panel opt3">
+    <div class="panel-inner">
+      <span class="label-tag">Option 3 &middot; Italiana + Jost</span>
+      <p class="eyebrow">Our Story</p>
+      <h2>How It Began</h2>
+      <p class="body">We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
+      <a class="btn">Get Started</a>
+    </div>
+  </section>
+
+  <section class="panel opt4">
+    <div class="panel-inner">
+      <span class="label-tag">Option 4 &middot; Bodoni Moda + DM Sans</span>
+      <p class="eyebrow">Our Story</p>
+      <h2>How It Began</h2>
+      <p class="body">We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
+      <a class="btn">Get Started</a>
+    </div>
+  </section>
+</body>
+</html>
