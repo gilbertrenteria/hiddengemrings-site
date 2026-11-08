@@ -126,6 +126,33 @@
   @media(max-width:900px){.design-grid{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:560px){.design-grid{grid-template-columns:1fr;max-width:380px;}}
 
+  /* ===== STYLE GALLERY (shape & setting) ===== */
+  .style-grid{
+    max-width:var(--maxw);margin:0 auto;padding:36px 32px 10px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:50px 34px;
+  }
+  .style-card{text-align:center;}
+  .style-card-media{
+    position:relative;border-radius:8px;overflow:hidden;background:var(--white);
+    border:1px solid rgba(92,77,64,.14);box-shadow:0 8px 20px rgba(92,77,64,.1);
+    margin-bottom:14px;
+  }
+  .style-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;transition:opacity .2s ease;}
+  .metal-swatches{display:flex;justify-content:center;gap:10px;margin-bottom:14px;}
+  .metal-swatches button{
+    width:22px;height:22px;border-radius:50%;cursor:pointer;
+    border:2px solid transparent;padding:0;box-shadow:0 0 0 1px rgba(92,77,64,.25) inset;
+    transition:transform .15s ease,border-color .15s ease;
+  }
+  .metal-swatches button:hover{transform:translateY(-1px);}
+  .metal-swatches button.active{border-color:var(--brown-dark);}
+  .style-card h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;color:var(--brown-dark);margin:0 0 6px;}
+  .style-card .metal-label{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--taupe-dark);margin:0 0 10px;}
+  .style-card p{font-size:15.5px;color:var(--ink);line-height:1.65;margin:0 0 16px;}
+  .style-card .btn{padding:11px 22px;font-size:11px;}
+  @media(max-width:900px){.style-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.style-grid{grid-template-columns:1fr;max-width:380px;}}
+
   /* ===== INSPIRATION STRIP ===== */
   .inspo-grid{
     max-width:var(--maxw);margin:0 auto;padding:30px 32px 20px;
@@ -238,6 +265,185 @@
 </div>
 
 <div class="section-head">
+  <p class="eyebrow">Explore The Collection</p>
+  <h2>Find Your <span class="script">Setting</span></h2>
+  <p style="max-width:640px;margin:14px auto 0;font-size:16.5px;">Some of the cuts and settings our couples come back to again and again. Tap a swatch to see each one in white, yellow, or rose gold.</p>
+</div>
+
+<div class="style-grid">
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-white.webp" alt="Cushion-cut diamond in a bezel setting" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Cushion &mdash; Bezel</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A cushion-cut diamond wrapped edge-to-edge in a sleek bezel &mdash; soft corners, modern polish.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-white.webp" alt="Elongated cushion-cut diamond with side stones" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Elongated Cushion &mdash; Side Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>An elongated cushion diamond with smaller stones tracing the band toward it.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-white.webp" alt="Elongated cushion-cut diamond with five stones" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Elongated Cushion &mdash; Five Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>An elongated cushion center stone set among four graduated diamonds for extra brilliance.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/emerald-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/emerald-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/emerald-three-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/emerald-three-white.webp" alt="Emerald-cut diamond three stone ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Emerald &mdash; Three Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A clean-lined emerald cut flanked by two accent diamonds &mdash; understated and architectural.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-white.webp" alt="Marquise-cut diamond solitaire ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Marquise &mdash; Solitaire</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A marquise diamond set simply on its own &mdash; elongated, elegant, unmistakably classic.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-white.webp" alt="Marquise-cut diamond with hidden halo" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Marquise &mdash; Hidden Halo</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A marquise diamond with a halo of hidden diamonds tucked just beneath it.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/marquise-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/marquise-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/marquise-three-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-three-white.webp" alt="Marquise-cut diamond three stone ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Marquise &mdash; Three Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A marquise center stone between two accents, echoing its pointed silhouette.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/oval-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/oval-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/oval-three-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/oval-three-white.webp" alt="Oval-cut diamond three stone ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Oval &mdash; Three Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>An oval diamond flanked by two smaller stones for a soft, elongated look.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-white.webp" alt="Pear-shaped diamond solitaire ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Pear &mdash; Solitaire</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A single pear-shaped diamond, teardrop and timeless, set on its own.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/pear-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/pear-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/pear-three-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/pear-three-white.webp" alt="Pear-shaped diamond three stone ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Pear &mdash; Three Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A pear-shaped center diamond with two accent stones for extra dimension.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-white.webp" alt="Round brilliant diamond solitaire ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Round &mdash; Solitaire</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A round brilliant diamond set simply &mdash; the most classic engagement ring of all.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/round-side-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/round-side-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/round-side-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/round-side-white.webp" alt="Round brilliant diamond with side stones" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Round &mdash; Side Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A round diamond with smaller stones tracing the band for added sparkle.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+  <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/round-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/round-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/round-three-rose.webp">
+    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/round-three-white.webp" alt="Round brilliant diamond three stone ring" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
+    <h3>Round &mdash; Three Stone</h3>
+    <p class="metal-label">White Gold</p>
+    <p>A round center diamond flanked by two accents &mdash; a Hidden Gem favorite.</p>
+    <a class="btn" href="index.html#consult-form">Build This Design</a>
+  </div>
+
+</div>
+
+<div class="section-head">
   <p class="eyebrow">A Little More Inspiration</p>
   <h2>Moments From Our <span class="script">Workbench</span></h2>
 </div>
@@ -277,6 +483,24 @@
   const menuToggle = document.getElementById('menuToggle');
   const primaryNav = document.getElementById('primaryNav');
   menuToggle.addEventListener('click', () => primaryNav.classList.toggle('open'));
+
+  document.querySelectorAll('.style-card').forEach(card => {
+    const img = card.querySelector('.style-card-media img');
+    const label = card.querySelector('.metal-label');
+    const names = {white:'White Gold', yellow:'Yellow Gold', rose:'Rose Gold'};
+    card.querySelectorAll('.metal-swatches button').forEach(sw => {
+      sw.addEventListener('click', () => {
+        const metal = sw.dataset.metal;
+        const url = card.dataset[metal];
+        if (!url) return;
+        img.style.opacity = '0';
+        setTimeout(() => { img.src = url; img.style.opacity = '1'; }, 120);
+        if (label) label.textContent = names[metal];
+        card.querySelectorAll('.metal-swatches button').forEach(b => b.classList.remove('active'));
+        sw.classList.add('active');
+      });
+    });
+  });
 </script>
 
 </body></html>
