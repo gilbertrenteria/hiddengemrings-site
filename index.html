@@ -270,6 +270,56 @@
     .operate-photo img{height:280px;}
   }
 
+  /* ===== RING GALLERY TEASER ===== */
+  .gallery-teaser{background:var(--cream-alt);padding:84px 0 90px;}
+  .gallery-head{max-width:var(--maxw);margin:0 auto;padding:0 32px 44px;text-align:center;}
+  .gallery-eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
+  .gallery-head h2{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(30px,4.2vw,44px);color:var(--brown-dark);margin:0 0 16px;}
+  .gallery-head h2 .script{font-size:1.2em;color:var(--gold);}
+  .gallery-head p{max-width:620px;margin:0 auto;font-size:17px;color:var(--ink);line-height:1.7;}
+  .gallery-grid{
+    display:grid;grid-template-columns:repeat(6,1fr);gap:18px;
+    max-width:var(--maxw);margin:0 auto;padding:0 32px;
+  }
+  .gallery-card{display:block;text-align:center;}
+  .gallery-card-media{
+    border-radius:8px;overflow:hidden;background:var(--white);
+    border:1px solid rgba(92,77,64,.14);box-shadow:0 8px 20px rgba(92,77,64,.1);
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .gallery-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;}
+  .gallery-card:hover .gallery-card-media{transform:translateY(-5px);box-shadow:0 14px 28px rgba(92,77,64,.18);}
+  .gallery-card-name{
+    display:block;margin-top:12px;font-family:'Jost',sans-serif;text-transform:uppercase;
+    letter-spacing:.08em;font-size:12.5px;font-weight:600;color:var(--brown-dark);
+  }
+  .gallery-cta{text-align:center;margin-top:44px;}
+  @media(max-width:900px){.gallery-grid{grid-template-columns:repeat(3,1fr);gap:16px;}}
+  @media(max-width:560px){.gallery-grid{grid-template-columns:repeat(2,1fr);gap:14px;}}
+
+  /* ===== PHOTO BANNER (brand) ===== */
+  .photo-banner{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
+  .photo-banner-media{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 14px 34px rgba(92,77,64,.2);}
+  .photo-banner-media img{width:100%;height:420px;object-fit:cover;object-position:center 30%;display:block;}
+  .photo-banner-media::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(100deg, rgba(28,22,17,.58) 0%, rgba(28,22,17,.1) 44%, rgba(28,22,17,0) 62%);
+  }
+  .photo-banner-caption{position:absolute;left:0;top:0;bottom:0;z-index:1;display:flex;flex-direction:column;justify-content:center;padding:40px 44px;max-width:460px;}
+  .photo-banner-caption p{
+    font-family:'Cormorant Garamond',serif;color:var(--white);margin:0 0 10px;
+    font-size:clamp(17px,2.1vw,21px);line-height:1.55;
+  }
+  .photo-banner-caption .highlight{
+    font-style:italic;font-weight:600;font-size:clamp(20px,2.6vw,27px);color:var(--gold);margin:0;
+  }
+  @media(max-width:700px){
+    .photo-banner{padding:0 16px;}
+    .photo-banner-media img{height:440px;object-position:center 22%;}
+    .photo-banner-media::after{background:linear-gradient(0deg, rgba(28,22,17,.8) 0%, rgba(28,22,17,.25) 46%, rgba(28,22,17,0) 72%);}
+    .photo-banner-caption{top:auto;bottom:0;padding:28px 24px;max-width:100%;}
+  }
+
   /* ===== BOOK APPOINTMENT ===== */
   .appointment-wrap{max-width:var(--maxw);margin:0 auto;padding:40px 32px;}
   .appointment{
@@ -476,6 +526,7 @@
     <nav class="primary" id="primaryNav">
       <a href="#top">Home</a><span class="dot">&middot;</span>
       <a href="#story">Our Story</a><span class="dot">&middot;</span>
+      <a href="collection.html">Collection</a><span class="dot">&middot;</span>
       <a href="#operate">How It Works</a><span class="dot">&middot;</span>
       <a href="faq.html">FAQ</a>
       <a class="btn nav-cta" href="#consult-form">Get Started</a>
@@ -560,6 +611,43 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="gallery-teaser" id="collection-preview">
+  <div class="gallery-head reveal">
+    <p class="eyebrow gallery-eyebrow">The Collection</p>
+    <h2>A Few of Our Favorite <span class="script">Designs</span></h2>
+    <p>Every ring starts as a conversation and ends up one of a kind &mdash; here's a small taste of what we've built for other couples.</p>
+  </div>
+  <div class="gallery-grid reveal-stagger">
+    <a class="gallery-card" href="collection.html#aurora">
+      <div class="gallery-card-media"><img src="design-aurora.jpg" alt="Aurora, a curved diamond wedding band with marquise and baguette stones" loading="lazy"></div>
+      <span class="gallery-card-name">Aurora</span>
+    </a>
+    <a class="gallery-card" href="collection.html#allison">
+      <div class="gallery-card-media"><img src="design-allison.jpg" alt="The Allison, a bezel-set cushion diamond with a split shank in yellow gold" loading="lazy"></div>
+      <span class="gallery-card-name">The Allison</span>
+    </a>
+    <a class="gallery-card" href="collection.html#nova">
+      <div class="gallery-card-media"><img src="design-nova.jpg" alt="The Nova, a bezel-set oval diamond in yellow gold" loading="lazy"></div>
+      <span class="gallery-card-name">The Nova</span>
+    </a>
+    <a class="gallery-card" href="collection.html#penelope">
+      <div class="gallery-card-media"><img src="design-penelope.jpg" alt="The Penelope, a classic pear-shaped diamond solitaire in yellow gold" loading="lazy"></div>
+      <span class="gallery-card-name">The Penelope</span>
+    </a>
+    <a class="gallery-card" href="collection.html#selah">
+      <div class="gallery-card-media"><img src="design-selah.jpg" alt="The Selah, an elongated cushion-cut diamond with double claw prongs in yellow gold" loading="lazy"></div>
+      <span class="gallery-card-name">The Selah</span>
+    </a>
+    <a class="gallery-card" href="collection.html#souline">
+      <div class="gallery-card-media"><img src="design-souline.jpg" alt="The Souline, a round rose-cut diamond bezel with a split shank in yellow gold" loading="lazy"></div>
+      <span class="gallery-card-name">The Souline</span>
+    </a>
+  </div>
+  <div class="gallery-cta reveal">
+    <a class="btn" href="collection.html">View The Full Collection</a>
   </div>
 </section>
 
@@ -658,6 +746,16 @@
     </div>
   </div>
 </section>
+
+<div class="photo-banner reveal">
+  <div class="photo-banner-media">
+    <img src="brand-bands.jpg" alt="Three stacked gold wedding bands displayed on a ring cone beside a Hidden Gem brand card reading Romantic, Timeless, Intentional" loading="lazy">
+    <div class="photo-banner-caption">
+      <p>Every piece we make carries the same three words.</p>
+      <p class="highlight">Romantic. Timeless. Intentional.</p>
+    </div>
+  </div>
+</div>
 
 <div class="ornamental"></div>
 
