@@ -304,24 +304,39 @@
   /* ===== BOOK APPOINTMENT ===== */
   .appointment-wrap{max-width:var(--maxw);margin:0 auto;padding:40px 32px;}
   .appointment{
-    position:relative;background:var(--brown-dark);
-    padding:70px 56px;color:var(--white);border-radius:22px;overflow:hidden;
+    position:relative;
+    display:grid;grid-template-columns:1.25fr .75fr;
+    border-radius:22px;overflow:hidden;
   }
-  .appointment-inner{position:relative;z-index:1;max-width:560px;margin:0;text-align:left;}
-  .appointment-eyebrow{color:rgba(255,255,255,.8);margin:0 0 14px;}
+  .appointment-inner{
+    position:relative;z-index:1;
+    background:var(--brown-dark);color:var(--white);
+    padding:70px 56px;
+  }
+  .appointment-eyebrow{color:var(--taupe);margin:0 0 14px;}
   .appointment h2{
     font-size:clamp(34px,5vw,52px);font-family:'Newsreader',serif;font-weight:500;
     margin:0 0 20px;line-height:1.15;
   }
-  .appointment h2 .script{font-size:1.2em;color:var(--gold);}
+  .appointment h2 .script{font-size:1.2em;color:var(--taupe);}
   .appointment p{font-size:17px;font-family:'Work Sans',sans-serif;margin:0 0 30px;line-height:1.7;}
   .appointment .btn.ghost{
-    background:var(--brown-dark);color:var(--white);border-color:var(--brown-dark);
+    background:var(--brown-dark);color:var(--white);border-color:var(--taupe);
     padding:16px 30px;
   }
-  .appointment .btn.ghost:hover{background:transparent;color:var(--white);border-color:rgba(255,255,255,.7);}
+  .appointment .btn.ghost:hover{background:var(--taupe);color:var(--brown-dark);border-color:var(--taupe);}
+  .appointment-accent{
+    background:var(--taupe);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .appointment-accent svg{width:46%;height:auto;max-width:150px;}
+  .appointment-accent svg circle,
+  .appointment-accent svg path{fill:none;stroke:var(--brown-dark);stroke-width:2;opacity:.45;}
   @media(max-width:700px){
-    .appointment{padding:50px 28px;}
+    .appointment{grid-template-columns:1fr;}
+    .appointment-inner{padding:50px 28px;}
+    .appointment-accent{min-height:140px;padding:20px;}
+    .appointment-accent svg{max-width:110px;}
     .appointment-wrap{padding:0 16px;}
   }
 
@@ -616,6 +631,12 @@
       <p class="eyebrow appointment-eyebrow">Get Started</p>
       <h2>Start Your Ring <span class="script">Journey</span></h2>
       <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
+    </div>
+    <div class="appointment-accent" aria-hidden="true">
+      <svg viewBox="0 0 200 240">
+        <circle cx="100" cy="150" r="55"></circle>
+        <path d="M100 55 L130 95 L100 135 L70 95 Z"></path>
+      </svg>
     </div>
   </section>
 
