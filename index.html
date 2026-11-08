@@ -395,6 +395,27 @@
   .subscribe-form button{padding:12px 20px;background:var(--gold);color:var(--brown-dark);border:none;font-family:'Jost',sans-serif;font-weight:600;letter-spacing:.06em;font-size:13px;text-transform:uppercase;cursor:pointer;}
   .footer-bottom{max-width:var(--maxw);margin:40px auto 0;padding:20px 32px 0;border-top:1px solid rgba(255,255,255,.15);text-align:center;font-size:14px;color:rgba(246,243,236,.6);}
   @media(max-width:800px){.footer-grid{grid-template-columns:1fr;gap:34px;}}
+
+  /* ===== SCROLL REVEAL ===== */
+  .reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .75s cubic-bezier(.22,.61,.36,1), transform .75s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.is-visible{opacity:1;transform:translateY(0);}
+  .reveal-stagger > *{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .75s cubic-bezier(.22,.61,.36,1), transform .75s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal-stagger.is-visible > *{opacity:1;transform:translateY(0);}
+  .reveal-stagger.is-visible > *:nth-child(1){transition-delay:.05s;}
+  .reveal-stagger.is-visible > *:nth-child(2){transition-delay:.17s;}
+  .reveal-stagger.is-visible > *:nth-child(3){transition-delay:.29s;}
+  .reveal-stagger.is-visible > *:nth-child(4){transition-delay:.41s;}
+  @media(prefers-reduced-motion: reduce){
+    .reveal, .reveal-stagger > *{opacity:1;transform:none;transition:none;}
+  }
 </style>
 <div class="splash" id="splash">
   <button class="splash-skip" id="splashSkip">Skip</button>
@@ -476,16 +497,16 @@
   </div>
 </section>
 
-<section class="tagline">
+<section class="tagline reveal">
   <p>We are committed to offering timeless designs, honest pricing, and a personalized experience from the very first conversation to the final piece.</p>
 </section>
 
 <section class="story" id="story">
-  <div class="story-header">
+  <div class="story-header reveal">
     <p class="eyebrow story-eyebrow">Our Story</p>
     <h2>A Family Business, Built on <span class="script">Love</span></h2>
   </div>
-  <div class="story-contrast">
+  <div class="story-contrast reveal">
     <div class="story-contrast-media">
       <img src="story-opener.jpg" alt="A pear-cut diamond engagement ring and a gold wedding band resting on an ornate vintage tray with silk ribbon" loading="lazy">
       <div class="story-contrast-caption">
@@ -496,7 +517,7 @@
   </div>
   <div class="wrap story-grid">
     <div class="story-copy">
-      <div class="story-points">
+      <div class="story-points reveal-stagger">
         <div class="story-point">
           <img src="icon-search.png" alt="">
           <div>
@@ -520,7 +541,7 @@
         </div>
       </div>
     </div>
-    <div class="story-sketch">
+    <div class="story-sketch reveal">
       <img src="sketch-ring.jpg" alt="Hand-drawn design sketch of a marquise diamond engagement ring from four angles" loading="lazy">
       <div class="set-in-stone">
         <p class="eyebrow set-in-stone-label">Set in Stone</p>
@@ -536,14 +557,14 @@
 
 <div class="appointment-wrap">
   <section class="appointment" id="appointment">
-    <div class="appointment-inner">
+    <div class="appointment-inner reveal">
       <p class="eyebrow appointment-eyebrow">Get Started</p>
       <h2>Start Your Ring <span class="script">Journey</span></h2>
       <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
     </div>
   </section>
 
-  <div class="consult-form-card" id="consult-form">
+  <div class="consult-form-card reveal" id="consult-form">
     <h3>We'll Call You</h3>
     <p class="form-intro">A few quick taps, thirty seconds &mdash; we'll handle the rest on a quick call.</p>
     <form class="consult-form" id="consultForm" action="https://long-bar-d49d.gilbertrenteria.workers.dev/" method="POST">
@@ -582,13 +603,13 @@
 </div>
 
 <section class="pathways" id="operate">
-  <div class="operate-intro">
+  <div class="operate-intro reveal">
     <p class="eyebrow operate-eyebrow">How It Works</p>
     <h2>A Process Built Around <span class="script">You</span></h2>
     <p>Whether you already know exactly what you want, need some inspiration, or would rather we guide the whole thing &mdash; it starts the same simple way.</p>
   </div>
 
-  <div class="operate-body">
+  <div class="operate-body reveal-stagger">
     <div class="operate-steps-col">
       <div class="steps-label">What happens next</div>
       <ul class="steps-list">
@@ -605,7 +626,7 @@
 </section>
 
 <section class="covered">
-  <div class="covered-grid">
+  <div class="covered-grid reveal-stagger">
     <div class="covered-item">
       <img src="icon-payment.png" alt="">
       <div>
@@ -633,7 +654,7 @@
 <div class="ornamental"></div>
 
 <section class="trust">
-  <div class="wrap trust-grid">
+  <div class="wrap trust-grid reveal-stagger">
     <div>
       <img src="icon-designed.png" alt="">
       <h3>Thoughtfully Designed</h3>
@@ -652,7 +673,7 @@
   </div>
 </section>
 
-<section class="follow">
+<section class="follow reveal">
   <span class="script">Follow us</span>
   <a class="handle" href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener">@HIDDENGEMRINGS</a>
 </section>
@@ -706,6 +727,27 @@
   }
   updateHeaderScroll();
   window.addEventListener('scroll', updateHeaderScroll, { passive: true });
+
+  // scroll reveal: sections/elements fade and rise into place as the
+  // visitor scrolls to them. Fires once per element, then stops watching it.
+  (function () {
+    var items = document.querySelectorAll('.reveal, .reveal-stagger');
+    if (!items.length) return;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      items.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  })();
 
   // tabs
 
