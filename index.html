@@ -179,7 +179,7 @@
   .story .wrap, .story .story-grid{position:relative;z-index:1;}
   .story-header{max-width:var(--maxw);margin:0 auto;padding:0 32px 40px;position:relative;z-index:1;}
   .story-grid{
-    display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;
+    display:grid;grid-template-columns:1fr;max-width:720px;margin:0 auto;
   }
   .story-eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
   .story h2{
@@ -220,37 +220,46 @@
     .story-contrast-media img{height:280px;}
     .story-contrast-caption{padding:24px 24px 22px;}
   }
-  .story-sketch img{border:1px solid rgba(92,77,64,.15);border-radius:4px;}
   @media(max-width:860px){
     .story-grid{grid-template-columns:1fr;gap:34px;}
-    .story-sketch{order:-1;}
   }
 
   /* ===== SET IN STONE BANNER ===== */
   .set-in-stone-banner{
     position:relative;
-    min-height:460px;
     background:url('story-bg.jpg') center/cover no-repeat;
-    display:flex;align-items:center;justify-content:center;
-    text-align:center;
-    padding:100px 24px;
+    padding:110px 0;
   }
   .set-in-stone-banner::after{
-    content:"";position:absolute;inset:0;background:rgba(40,30,22,.56);
+    content:"";position:absolute;inset:0;background:rgba(40,30,22,.46);
   }
-  .set-in-stone-banner-inner{position:relative;z-index:1;max-width:680px;margin:0 auto;}
-  .set-in-stone-banner h2{
-    font-family:'Cormorant Garamond',serif;font-weight:500;
-    font-size:clamp(32px,5vw,54px);color:var(--cream);margin:0 0 26px;line-height:1.2;
+  .set-in-stone-grid{
+    position:relative;z-index:1;
+    display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;
   }
-  .set-in-stone-banner h2 .script{font-size:1.2em;color:var(--gold);}
-  .set-in-stone-banner p{
-    font-family:'Cormorant Garamond',serif;font-size:clamp(16px,1.9vw,19px);
-    color:rgba(246,243,236,.92);line-height:1.75;margin:0 0 20px;
+  .set-in-stone-copy h2{
+    font-family:'Space Mono',monospace;font-weight:400;
+    font-size:clamp(28px,4.2vw,46px);color:rgba(246,243,236,.5);
+    margin:0 0 30px;line-height:1.3;
   }
-  .set-in-stone-banner p:last-child{margin-bottom:0;}
+  .set-in-stone-copy p{
+    font-family:'Space Mono',monospace;font-size:15px;
+    color:rgba(246,243,236,.92);line-height:1.9;margin:0 0 24px;
+  }
+  .set-in-stone-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:460px;margin-top:6px;}
+  .set-in-stone-photos img{width:100%;height:120px;object-fit:cover;border-radius:4px;box-shadow:0 8px 20px rgba(0,0,0,.25);}
+  .set-in-stone-sketch{
+    background:var(--cream);border-radius:10px;padding:28px;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);
+  }
+  .set-in-stone-sketch img{width:100%;height:auto;display:block;border-radius:4px;}
+  @media(max-width:860px){
+    .set-in-stone-grid{grid-template-columns:1fr;gap:44px;}
+    .set-in-stone-sketch{order:-1;max-width:420px;margin:0 auto;}
+    .set-in-stone-photos{max-width:100%;}
+  }
   @media(max-width:700px){
-    .set-in-stone-banner{min-height:auto;padding:76px 22px;}
+    .set-in-stone-banner{padding:76px 0;}
   }
 
   /* ===== GUIDED PATH TABS ===== */
@@ -583,10 +592,20 @@
 </section>
 
 <section class="set-in-stone-banner" id="set-in-stone">
-  <div class="set-in-stone-banner-inner reveal">
-    <h2>Your Story, <span class="script">Set in Stone</span></h2>
-    <p>Whether you're celebrating an engagement, anniversary, or milestone moment, we are here to work closely with you to create a piece that tells your story.</p>
-    <p>Unlike traditional jewelry stores, we take a personal approach from selecting the perfect stone to refining every detail, we're here to guide you through each step with honesty, care and exceptional craftsmanship.</p>
+  <div class="wrap set-in-stone-grid reveal">
+    <div class="set-in-stone-copy">
+      <h2>Your Story, Set in Stone</h2>
+      <p>Whether you're celebrating an engagement, anniversary, or milestone moment, we are here to work closely with you to create a piece that tells your story.</p>
+      <p>Unlike traditional jewelry stores, we take a personal approach from selecting the perfect stone to refining every detail, we're here to guide you through each step with honesty, care and exceptional craftsmanship.</p>
+      <div class="set-in-stone-photos">
+        <img src="ring-set-1.jpg" alt="Finished marquise diamond engagement ring with a twisted gold shank, front view" loading="lazy">
+        <img src="ring-set-2.jpg" alt="Finished marquise diamond engagement ring with a twisted gold shank, angled view" loading="lazy">
+        <img src="ring-set-3.jpg" alt="Finished marquise diamond engagement ring on satin fabric, close up" loading="lazy">
+      </div>
+    </div>
+    <div class="set-in-stone-sketch">
+      <img src="sketch-ring.jpg" alt="Hand-drawn design sketch of a marquise diamond engagement ring from four angles" loading="lazy">
+    </div>
   </div>
 </section>
 
@@ -629,9 +648,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="story-sketch reveal">
-      <img src="sketch-ring.jpg" alt="Hand-drawn design sketch of a marquise diamond engagement ring from four angles" loading="lazy">
     </div>
   </div>
 </section>
