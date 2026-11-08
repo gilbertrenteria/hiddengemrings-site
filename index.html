@@ -174,42 +174,27 @@
   .story{
     position:relative;
     background:var(--cream-alt);
-    padding:90px 0;
+    padding:100px 0;
   }
-  .story .wrap, .story .story-grid{position:relative;z-index:1;}
-  .story-header{max-width:var(--maxw);margin:0 auto;padding:0 32px 40px;position:relative;z-index:1;}
   .story-grid{
-    display:grid;grid-template-columns:1fr;max-width:720px;margin:0 auto;
+    position:relative;z-index:1;
+    display:grid;grid-template-columns:.95fr 1.05fr;gap:72px;align-items:center;
   }
-  .story-eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
-  .story h2{
+  .story-media{border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(92,77,64,.22);}
+  .story-media img{width:100%;height:520px;object-fit:cover;display:block;}
+  .story-copy h2{
     font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;
-    font-size:clamp(28px,3.4vw,46px);margin:0;color:var(--brown-dark);
+    font-size:clamp(32px,4vw,52px);margin:0 0 26px;color:var(--brown-dark);
   }
-  .story h2 .script{font-size:1.15em;color:var(--gold);}
-  .story p{margin:0 0 20px;font-size:17px;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1.7;}
-  .story-contrast{max-width:var(--maxw);margin:0 auto 54px;padding:0 32px;position:relative;z-index:1;}
-  .story-contrast-media{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 14px 34px rgba(92,77,64,.2);}
-  .story-contrast-media img{width:100%;height:380px;object-fit:cover;display:block;filter:saturate(.82) contrast(1.05);}
-  .story-contrast-media::after{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(0deg, rgba(28,22,17,.88) 0%, rgba(28,22,17,.5) 42%, rgba(28,22,17,.05) 68%, rgba(28,22,17,0) 100%);
-  }
-  .story-contrast-caption{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:34px 40px 30px;max-width:620px;}
-  .story-contrast-caption p{
-    font-family:'Cormorant Garamond',serif;color:var(--white);margin:0 0 8px;
-    font-size:clamp(17px,2.1vw,21px);line-height:1.5;
-  }
-  .story-contrast-caption .highlight{
-    font-style:italic;font-weight:600;font-size:clamp(19px,2.4vw,24px);color:var(--gold);margin:0;
+  .story-copy p{margin:0 0 20px;font-size:17px;font-family:'Cormorant Garamond',serif;color:var(--ink);line-height:1.8;}
+  .story-copy p:last-child{margin-bottom:0;}
+  @media(max-width:860px){
+    .story-grid{grid-template-columns:1fr;gap:38px;}
+    .story-media{order:-1;}
+    .story-media img{height:360px;}
   }
   @media(max-width:700px){
-    .story-contrast{padding:0 16px;margin-bottom:40px;}
-    .story-contrast-media img{height:280px;}
-    .story-contrast-caption{padding:24px 24px 22px;}
-  }
-  @media(max-width:860px){
-    .story-grid{grid-template-columns:1fr;gap:34px;}
+    .story{padding:70px 0;}
   }
 
   /* ===== SET IN STONE BANNER ===== */
@@ -598,21 +583,12 @@
 </section>
 
 <section class="story" id="story">
-  <div class="story-header reveal">
-    <p class="eyebrow story-eyebrow">How It Began</p>
-    <h2>How It Started</h2>
-  </div>
-  <div class="story-contrast reveal">
-    <div class="story-contrast-media">
-      <img src="story-opener.jpg" alt="A pear-cut diamond engagement ring and a gold wedding band resting on an ornate vintage tray with silk ribbon" loading="lazy">
-      <div class="story-contrast-caption">
-        <p>Every love story deserves a ring that's actually theirs &mdash; not something pulled from a case.</p>
-        <p class="highlight">We build something meaningful and unique to you &mdash; for about half the price.</p>
-      </div>
+  <div class="wrap story-grid reveal">
+    <div class="story-media">
+      <img src="ringbox.jpg" alt="A pear-shaped diamond engagement ring resting in an open Hidden Gem ring box on sand" loading="lazy">
     </div>
-  </div>
-  <div class="wrap story-grid">
-    <div class="story-copy reveal-stagger">
+    <div class="story-copy">
+      <h2>How It Began</h2>
       <p>We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
       <p>We believe every good thing starts with a calling, and that search is what led us here, to build something placed on our hearts: a ring that starts with your story, not a catalog page.</p>
       <p>No markup for a brand name, no pushy sales, no guessing what you're actually paying for. Just honest pricing and a design built around you, not a name on a box.</p>
