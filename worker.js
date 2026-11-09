@@ -14,8 +14,8 @@ const ALLOWED_ORIGINS = new Set([
   'https://www.hiddengemrings.com',
 ]);
 
-// Public contact email (switch to hello@hiddengemrings.com once that inbox works).
-const PUBLIC_EMAIL = 'hiddengembridalrings@gmail.com';
+// Public contact email (live Google Workspace inbox).
+const PUBLIC_EMAIL = 'hello@hiddengemrings.com';
 const TO_ADDRESS = PUBLIC_EMAIL;
 const PUBLIC_PHONE = '(832) 743-7657';
 const PUBLIC_TEL = '+18327437657';
