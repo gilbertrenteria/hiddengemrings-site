@@ -8,10 +8,10 @@
     --cream:#F6F3EC;
     --cream-alt:#EEEBE2;
     --taupe:#A0948A;
-    --taupe-dark:#8A7F6E;
-    --brown:#6B5B4C;
-    --brown-dark:#5C4D40;
-    --ink:#5C534B;
+    --taupe-dark:#776C5C;
+    --brown:#54453A;
+    --brown-dark:#423529;
+    --ink:#453E37;
     --gold:#B99C5F;
     --white:#FFFFFF;
     --maxw:1180px;
@@ -51,6 +51,19 @@
     transition:background .25s ease, color .25s ease, transform .2s ease, box-shadow .2s ease;
   }
   .btn:hover{background:transparent;color:var(--brown-dark);transform:translateY(-2px);box-shadow:0 8px 18px rgba(92,77,64,.16);}
+  /* modern CTA treatment, applied to every solid button except the hero's
+     (left untouched by design): dark gradient pill with a lift-on-hover. */
+  .btn:not(.hero-cta){
+    border-radius:999px;border:none;
+    background:linear-gradient(135deg, var(--brown) 0%, var(--brown-dark) 100%);
+    box-shadow:0 6px 18px rgba(33,26,20,.32);
+  }
+  .btn:not(.hero-cta):hover{
+    background:linear-gradient(135deg, var(--brown-dark) 0%, var(--brown) 100%);
+    color:var(--white);
+    transform:translateY(-3px);
+    box-shadow:0 10px 26px rgba(33,26,20,.42);
+  }
   .btn.ghost{background:transparent;color:var(--white);border-color:rgba(255,255,255,.7);}
   .btn.ghost:hover{background:var(--white);color:var(--brown-dark);}
   @media(prefers-reduced-motion: reduce){.btn:hover{transform:none;}}
@@ -82,7 +95,7 @@
   }
   nav.primary a:hover{color:var(--gold);}
   nav.primary a.btn.nav-cta{color:var(--white);}
-  nav.primary a.btn.nav-cta:hover{color:var(--brown-dark);}
+  nav.primary a.btn.nav-cta:hover{color:var(--white);}
   nav.primary .dot{color:var(--taupe);transition:color .3s ease;}
   @media(min-width:901px){
     header:not(.scrolled) nav.primary a:not(.btn){color:var(--white);}
@@ -180,7 +193,7 @@
     position:relative;z-index:1;
     display:grid;grid-template-columns:.95fr 1.05fr;gap:72px;align-items:center;
   }
-  .story-media{border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(40,30,22,.35);}
+  .story-media{overflow:hidden;box-shadow:0 20px 50px rgba(40,30,22,.35);}
   .story-media img{width:100%;height:520px;object-fit:cover;display:block;}
   .story-copy h2{
     font-family:'Newsreader',serif;font-style:italic;font-weight:400;
@@ -220,9 +233,10 @@
     color:rgba(246,243,236,.92);line-height:1.9;margin:0 0 24px;
   }
   .set-in-stone-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:460px;margin-top:6px;}
-  .set-in-stone-photos img{width:100%;height:120px;object-fit:cover;border-radius:4px;box-shadow:0 8px 20px rgba(0,0,0,.25);}
+  .set-in-stone-photos img{width:100%;height:120px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.25);border-radius:38% 10% 38% 10%;}
+  .set-in-stone-photos img:nth-child(2){border-radius:10% 38% 10% 38%;}
   .set-in-stone-sketch{
-    background:var(--cream);border-radius:10px;padding:28px;
+    background:var(--cream);border-radius:54px 20px 54px 20px;padding:28px;
     box-shadow:0 20px 50px rgba(0,0,0,.3);
   }
   .set-in-stone-sketch img{width:100%;height:auto;display:block;border-radius:4px;}
@@ -273,10 +287,11 @@
   }
   .step-num{
     flex-shrink:0;width:43px;height:43px;border-radius:50%;position:relative;z-index:1;
-    background:var(--white);border:1.5px solid var(--gold);
+    background:linear-gradient(155deg, var(--brown) 0%, var(--brown-dark) 100%);
+    border:1.5px solid rgba(185,156,95,.55);
     display:flex;align-items:center;justify-content:center;
-    font-family:'Newsreader',serif;font-weight:600;font-size:17px;color:var(--brown-dark);
-    box-shadow:0 4px 12px rgba(92,77,64,.14);
+    font-family:'Newsreader',serif;font-weight:600;font-size:17px;color:var(--gold);
+    box-shadow:0 6px 16px rgba(33,26,20,.35), inset 0 1px 0 rgba(255,255,255,.08);
   }
   .steps-list li .step-body{flex:1;padding-top:5px;}
   .steps-list li .step-body h4{margin:0 0 4px;font-family:'Work Sans',sans-serif;font-weight:600;font-size:16px;color:var(--brown-dark);}
@@ -347,7 +362,7 @@
   }
   .appointment-accent img{
     width:100%;max-width:320px;aspect-ratio:3/4;object-fit:cover;object-position:center 46%;
-    border-radius:16px;border:3px solid rgba(255,255,255,.18);
+    border-radius:10% 42% 10% 42%;border:3px solid rgba(255,255,255,.18);
     box-shadow:0 24px 50px rgba(40,30,22,.38);
   }
   @media(max-width:700px){
@@ -561,6 +576,38 @@
   @media(prefers-reduced-motion: reduce){
     .reveal, .reveal-stagger > *{opacity:1;transform:none;transition:none;}
   }
+
+  /* ===== WAVE HEADING REVEAL =====
+     Same base as the scroll reveal above (same trigger, same observer),
+     applied per-word so the heading text rises in as one coordinated wave
+     rather than a single block. Used consistently on every major section
+     heading across the site. */
+  .wave-word{
+    display:inline-block;
+    opacity:0;
+    transform:translateY(34px);
+    filter:blur(6px);
+    transition:opacity 1s cubic-bezier(.19,1,.22,1), transform 1s cubic-bezier(.19,1,.22,1), filter 1s cubic-bezier(.19,1,.22,1);
+    will-change:opacity, transform, filter;
+  }
+  .wave-target.is-visible .wave-word{opacity:1;transform:translateY(0);filter:blur(0);}
+  @media(max-width:700px){
+    .wave-word{transform:translateY(18px);filter:blur(3px);transition-duration:.85s;}
+  }
+  @media(prefers-reduced-motion: reduce){
+    .wave-word{opacity:1;transform:none;filter:none;transition:none;}
+  }
+
+  /* ===== MODERN IMAGE SHAPES =====
+     A coordinated pair of asymmetric, soft-cornered frames (percentage
+     radius so it scales with each image's own size) used across the
+     site's photo moments instead of plain hard-squared rectangles. */
+  .shape-a{border-radius:38% 10% 38% 10%;}
+  .shape-b{border-radius:10% 38% 10% 38%;}
+  @media(max-width:700px){
+    .shape-a{border-radius:28% 9% 28% 9%;}
+    .shape-b{border-radius:9% 28% 9% 28%;}
+  }
 </style>
 <div class="splash" id="splash">
   <button class="splash-skip" id="splashSkip">Skip</button>
@@ -650,7 +697,7 @@
 <section class="set-in-stone-banner" id="set-in-stone">
   <div class="wrap set-in-stone-grid reveal">
     <div class="set-in-stone-copy">
-      <h2>Your Story, Set in Stone</h2>
+      <h2 class="wave-target">Your Story, Set in Stone</h2>
       <p>Whether you're celebrating an engagement, anniversary, or milestone moment, we are here to work closely with you to create a piece that tells your story.</p>
       <p>Unlike traditional jewelry stores, we take a personal approach from selecting the perfect stone to refining every detail, we're here to guide you through each step with honesty, care and exceptional craftsmanship.</p>
       <div class="set-in-stone-photos">
@@ -668,7 +715,7 @@
 <section class="gallery-teaser" id="collection-preview">
   <div class="gallery-head reveal">
     <p class="eyebrow gallery-eyebrow">The Collection</p>
-    <h2>A Few of Our Favorite <span class="script">Designs</span></h2>
+    <h2 class="wave-target">A Few of Our Favorite <span class="script">Designs</span></h2>
     <p>Every ring starts as a conversation and ends up one of a kind &mdash; here's a small taste of what we've built for other couples.</p>
   </div>
   <div class="gallery-grid reveal-stagger">
@@ -704,14 +751,15 @@
 
 <section class="story" id="story">
   <div class="wrap story-grid reveal">
-    <div class="story-media">
+    <div class="story-media shape-a">
       <img src="story-veil-original.jpg" alt="A hand wearing a round diamond engagement ring with a pave wedding band resting gently on a sheer bridal lace veil" loading="lazy">
     </div>
     <div class="story-copy">
-      <h2>How It Began</h2>
-      <p>We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
-      <p>We believe every good thing starts with a calling, and that search is what led us here, to build something placed on our hearts: a ring that starts with your story, not a catalog page.</p>
-      <p>No markup for a brand name, no pushy sales, no guessing what you're actually paying for. Just honest pricing and a design built around you, not a name on a box.</p>
+      <h2 class="wave-target">Why We're Different</h2>
+      <p>Most jewelry stores are built to move inventory &mdash; rows of cases, a sales floor, and a name on the box you're really paying for. We built Hidden Gem to work the opposite way: no showroom pressure, no commissioned upsells, just an honest conversation about the ring you actually want.</p>
+      <p>There's no brand markup here. What you pay goes into the stone and the craftsmanship, not a storefront lease or a name on the box. You'll always know exactly what you're paying for, and why.</p>
+      <p>Every ring starts with a real conversation, not a form that disappears into a queue. We get on the phone, talk through your style, your budget, and your story, and design around you &mdash; not the other way around.</p>
+      <p>And we stand behind what we make: every piece is handcrafted to order, backed by a one-year warranty, complimentary lifetime cleaning and inspection, and fully insured shipping. This isn't a transaction we walk away from once the ring ships &mdash; it's a relationship that starts there.</p>
     </div>
   </div>
 </section>
@@ -720,7 +768,7 @@
   <section class="appointment" id="appointment">
     <div class="appointment-inner reveal">
       <p class="eyebrow appointment-eyebrow">Get Started</p>
-      <h2>Start Your Ring <span class="script">Journey</span></h2>
+      <h2 class="wave-target">Start Your Ring <span class="script">Journey</span></h2>
       <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
     </div>
     <div class="appointment-accent">
@@ -729,7 +777,7 @@
   </section>
 
   <div class="consult-form-card reveal" id="consult-form">
-    <h3>We'll Call You
+    <h3 class="wave-target">We'll Call You
       <span class="title-icons">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
@@ -774,7 +822,7 @@
 <section class="pathways" id="operate">
   <div class="operate-intro reveal">
     <p class="eyebrow operate-eyebrow">How It Works</p>
-    <h2>A Process Built Around <span class="script">You</span></h2>
+    <h2 class="wave-target">A Process Built Around <span class="script">You</span></h2>
     <p>Whether you already know exactly what you want, need some inspiration, or would rather we guide the whole thing &mdash; it starts the same simple way.</p>
   </div>
 
@@ -933,10 +981,56 @@
   updateHeaderScroll();
   window.addEventListener('scroll', updateHeaderScroll, { passive: true });
 
+  // wave heading reveal: splits each marked heading into words (keeping any
+  // inline accent/icon elements as single units) that rise in with a soft
+  // blur, staggered into one flowing wave. Runs once, before the reveal
+  // observer below picks these headings up as part of the same system.
+  (function () {
+    var targets = document.querySelectorAll('.wave-target');
+    targets.forEach(function (heading) {
+      var isFlexRow = getComputedStyle(heading).display === 'flex';
+      var wordIndex = 0;
+      function makeWordSpan(text) {
+        var span = document.createElement('span');
+        span.className = 'wave-word';
+        span.textContent = text;
+        span.style.transitionDelay = (wordIndex * 0.07) + 's';
+        wordIndex++;
+        return span;
+      }
+      function splitTextInto(text, container) {
+        text.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) container.appendChild(document.createTextNode(part));
+          else container.appendChild(makeWordSpan(part));
+        });
+      }
+      var nodes = Array.prototype.slice.call(heading.childNodes);
+      var wrap = isFlexRow ? document.createElement('span') : null;
+      if (wrap) wrap.className = 'wave-text-wrap';
+      var tail = document.createDocumentFragment();
+      nodes.forEach(function (node) {
+        if (node.nodeType === 3) {
+          splitTextInto(node.textContent, wrap || tail);
+        } else if (node.nodeType === 1) {
+          node.classList.add('wave-word');
+          node.style.transitionDelay = (wordIndex * 0.07) + 's';
+          wordIndex++;
+          tail.appendChild(node);
+        }
+      });
+      heading.innerHTML = '';
+      if (wrap) heading.appendChild(wrap);
+      heading.appendChild(tail);
+    });
+  })();
+
   // scroll reveal: sections/elements fade and rise into place as the
   // visitor scrolls to them. Fires once per element, then stops watching it.
+  // Wave headings (above) share this exact same trigger/timing base so
+  // every section's motion stays coordinated with the rest of the site.
   (function () {
-    var items = document.querySelectorAll('.reveal, .reveal-stagger');
+    var items = document.querySelectorAll('.reveal, .reveal-stagger, .wave-target');
     if (!items.length) return;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion || !('IntersectionObserver' in window)) {
