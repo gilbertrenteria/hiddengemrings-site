@@ -17,6 +17,8 @@ const ALLOWED_ORIGINS = new Set([
 // Public contact email (switch to hello@hiddengemrings.com once that inbox works).
 const PUBLIC_EMAIL = 'hiddengembridalrings@gmail.com';
 const TO_ADDRESS = PUBLIC_EMAIL;
+const PUBLIC_PHONE = '(832) 743-7657';
+const PUBLIC_TEL = '+18327437657';
 const OWNER_ADDRESS = 'gilbertrenteria@yahoo.com';
 const FROM_ADDRESS = 'Hidden Gem Website <forms@mail.gilbertrenteria.dev>';
 const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.dev>';
@@ -471,7 +473,7 @@ async function handleLeadEmail(fields, env, origin) {
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">What happens next</h3>` +
     `<ol style="font-size:16px;line-height:1.55;padding-left:20px"><li>We send ring designs that match your style and budget.</li><li>You get a secure link to check your payment options with our lending partner, right on your phone.</li><li>You approve your final design and we start making your ring. Delivered within 6 weeks.</li></ol>` +
     `<p style="margin:24px 0"><a href="${SITE}/collection.html" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
-    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies.html" style="color:#776C5C">Our policies</a></p></div>`;
+    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Call or text <a href="tel:${PUBLIC_TEL}" style="color:#776C5C">${PUBLIC_PHONE}</a> or just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies.html" style="color:#776C5C">Our policies</a></p></div>`;
   const sent = await sendEmail(env, { to: [email], subject: `Your Hidden Gem ring picks, ${lead.name.split(' ')[0]}`, html, replyTo: PUBLIC_EMAIL, from: CUSTOMER_FROM });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.recapSent = true;
@@ -678,7 +680,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
     const c = await sendEmail(env, {
       to: [o.customerEmail],
       subject: 'Your Hidden Gem design approval',
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Reply to this email or write to ${PUBLIC_EMAIL}.</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Call or text ${PUBLIC_PHONE}, or reply to this email.</p></div>`,
       replyTo: TO_ADDRESS,
     });
     if (c.ok) o.approval.customerEmailed = true;
