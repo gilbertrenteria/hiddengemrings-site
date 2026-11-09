@@ -160,6 +160,47 @@ function leadLabel(l) {
   return 'NEW';
 }
 
+function contactLine(c) {
+  if (c === 'Call me') return 'Wants a CALL. Text first, then call within 5 minutes.';
+  if (c === 'Text me') return 'Wants TEXT only. Text within 5 minutes with 2 to 3 ring photos.';
+  if (c === 'Design it online') return 'Chose DESIGN IT ONLINE. Their design picks arrive in a second email. Text a concept and price within 24 hours.';
+  return 'Reach out within 5 minutes.';
+}
+function contactShort(c) {
+  return c === 'Call me' ? 'CALL' : c === 'Text me' ? 'TEXT' : c === 'Design it online' ? 'ONLINE' : 'ANY';
+}
+
+const DESIGN_FIELDS = [
+  ['style', 'Ring style'], ['shape', 'Stone shape'], ['carat', 'Stone size'], ['stoneType', 'Stone type'],
+  ['metal', 'Metal'], ['band', 'Band style'], ['ringSize', 'Ring size'], ['engraving', 'Engraving'], ['designNotes', 'Notes'],
+];
+
+async function handleDesign(fields, env, origin) {
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const key = `lead:${id}`;
+  const lead = await env.IG_KV.get(key, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found, send the first form again' }, 404, origin);
+  if (lead.design && lead.designEmailed) return json({ ok: true, duplicate: true }, 200, origin);
+  lead.design = lead.design || Object.fromEntries(DESIGN_FIELDS.map(([k]) => [k, String(fields[k] || '').slice(0, 300)]));
+  lead.designAt = lead.designAt || Date.now();
+  await env.IG_KV.put(key, JSON.stringify(lead));
+  const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
+  const rows = DESIGN_FIELDS.map(([k, label]) => [label, lead.design[k] || 'not answered'])
+    .concat([['Budget', lead.budget], ['Pay', lead.pay], ['Proposing', lead.timeline], ['Phone', fmtPhone(lead.phone)]]);
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px">` +
+    `<div style="display:inline-block;background:#B99C5F;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">ONLINE DESIGN</div>` +
+    `<h2 style="margin:14px 0 6px">${escapeHtml(lead.name)} designed a ring online</h2>` +
+    `<p style="margin:0 0 14px;color:#333"><strong>Text a concept and exact price within 24 hours.</strong></p>` +
+    `<table cellpadding="7" style="border-collapse:collapse">` +
+    rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') +
+    `</table><p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Text ${escapeHtml(lead.name.split(' ')[0])}</a></p></div>`;
+  const sent = await sendEmail(env, { to: [OWNER_ADDRESS, TO_ADDRESS], subject: `ONLINE DESIGN: ${lead.name} (${lead.design.style || 'custom'}, ${lead.budget || 'budget not set'})`, html });
+  if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
+  lead.designEmailed = true;
+  await env.IG_KV.put(key, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+
 async function handleLead(fields, request, env, origin) {
   if (fields._honey) return json({ ok: true }, 200, origin);
   const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
@@ -176,7 +217,7 @@ async function handleLead(fields, request, env, origin) {
   const lead = existing || {
     id, name, phone,
     budget: pick('budget'), pay: pick('pay'), monthly: pick('monthly'),
-    timeline: pick('timeline'), credit: pick('credit'),
+    timeline: pick('timeline'), credit: pick('credit'), contact: pick('contact'),
     page: pick('page'), receivedAt: Date.now(), status: 'new',
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
@@ -190,6 +231,7 @@ async function handleLead(fields, request, env, origin) {
     ['Phone', `<a href="tel:+1${tel}">${escapeHtml(fmtPhone(lead.phone))}</a> (tap to call)`],
     ['Ring budget', lead.budget],
     ['How they want to pay', lead.pay],
+    ['Wants to continue by', lead.contact || 'not answered'],
     ['Comfortable monthly', lead.monthly || 'n/a'],
     ['Proposing', lead.timeline],
     ['Credit (self reported)', lead.credit || 'not answered'],
@@ -200,16 +242,16 @@ async function handleLead(fields, request, env, origin) {
     `<div style="font-family:Arial,sans-serif;max-width:560px">` +
     `<div style="display:inline-block;background:${color};color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">${lead.label}</div>` +
     `<h2 style="margin:14px 0 6px">New payment options lead: ${escapeHtml(lead.name)}</h2>` +
-    `<p style="margin:0 0 14px;color:#555">Call within 15 minutes for the best chance to close.</p>` +
+    `<p style="margin:0 0 14px;color:#333;font-size:16px"><strong>${escapeHtml(contactLine(lead.contact))}</strong></p>` +
     `<table cellpadding="7" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${k === 'Phone' ? v : escapeHtml(v)}</td></tr>`).join('') +
     `</table>` +
-    `<p style="margin-top:18px"><a href="tel:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Call ${escapeHtml(lead.name.split(' ')[0])} now</a></p>` +
+    `<p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700;margin-right:8px">Text ${escapeHtml(lead.name.split(' ')[0])}</a> <a href="tel:+1${tel}" style="background:#fff;color:#54453A;border:2px solid #54453A;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700">Call</a></p>` +
     `</div>`;
 
   const sent = await sendEmail(env, {
     to: [OWNER_ADDRESS, TO_ADDRESS],
-    subject: `${lead.label} lead: ${lead.name} (${lead.budget || 'budget not set'})`,
+    subject: `${lead.label} lead (${contactShort(lead.contact)}): ${lead.name}, ${lead.budget || 'budget not set'}`,
     html,
   });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
@@ -404,6 +446,7 @@ export default {
     }
 
     if (path === '/lead') return handleLead(fields, request, env, origin);
+    if (path === '/lead/design') return handleDesign(fields, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
     const am = path.match(/^\/order\/([a-z0-9]{6,32})\/approve$/);

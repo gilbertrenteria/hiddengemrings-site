@@ -207,6 +207,14 @@
   .po-status{font-family:'Work Sans',sans-serif;font-size:14px;color:var(--taupe-dark);min-height:20px;margin:12px 0 0;}
   .po-status.err{color:#9a3b2e;}
   .po-consent{font-family:'Work Sans',sans-serif;font-size:11.5px;line-height:1.5;color:var(--taupe-dark);margin:10px 0 0;}
+  .po-chips-1{grid-template-columns:1fr;}
+  .po-chips.po-pics{grid-template-columns:1fr 1fr;}
+  .po-pics button.pic{padding:8px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .po-pics button.pic img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;display:block;background:#fff;}
+  .po-pics button.pic.selected span{color:#fff;}
+  .po-design-send{text-align:center;}
+  @media(min-width:601px){.po-chips.po-pics{grid-template-columns:1fr 1fr 1fr 1fr;}}
+  @media(max-width:600px){.po-chips.po-pics{grid-template-columns:1fr 1fr;gap:10px;}}
   .po-done{text-align:center;animation:poIn .5s ease both;}
   .po-lead{font-family:'Newsreader',serif;font-size:20px;color:var(--ink);margin:6px 0 20px;line-height:1.45;}
   .po-next{text-align:left;font-family:'Newsreader',serif;font-size:18px;color:var(--ink);line-height:1.5;padding-left:24px;margin:0 0 18px;}
@@ -253,7 +261,7 @@
 <section class="page-head">
   <p class="eyebrow">Payment Options</p>
   <h1 class="wave-target">See Your <span class="script">Options</span></h1>
-  <p>Six quick taps and we'll call you with payment options that fit your budget. This is not a credit application and won't affect your credit.</p>
+  <p>A few quick taps and we'll reach out with payment options that fit your budget. This is not a credit application and won't affect your credit.</p>
 </section>
 
 <div class="po-wrap">
@@ -325,10 +333,20 @@
       </div>
     </div>
 
+    <div class="po-step" data-key="contactPref">
+      <img class="po-icon" src="icon-conversation.png" alt="">
+      <h2>How would you like to continue?</h2>
+      <div class="po-chips po-chips-1">
+        <button type="button" data-v="Call me">Call me</button>
+        <button type="button" data-v="Text me">Text me</button>
+        <button type="button" data-v="Design it online">Design my ring online</button>
+      </div>
+    </div>
+
     <div class="po-step" data-key="contact">
       <img class="po-icon" src="icon-personal.png" alt="">
-      <h2>Where can Gilbert reach you?</h2>
-      <p class="po-sub">We'll call you to talk through your options. No spam, ever.</p>
+      <h2>Where can we reach you?</h2>
+      <p class="po-sub" id="poContactSub">We'll reach out to talk through your options. No spam, ever.</p>
       <label class="po-field"><span>First and last name</span>
         <input id="poName" type="text" autocomplete="name" placeholder="Your name" maxlength="120">
       </label>
@@ -341,12 +359,127 @@
       <p class="po-consent">By sending, you agree that Hidden Gem may call or text you at this number about your ring. Message and data rates may apply. Reply STOP to opt out.</p>
     </div>
 
+    <div class="po-design" id="poDesign" hidden>
+    <div class="po-step po-dstep" data-dkey="style">
+      <h2>Pick a ring style you love</h2>
+      <p class="po-sub">Tap the closest one. We'll customize it for you.</p>
+      <div class="po-chips po-pics">
+        <button type="button" class="pic" data-v="The Aurora"><img src="design-aurora-yellow.jpg" alt="" loading="lazy"><span>The Aurora</span></button>
+        <button type="button" class="pic" data-v="The Selah"><img src="design-selah-yellow.jpg" alt="" loading="lazy"><span>The Selah</span></button>
+        <button type="button" class="pic" data-v="The Penelope"><img src="design-penelope-yellow.jpg" alt="" loading="lazy"><span>The Penelope</span></button>
+        <button type="button" class="pic" data-v="The Nova"><img src="design-nova-yellow.jpg" alt="" loading="lazy"><span>The Nova</span></button>
+        <button type="button" class="pic" data-v="The Allison"><img src="design-allison-yellow.jpg" alt="" loading="lazy"><span>The Allison</span></button>
+        <button type="button" class="pic" data-v="The Souline"><img src="design-souline-yellow.jpg" alt="" loading="lazy"><span>The Souline</span></button>
+        <button type="button" class="pic" data-v="The Setlla"><img src="design-setlla-yellow.jpg" alt="" loading="lazy"><span>The Setlla</span></button>
+        <button type="button" class="pic" data-v="Something custom"><img src="sketch-ring.jpg" alt="" loading="lazy"><span>Something custom</span></button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="shape">
+      <img class="po-icon" src="icon-diamond.png" alt="">
+      <h2>What stone shape?</h2>
+      <div class="po-chips ">
+        <button type="button" data-v="Round">Round</button>
+        <button type="button" data-v="Oval">Oval</button>
+        <button type="button" data-v="Pear">Pear</button>
+        <button type="button" data-v="Emerald">Emerald</button>
+        <button type="button" data-v="Cushion">Cushion</button>
+        <button type="button" data-v="Radiant">Radiant</button>
+        <button type="button" data-v="Princess">Princess</button>
+        <button type="button" data-v="Marquise">Marquise</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="carat">
+      <img class="po-icon" src="icon-search.png" alt="">
+      <h2>How big of a stone?</h2>
+      <div class="po-chips ">
+        <button type="button" data-v="Under 1 carat">Under 1 carat</button>
+        <button type="button" data-v="1 to 1.5 carats">1 to 1.5 carats</button>
+        <button type="button" data-v="1.5 to 2 carats">1.5 to 2 carats</button>
+        <button type="button" data-v="2 to 3 carats">2 to 3 carats</button>
+        <button type="button" data-v="3 carats+">3 carats+</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="stoneType">
+      <img class="po-icon" src="icon-checkmark.png" alt="">
+      <h2>What kind of stone?</h2>
+      <p class="po-sub">Lab-grown diamonds are real diamonds at a fraction of the price.</p>
+      <div class="po-chips ">
+        <button type="button" data-v="Lab-grown diamond">Lab-grown diamond</button>
+        <button type="button" data-v="Natural diamond">Natural diamond</button>
+        <button type="button" data-v="Moissanite">Moissanite</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="metal">
+      <img class="po-icon" src="icon-metal.png" alt="">
+      <h2>Which metal?</h2>
+      <div class="po-chips ">
+        <button type="button" data-v="Yellow gold">Yellow gold</button>
+        <button type="button" data-v="White gold">White gold</button>
+        <button type="button" data-v="Rose gold">Rose gold</button>
+        <button type="button" data-v="Platinum">Platinum</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="band">
+      <img class="po-icon" src="icon-tworings.png" alt="">
+      <h2>What kind of band?</h2>
+      <div class="po-chips ">
+        <button type="button" data-v="Plain band">Plain band</button>
+        <button type="button" data-v="Diamond band">Diamond band</button>
+        <button type="button" data-v="Hidden halo">Hidden halo</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="ringSize">
+      <img class="po-icon" src="icon-ringsize.png" alt="">
+      <h2>Do you know the ring size?</h2>
+      <p class="po-sub">No worries if not. We have easy ways to find it.</p>
+      <div class="po-chips ">
+        <button type="button" data-v="Size 4 to 5">Size 4 to 5</button>
+        <button type="button" data-v="Size 5 to 6">Size 5 to 6</button>
+        <button type="button" data-v="Size 6 to 7">Size 6 to 7</button>
+        <button type="button" data-v="Size 7 to 8">Size 7 to 8</button>
+        <button type="button" data-v="Size 8+">Size 8+</button>
+        <button type="button" data-v="Not sure (secret proposal)">Not sure (secret proposal)</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep" data-dkey="engraving">
+      <img class="po-icon" src="icon-engraving.png" alt="">
+      <h2>Would you like an engraving?</h2>
+      <div class="po-chips ">
+        <button type="button" data-v="Yes">Yes</button>
+        <button type="button" data-v="No">No</button>
+        <button type="button" data-v="Maybe">Maybe</button>
+      </div>
+    </div>
+    <div class="po-design-send" id="poDesignSend" hidden>
+      <p class="po-status" id="poDStatus" role="status" aria-live="polite">Sending your design...</p>
+      <button class="btn po-send" id="poDSendBtn" type="button">Send my design</button>
+    </div>
+    </div>
+
+    <div class="po-done" id="poDesignDone" hidden>
+      <img class="po-icon" src="icon-design.png" alt="">
+      <h2>Your design is in<span class="po-firstname"></span>!</h2>
+      <p class="po-lead">Expect a text at <strong class="po-phoneshow"></strong> within 24 hours with your custom concept and exact price.</p>
+      <ol class="po-next">
+        <li><strong>You get your concept and price</strong> by text.</li>
+        <li><strong>Say yes</strong> and we send a secure link to check your payment options with our lending partner.</li>
+        <li><strong>Approve your final design</strong> and we start making your ring. Delivered within 6 weeks.</li>
+      </ol>
+      <p class="po-fine">Questions anytime? Just reply to our text or call <a href="tel:+18324746344">(832) 474-6344</a>. Financing is subject to our lending partners' approval. <a href="policies.html">Our policies</a></p>
+      <button type="button" class="po-restart" id="poRestart2">Start over</button>
+    </div>
+
     <div class="po-done" id="poDone" hidden>
       <img class="po-icon" src="icon-conversation.png" alt="">
       <h2>You're all set<span id="poFirst"></span>!</h2>
-      <p class="po-lead">Expect a call from Gilbert at <strong id="poPhoneShow"></strong> shortly, usually within 15 minutes during business hours.</p>
+      <p class="po-lead" id="poDoneLead">Expect to hear from us at <strong id="poPhoneShow"></strong> shortly, usually within 15 minutes during business hours.</p>
       <ol class="po-next">
-        <li><strong>We call you</strong> to talk through the ring and your budget.</li>
+        <li><strong>We reach out</strong> with ring photos in your budget and talk through your style.</li>
         <li><strong>You get a secure link</strong> to check your payment options with our lending partner, right on your phone.</li>
         <li><strong>Once you're approved,</strong> we finalize your design and start making your ring.</li>
       </ol>
@@ -403,7 +536,9 @@
     var STORE = 'hg_payopts_v1';
     var card = document.getElementById('poCard');
     if (!card) return;
-    var steps = Array.prototype.slice.call(card.querySelectorAll('.po-step'));
+    var steps = Array.prototype.slice.call(card.querySelectorAll('.po-step:not(.po-dstep)'));
+    var dsteps = Array.prototype.slice.call(card.querySelectorAll('.po-dstep'));
+    var mode = 'lead';
     var backBtn = document.getElementById('poBack');
     var countEl = document.getElementById('poCount');
     var barEl = document.getElementById('poBar');
@@ -421,6 +556,7 @@
       return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
     }
     var state = load() || { id: uid(), a: {}, step: 0, sent: false, pending: false };
+    state.d = state.d || {}; state.dstep = state.dstep || 0;
 
     function skipMonthly() { return state.a.pay === '50% deposit' || state.a.pay === 'Pay in full'; }
     function visibleSteps() { return steps.filter(function (s) { return !(s.dataset.key === 'monthly' && skipMonthly()); }); }
@@ -454,7 +590,7 @@
         });
       });
     });
-    backBtn.addEventListener('click', function () { show(state.step - 1); });
+    backBtn.addEventListener('click', function () { if (mode === 'design') dshow(state.dstep - 1); else show(state.step - 1); });
 
     function digits(v) { return String(v || '').replace(/\D/g, ''); }
     function phoneOk() { var d = digits(phoneEl.value).replace(/^1(?=\d{10}$)/, ''); return d.length === 10; }
@@ -489,7 +625,7 @@
         id: state.id, name: (state.a.name || '').trim(), phone: state.a.phone || '',
         budget: state.a.budget || '', pay: state.a.pay || '',
         monthly: skipMonthly() ? '' : (state.a.monthly || ''),
-        timeline: state.a.timeline || '', credit: state.a.credit || '',
+        timeline: state.a.timeline || '', credit: state.a.credit || '', contact: state.a.contactPref || '',
         page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
       };
     }
@@ -527,7 +663,78 @@
     }
     function done() {
       sending = false; state.sent = true; state.pending = false; save();
-      renderDone();
+      if (state.a.contactPref === 'Design it online') startDesign(); else renderDone();
+    }
+
+    // ----- online design flow (after the lead is saved) -----
+    var designEl = document.getElementById('poDesign');
+    var dSendWrap = document.getElementById('poDesignSend');
+    var dStatus = document.getElementById('poDStatus');
+    var dSending = false;
+    function startDesign() {
+      mode = 'design';
+      steps.forEach(function (s) { s.classList.remove('active'); });
+      designEl.hidden = false;
+      if (state.dPending && !state.dSent) { showSendArea(); submitDesign(); return; }
+      dshow(state.dstep || 0);
+    }
+    function dshow(i) {
+      if (i < 0) i = 0; if (i > dsteps.length - 1) i = dsteps.length - 1;
+      state.dstep = i; save();
+      dSendWrap.hidden = true;
+      dsteps.forEach(function (s) { s.classList.remove('active'); });
+      dsteps[i].classList.add('active');
+      countEl.textContent = 'Design ' + (i + 1) + ' of ' + dsteps.length;
+      barEl.style.width = Math.round(((i + 1) / dsteps.length) * 100) + '%';
+      backBtn.classList.toggle('show', i > 0);
+      var key = dsteps[i].dataset.dkey;
+      dsteps[i].querySelectorAll('.po-chips button').forEach(function (b) { b.classList.toggle('selected', state.d[key] === b.dataset.v); });
+    }
+    dsteps.forEach(function (s, idx) {
+      s.querySelectorAll('.po-chips button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          state.d[s.dataset.dkey] = b.dataset.v; save();
+          s.querySelectorAll('.po-chips button').forEach(function (x) { x.classList.remove('selected'); });
+          b.classList.add('selected');
+          setTimeout(function () {
+            if (idx < dsteps.length - 1) { dshow(idx + 1); window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' }); }
+            else { showSendArea(); submitDesign(); } // last design answer: send automatically
+          }, 260);
+        });
+      });
+    });
+    function showSendArea() {
+      dsteps.forEach(function (s) { s.classList.remove('active'); });
+      dSendWrap.hidden = false; backBtn.classList.add('show');
+      countEl.textContent = 'Sending'; barEl.style.width = '100%';
+    }
+    document.getElementById('poDSendBtn').addEventListener('click', function () { submitDesign(); });
+    function submitDesign() {
+      if (dSending || state.dSent) return;
+      dSending = true; state.dPending = true; save();
+      dStatus.className = 'po-status'; dStatus.textContent = 'Sending your design...';
+      var body = { id: state.id }; Object.keys(state.d).forEach(function (k) { body[k] = state.d[k]; });
+      var attempt = 0;
+      (function tryOnce() {
+        fetch(API + '/lead/design', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true })
+          .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
+          .then(function (res) { if (res.r.ok && res.j.ok) { dSending = false; state.dSent = true; state.dPending = false; save(); renderDesignDone(); } else retry(); })
+          .catch(retry);
+        function retry() {
+          attempt++;
+          if (attempt < delays.length) { dStatus.textContent = 'Still sending... (try ' + (attempt + 1) + ')'; setTimeout(tryOnce, delays[attempt]); }
+          else { dSending = false; dStatus.className = 'po-status err'; dStatus.textContent = 'We could not send yet. Tap Send my design, or call (832) 474-6344.'; }
+        }
+      })();
+    }
+    function renderDesignDone() {
+      designEl.hidden = true;
+      document.querySelector('.po-top').style.display = 'none';
+      document.querySelector('.po-bar').style.display = 'none';
+      var first = (state.a.name || '').trim().split(/\s+/)[0];
+      document.querySelector('.po-firstname').textContent = first ? ', ' + first : '';
+      document.querySelector('.po-phoneshow').textContent = state.a.phone || 'your phone';
+      document.getElementById('poDesignDone').hidden = false;
     }
     function renderDone() {
       steps.forEach(function (s) { s.classList.remove('active'); });
@@ -536,26 +743,34 @@
       var first = (state.a.name || '').trim().split(/\s+/)[0];
       document.getElementById('poFirst').textContent = first ? ', ' + first : '';
       document.getElementById('poPhoneShow').textContent = state.a.phone || 'your phone';
+      var how = state.a.contactPref === 'Text me' ? 'Expect a text from us at ' : state.a.contactPref === 'Call me' ? 'Expect a quick text, then a call from us at ' : 'Expect to hear from us at ';
+      document.getElementById('poDoneLead').firstChild.textContent = how;
       doneEl.hidden = false;
     }
-    document.getElementById('poRestart').addEventListener('click', function () {
-      state = { id: uid(), a: {}, step: 0, sent: false, pending: false }; save();
+    function restart() {
+      state = { id: uid(), a: {}, step: 0, sent: false, pending: false, d: {}, dstep: 0 }; save();
+      mode = 'lead'; designEl.hidden = true; document.getElementById('poDesignDone').hidden = true;
       doneEl.hidden = true;
       document.querySelector('.po-top').style.display = '';
       document.querySelector('.po-bar').style.display = '';
       nameEl.value = ''; phoneEl.value = ''; statusEl.textContent = '';
       show(0);
-    });
+    }
+    document.getElementById('poRestart').addEventListener('click', restart);
+    document.getElementById('poRestart2').addEventListener('click', restart);
 
     // restore
     nameEl.value = state.a.name || '';
     phoneEl.value = state.a.phone || '';
-    if (state.sent) { renderDone(); }
+    if (state.sent) {
+      if (state.a.contactPref === 'Design it online') { if (state.dSent) renderDesignDone(); else startDesign(); }
+      else renderDone();
+    }
     else {
       show(state.step || 0);
       if (state.pending) submit(); // reopened with an unsent copy: resend it
     }
-    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); });
+    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); if (state.dPending && !state.dSent) submitDesign(); });
   })();
 
   // ===== WAVE HEADING REVEAL (same base as the rest of the site) =====
