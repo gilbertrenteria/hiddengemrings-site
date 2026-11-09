@@ -118,16 +118,15 @@
   .splash-logo{width:min(46vw,220px);height:auto;margin:0 auto 22px;opacity:0;transform:scale(.92);filter:drop-shadow(0 2px 16px rgba(92,77,64,.18));}
   .splash-logo.go{animation:logoIn 1.1s cubic-bezier(.19,1,.22,1) forwards;}
   @keyframes logoIn{to{opacity:1;transform:scale(1);}}
-  .splash-tagline{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.28em;font-size:clamp(12px,1.6vw,15px);color:var(--brown-dark);margin:0;}
-  .splash-tagline .w{display:inline-block;opacity:0;filter:blur(6px);transform:translateY(6px);}
-  .splash-tagline.go .w{animation:wIn .5s ease forwards;}
+  .splash-tagline{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.28em;font-size:clamp(12px,1.6vw,15px);color:var(--brown-dark);margin:0;opacity:0;filter:blur(6px);transform:translateY(6px);}
+  .splash-tagline.go{animation:wIn .7s ease forwards;}
   @keyframes wIn{
     0%{opacity:0;filter:blur(6px);transform:translateY(6px);}
     55%{opacity:1;filter:blur(0);transform:translateY(0);text-shadow:0 0 14px rgba(185,156,95,.75);}
     100%{opacity:1;filter:blur(0);transform:translateY(0);text-shadow:0 0 0 rgba(185,156,95,0);}
   }
   @media(prefers-reduced-motion: reduce){
-    .splash-logo, .splash-tagline .w{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;text-shadow:none!important;}
+    .splash-logo, .splash-tagline{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;text-shadow:none!important;}
   }
   @media(max-width:900px){
     nav.primary{display:none;position:absolute;top:100%;left:0;right:0;background:var(--cream);
@@ -649,8 +648,6 @@
     if (sessionStorage.getItem('hgSplashSeen')) { splash.remove(); return; }
 
     var tagline = document.getElementById('splashTagline');
-    var words = tagline.textContent.trim().split(/\s+/);
-    tagline.innerHTML = words.map(function(w){ return '<span class="w">' + w + '</span>'; }).join(' ');
     var logo = document.getElementById('splashLogo');
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -669,13 +666,10 @@
         logo.classList.add('go');
         setTimeout(function(){
           tagline.classList.add('go');
-          tagline.querySelectorAll('.w').forEach(function(el, i){
-            el.style.animationDelay = (i * 90) + 'ms';
-          });
         }, 650);
       });
-      var taglineDuration = 650 + words.length * 90 + 500;
-      setTimeout(closeSplash, Math.max(2200, taglineDuration + 500));
+      // logo delay (650) + tagline's own single-flow animation (700) + a beat to read it
+      setTimeout(closeSplash, Math.max(2200, 650 + 700 + 700));
     }
   })();
 </script>
@@ -747,7 +741,7 @@
   <div class="gallery-grid reveal-stagger">
     <a class="gallery-card" href="collection.html#aurora">
       <div class="gallery-card-media"><img src="design-aurora-yellow.jpg" alt="Aurora, a curved diamond wedding band with marquise and baguette stones in yellow gold" loading="lazy"></div>
-      <span class="gallery-card-name">Aurora</span>
+      <span class="gallery-card-name">The Aurora</span>
     </a>
     <a class="gallery-card" href="collection.html#allison">
       <div class="gallery-card-media"><img src="design-allison.jpg" alt="The Allison, a bezel-set cushion diamond with a split shank in yellow gold" loading="lazy"></div>
