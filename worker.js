@@ -393,9 +393,9 @@ function leadLabel(l) {
 function contactLine(l) {
   if (l.contact === 'Book a call') return `BOOKED CALL: ${labelDate(l.slotDate)} at ${labelTime(l.slotTime)} (Central). Call them at that time.`;
   if (l.routeMode === 'offline') return `Everyone was offline. ${l.contact === 'Text me' ? 'Text' : 'Call'} them first thing during business hours (9 AM to 9 PM).`;
-  if (l.contact === 'Call me') return 'CALL NOW. Text first, then call within 5 minutes.';
-  if (l.contact === 'Text me') return 'TEXT NOW. Text within 5 minutes with 2 to 3 matching designs from the Canva library.';
-  return 'Reach out within 5 minutes.';
+  if (l.contact === 'Call me') return 'CALL NOW. Text first, then call within 15 minutes.';
+  if (l.contact === 'Text me') return 'TEXT NOW. Text within 15 minutes with 2 to 3 matching designs from the Canva library.';
+  return 'Reach out within 15 minutes.';
 }
 function contactShort(l) {
   if (l.contact === 'Book a call') return 'BOOKED CALL';
