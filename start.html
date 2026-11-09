@@ -218,12 +218,31 @@
   @media(min-width:601px){.po-chips.po-pics{grid-template-columns:1fr 1fr 1fr 1fr;}}
   @media(max-width:600px){.po-chips.po-pics{grid-template-columns:1fr 1fr;gap:10px;}}
   .po-done{text-align:center;animation:poIn .5s ease both;}
-  .po-chips.po-days{grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;}
-  .po-chips.po-days button{min-height:50px;padding:10px 6px;font-size:14px;}
-  .po-chips.po-times{grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;max-height:330px;overflow:auto;padding:2px;}
-  .po-chips.po-times button{min-height:46px;padding:10px 4px;font-size:14px;}
-  .po-times:empty,.po-days:empty{display:none;}
-  @media(max-width:600px){.po-chips.po-days,.po-chips.po-times{grid-template-columns:repeat(3,1fr);}}
+  /* call booking: day cards, part of day tabs, times */
+  .po-slot-sec{text-align:left;margin-top:24px;padding-top:20px;border-top:1px solid rgba(92,77,64,.12);}
+  .po-slot-label{display:flex;align-items:center;gap:10px;font-family:'Work Sans',sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--brown-dark);margin:0 0 14px;}
+  .po-slot-n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#fff;font-size:12px;letter-spacing:0;}
+  .po-slot-day{margin-left:auto;font-weight:500;letter-spacing:.04em;text-transform:none;color:var(--taupe-dark);font-size:13.5px;}
+  .po-days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+  .po-days button{flex:0 0 74px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 11px;border-radius:16px;border:1.5px solid rgba(92,77,64,.18);background:var(--cream);color:var(--brown-dark);cursor:pointer;font-family:'Work Sans',sans-serif;transition:all .2s ease;}
+  .po-days button:hover{border-color:var(--gold);background:#fff;}
+  .po-days .dw{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--taupe-dark);}
+  .po-days .dn{font-family:'Newsreader',serif;font-size:27px;line-height:1.1;font-weight:500;}
+  .po-days .dm{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe-dark);}
+  .po-days button.selected{background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(33,26,20,.25);}
+  .po-days button.selected .dw,.po-days button.selected .dm{color:rgba(255,255,255,.8);}
+  .po-parts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--cream-alt);border-radius:999px;padding:5px;margin-bottom:16px;}
+  .po-parts button{border:none;background:transparent;border-radius:999px;padding:10px 6px;font-family:'Work Sans',sans-serif;font-size:14px;font-weight:500;color:var(--brown-dark);cursor:pointer;}
+  .po-parts button small{display:block;font-size:11px;color:var(--taupe-dark);font-weight:400;}
+  .po-parts button.on{background:#fff;box-shadow:0 2px 8px rgba(66,53,41,.14);font-weight:600;}
+  .po-parts button:disabled{opacity:.4;cursor:default;}
+  .po-times{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .po-times button{min-height:48px;border-radius:14px;border:1.5px solid rgba(92,77,64,.18);background:#fff;color:var(--brown-dark);font-family:'Work Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s ease;}
+  .po-times button:hover{border-color:var(--gold);}
+  .po-times button.selected{background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%);border-color:transparent;color:#fff;}
+  .po-days button:focus-visible,.po-parts button:focus-visible,.po-times button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  @media(max-width:600px){.po-times{grid-template-columns:repeat(3,1fr);gap:8px;}.po-days button{flex-basis:66px;}.po-slot-day{display:none;}}
+  @media(min-width:601px){.po-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));overflow:visible;}.po-days button{min-width:0;}}
   .po-lead{font-family:'Newsreader',serif;font-size:20px;color:var(--ink);margin:6px 0 20px;line-height:1.45;}
   .po-next{text-align:left;font-family:'Newsreader',serif;font-size:18px;color:var(--ink);line-height:1.5;padding-left:24px;margin:0 0 18px;}
   .po-next li{margin-bottom:8px;}
@@ -357,8 +376,15 @@
       <h2>Pick a time for your call</h2>
       <p class="po-sub" id="poSlotSub">15 minutes with one of our ring specialists. Times are Central.</p>
       <p class="po-status err" id="poSlotMsg"></p>
-      <div class="po-chips po-days" id="poDays"></div>
-      <div class="po-chips po-times" id="poTimes"></div>
+      <div class="po-slot-sec">
+        <p class="po-slot-label"><span class="po-slot-n">1</span>Choose a day</p>
+        <div class="po-days" id="poDays" role="listbox" aria-label="Day"></div>
+      </div>
+      <div class="po-slot-sec">
+        <p class="po-slot-label"><span class="po-slot-n">2</span>Choose a time <span class="po-slot-day" id="poSlotDay"></span></p>
+        <div class="po-parts" id="poParts" role="tablist"></div>
+        <div class="po-times" id="poTimes" role="listbox" aria-label="Time"></div>
+      </div>
     </div>
 
     <div class="po-step" data-key="contact">
@@ -627,7 +653,7 @@
     var slotsFailed = false, slotDays = null;
     var daysEl = document.getElementById('poDays'), timesEl = document.getElementById('poTimes'), slotMsg = document.getElementById('poSlotMsg');
     function loadSlots() {
-      daysEl.innerHTML = ''; timesEl.innerHTML = '';
+      daysEl.innerHTML = ''; timesEl.innerHTML = ''; partsEl.innerHTML = '';
       fetch(API + '/book/slots').then(function (r) { return r.json(); }).then(function (j) {
         if (!j.ok || !j.days || !j.days.length) throw new Error('none');
         slotDays = j.days; renderDays();
@@ -637,17 +663,32 @@
         show(visibleSteps().length - 1);
       });
     }
+    var partsEl = document.getElementById('poParts'), slotDayEl = document.getElementById('poSlotDay');
+    var PARTS = [['Morning', 0, 12], ['Afternoon', 12, 17], ['Evening', 17, 24]];
+    function partOf(t) { var h = Number(t.split(':')[0]); return h < 12 ? 0 : h < 17 ? 1 : 2; }
     function renderDays() {
-      daysEl.innerHTML = slotDays.map(function (d) {
-        return '<button type="button" data-date="' + d.date + '" class="' + (state.a.pickDay === d.date ? 'selected' : '') + '">' + d.label + '</button>';
-      }).join('');
       var cur = slotDays.filter(function (d) { return d.date === state.a.pickDay; })[0] || slotDays[0];
       state.a.pickDay = cur.date; save();
-      Array.prototype.forEach.call(daysEl.children, function (b) { b.classList.toggle('selected', b.dataset.date === cur.date); });
-      timesEl.innerHTML = cur.times.map(function (t) {
-        return '<button type="button" data-time="' + t.t + '" data-label="' + cur.label + ' at ' + t.label + '" class="' + (state.a.slotDate === cur.date && state.a.slotTime === t.t ? 'selected' : '') + '">' + t.label + '</button>';
+      daysEl.innerHTML = slotDays.map(function (d) {
+        var m = d.label.match(/^(\w+), (\w+) (\d+)$/) || [, d.label, '', ''];
+        return '<button type="button" role="option" aria-selected="' + (d.date === cur.date) + '" aria-label="' + d.label + '" data-date="' + d.date + '" class="' + (d.date === cur.date ? 'selected' : '') + '">' +
+          '<span class="dw">' + m[1] + '</span><span class="dn">' + m[3] + '</span><span class="dm">' + m[2] + '</span></button>';
+      }).join('');
+      slotDayEl.textContent = cur.label;
+      var counts = [0, 0, 0]; cur.times.forEach(function (t) { counts[partOf(t.t)]++; });
+      if (state.a.pickPart == null || !counts[state.a.pickPart] || state.a.pickPartDay !== cur.date) {
+        var sel = cur.times.filter(function (t) { return state.a.slotDate === cur.date && t.t === state.a.slotTime; })[0];
+        state.a.pickPart = sel ? partOf(sel.t) : counts.findIndex(function (c) { return c > 0; });
+        state.a.pickPartDay = cur.date; save();
+      }
+      partsEl.innerHTML = PARTS.map(function (p, i) {
+        return '<button type="button" role="tab" data-part="' + i + '" class="' + (i === state.a.pickPart ? 'on' : '') + '"' + (counts[i] ? '' : ' disabled') + '>' + p[0] + '<small>' + (counts[i] ? counts[i] + ' open' : 'Full') + '</small></button>';
+      }).join('');
+      timesEl.innerHTML = cur.times.filter(function (t) { return partOf(t.t) === state.a.pickPart; }).map(function (t) {
+        return '<button type="button" role="option" data-time="' + t.t + '" data-label="' + cur.label + ' at ' + t.label + '" class="' + (state.a.slotDate === cur.date && state.a.slotTime === t.t ? 'selected' : '') + '">' + t.label + '</button>';
       }).join('');
     }
+    partsEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.disabled) return; state.a.pickPart = Number(b.dataset.part); save(); renderDays(); });
     daysEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.a.pickDay = b.dataset.date; save(); renderDays(); });
     timesEl.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
