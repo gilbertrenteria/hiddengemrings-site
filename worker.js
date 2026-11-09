@@ -14,9 +14,12 @@ const ALLOWED_ORIGINS = new Set([
   'https://www.hiddengemrings.com',
 ]);
 
-const TO_ADDRESS = 'hello@hiddengemrings.com';
+// Public contact email (switch to hello@hiddengemrings.com once that inbox works).
+const PUBLIC_EMAIL = 'hiddengembridalrings@gmail.com';
+const TO_ADDRESS = PUBLIC_EMAIL;
 const OWNER_ADDRESS = 'gilbertrenteria@yahoo.com';
 const FROM_ADDRESS = 'Hidden Gem Website <forms@mail.gilbertrenteria.dev>';
+const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.dev>';
 const SITE = 'https://hiddengemrings.com';
 
 function corsHeaders(origin) {
@@ -146,6 +149,194 @@ async function handleInstagramFeed(env, origin) {
   return json({ ok: true, images }, 200, origin);
 }
 
+// === Team status, lead routing and call booking ===
+// The team page (team.html, password = ADMIN_KEY) sets who is Online, who
+// gets leads first, the weekly call hours and the rep names and emails.
+// Everything lives in IG_KV:
+//   team:config        reps, lead order, round-robin pointer
+//   team:avail         weekly call hours + blocked dates
+//   book:YYYY-MM-DD    { 'HH:MM': { leadId, name, phone } }
+//   index:bookdates    list of dates that have bookings
+
+const TZ = 'America/Chicago';
+const SLOT_MIN = 15;
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const DEFAULT_CONFIG = {
+  reps: [
+    { id: 'gilbert', name: 'Gilbert', email: OWNER_ADDRESS, online: false },
+    { id: 'partner', name: 'Partner', email: PUBLIC_EMAIL, online: false },
+  ],
+  order: 'turns', // 'turns' or a rep id
+  turn: 0,
+};
+
+const DEFAULT_AVAIL = {
+  days: {
+    0: { on: false, from: '09:00', to: '21:00' },
+    1: { on: true, from: '09:00', to: '21:00' },
+    2: { on: true, from: '09:00', to: '21:00' },
+    3: { on: true, from: '09:00', to: '21:00' },
+    4: { on: true, from: '09:00', to: '21:00' },
+    5: { on: true, from: '09:00', to: '21:00' },
+    6: { on: true, from: '09:00', to: '21:00' },
+  },
+  blocked: [],
+};
+
+async function getConfig(env) {
+  const c = await env.IG_KV.get('team:config', 'json');
+  return c && Array.isArray(c.reps) ? c : JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+}
+async function getAvail(env) {
+  const a = await env.IG_KV.get('team:avail', 'json');
+  return a && a.days ? a : JSON.parse(JSON.stringify(DEFAULT_AVAIL));
+}
+
+// Current Chicago date and minutes past midnight.
+function chiNow(ms = Date.now()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, mins: Number(p.hour) * 60 + Number(p.minute) };
+}
+function addDays(dateStr, n) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + n));
+  return { date: t.toISOString().slice(0, 10), wd: t.getUTCDay() };
+}
+function toMins(hm) { const [h, m] = String(hm).split(':').map(Number); return h * 60 + (m || 0); }
+function toHM(mins) { return String(Math.floor(mins / 60)).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0'); }
+function labelTime(hm) {
+  const m = toMins(hm); let h = Math.floor(m / 60); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return `${h}:${String(m % 60).padStart(2, '0')} ${ap}`;
+}
+function labelDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// Open 15 minute slots for one date (Chicago time), minus booked ones.
+async function openSlotsFor(env, dateStr, wd, avail, now) {
+  const day = avail.days[wd];
+  if (!day || !day.on || (avail.blocked || []).includes(dateStr)) return [];
+  const booked = (await env.IG_KV.get(`book:${dateStr}`, 'json')) || {};
+  const from = toMins(day.from), to = toMins(day.to);
+  const earliest = dateStr === now.date ? now.mins + 60 : -1; // at least 1 hour notice today
+  const out = [];
+  for (let t = from; t + SLOT_MIN <= to; t += SLOT_MIN) {
+    if (t < earliest) continue;
+    const hm = toHM(t);
+    if (!booked[hm]) out.push(hm);
+  }
+  return out;
+}
+
+async function handleSlots(env, origin) {
+  const avail = await getAvail(env);
+  const now = chiNow();
+  const days = [];
+  for (let i = 0; i < 21 && days.length < 7; i++) {
+    const { date, wd } = addDays(now.date, i);
+    const times = await openSlotsFor(env, date, wd, avail, now);
+    if (times.length) days.push({ date, label: labelDate(date), times: times.map((t) => ({ t, label: labelTime(t) })) });
+  }
+  return json({ ok: true, days }, 200, origin);
+}
+
+async function handlePublicStatus(env, origin) {
+  const cfg = await getConfig(env);
+  return json({ ok: true, online: cfg.reps.some((r) => r.online) }, 200, origin);
+}
+
+// Picks who gets a lead right now. Returns { reps:[...], reason }.
+async function routeLead(env, contact) {
+  const cfg = await getConfig(env);
+  const online = cfg.reps.filter((r) => r.online && r.email);
+  if (contact === 'Book a call') return { reps: cfg.reps.filter((r) => r.email), reason: 'booked call, sent to everyone', mode: 'booked' };
+  if (!online.length) return { reps: cfg.reps.filter((r) => r.email), reason: 'everyone was offline, sent to everyone', mode: 'offline' };
+  let pick;
+  if (cfg.order === 'turns') {
+    pick = online[(cfg.turn || 0) % online.length];
+    cfg.turn = ((cfg.turn || 0) + 1) % 1000;
+    await env.IG_KV.put('team:config', JSON.stringify(cfg));
+    return { reps: [pick], reason: online.length > 1 ? 'online, taking turns' : 'the only one online', mode: 'online' };
+  }
+  pick = online.find((r) => r.id === cfg.order) || online[0];
+  return { reps: [pick], reason: pick.id === cfg.order ? 'online and first in line' : 'online (first in line was offline)', mode: 'online' };
+}
+
+function recipients(reps) {
+  return Array.from(new Set(reps.map((r) => r.email).concat([OWNER_ADDRESS]).filter(Boolean)));
+}
+
+function teamAuth(fields, url, env) { return isAdmin(fields, url, env); }
+
+async function handleTeamState(url, env, origin) {
+  if (!teamAuth(null, url, env)) return json({ ok: false, error: 'Wrong password' }, 403, origin);
+  const [cfg, avail] = await Promise.all([getConfig(env), getAvail(env)]);
+  const now = chiNow();
+  const leadIds = ((await env.IG_KV.get('index:leads', 'json')) || []).slice(0, 60);
+  const leads = (await Promise.all(leadIds.map((id) => env.IG_KV.get(`lead:${id}`, 'json')))).filter(Boolean)
+    .filter((l) => chiNow(l.receivedAt).date === now.date)
+    .map((l) => ({
+      name: l.name, phone: fmtPhone(l.phone), label: l.label, contact: l.contact, budget: l.budget,
+      at: labelTime(toHM(chiNow(l.receivedAt).mins)), routedTo: (l.routedNames || []).join(', '), reason: l.routeReason || '',
+      slot: l.slotDate ? `${labelDate(l.slotDate)} at ${labelTime(l.slotTime)}` : '',
+    }));
+  const dates = ((await env.IG_KV.get('index:bookdates', 'json')) || []).filter((d) => d >= now.date).sort();
+  const bookings = [];
+  for (const d of dates.slice(0, 30)) {
+    const b = (await env.IG_KV.get(`book:${d}`, 'json')) || {};
+    Object.keys(b).sort().forEach((t) => bookings.push({ date: d, time: t, label: `${labelDate(d)} at ${labelTime(t)}`, name: b[t].name, phone: fmtPhone(b[t].phone) }));
+  }
+  return json({ ok: true, config: cfg, avail, leads, bookings, today: now.date }, 200, origin);
+}
+
+async function handleTeamUpdate(fields, url, env, origin) {
+  if (!teamAuth(fields, url, env)) return json({ ok: false, error: 'Wrong password' }, 403, origin);
+  const action = String(fields.action || '');
+  const cfg = await getConfig(env);
+  if (action === 'online') {
+    const r = cfg.reps.find((x) => x.id === fields.rep);
+    if (!r) return json({ ok: false, error: 'Unknown rep' }, 400, origin);
+    r.online = fields.online === true || fields.online === 'true';
+    r.changedAt = Date.now();
+  } else if (action === 'order') {
+    const o = String(fields.order || '');
+    if (o !== 'turns' && !cfg.reps.some((r) => r.id === o)) return json({ ok: false, error: 'Unknown order' }, 400, origin);
+    cfg.order = o;
+  } else if (action === 'reps') {
+    (fields.reps || []).forEach((u) => {
+      const r = cfg.reps.find((x) => x.id === u.id);
+      if (!r) return;
+      if (u.name) r.name = String(u.name).trim().slice(0, 40);
+      if (u.email && String(u.email).includes('@')) r.email = String(u.email).trim().slice(0, 120);
+    });
+  } else if (action === 'avail') {
+    const a = fields.avail || {};
+    const clean = { days: {}, blocked: [] };
+    for (let i = 0; i < 7; i++) {
+      const d = (a.days || {})[i] || {};
+      const ok = (s) => /^\d{2}:\d{2}$/.test(String(s || ''));
+      clean.days[i] = { on: !!d.on, from: ok(d.from) ? d.from : '09:00', to: ok(d.to) ? d.to : '21:00' };
+    }
+    clean.blocked = (a.blocked || []).filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s)).slice(0, 60);
+    await env.IG_KV.put('team:avail', JSON.stringify(clean));
+    return json({ ok: true }, 200, origin);
+  } else if (action === 'cancelBooking') {
+    const d = String(fields.date || ''), t = String(fields.time || '');
+    const b = (await env.IG_KV.get(`book:${d}`, 'json')) || {};
+    delete b[t];
+    await env.IG_KV.put(`book:${d}`, JSON.stringify(b));
+    return json({ ok: true }, 200, origin);
+  } else {
+    return json({ ok: false, error: 'Unknown action' }, 400, origin);
+  }
+  await env.IG_KV.put('team:config', JSON.stringify(cfg));
+  return json({ ok: true, config: cfg }, 200, origin);
+}
+
 // === Payment options form (leads) ===
 // Saved to KV the moment it arrives, then emailed. Idempotent on the
 // client-generated id, so the page's automatic retries and the backup Send
@@ -160,19 +351,27 @@ function leadLabel(l) {
   return 'NEW';
 }
 
-function contactLine(c) {
-  if (c === 'Call me') return 'Wants a CALL. Text first, then call within 5 minutes. Their ring style picks (if any) arrive in a RING STYLE email.';
-  if (c === 'Text me') return 'Wants TEXT only. Text within 5 minutes with 2 to 3 matching designs from the Canva library.';
+function contactLine(l) {
+  if (l.contact === 'Book a call') return `BOOKED CALL: ${labelDate(l.slotDate)} at ${labelTime(l.slotTime)} (Central). Call them at that time.`;
+  if (l.routeMode === 'offline') return `Everyone was offline. ${l.contact === 'Text me' ? 'Text' : 'Call'} them first thing during business hours (9 AM to 9 PM).`;
+  if (l.contact === 'Call me') return 'CALL NOW. Text first, then call within 5 minutes.';
+  if (l.contact === 'Text me') return 'TEXT NOW. Text within 5 minutes with 2 to 3 matching designs from the Canva library.';
   return 'Reach out within 5 minutes.';
 }
-function contactShort(c) {
-  return c === 'Call me' ? 'CALL' : c === 'Text me' ? 'TEXT' : 'ANY';
+function contactShort(l) {
+  if (l.contact === 'Book a call') return 'BOOKED CALL';
+  if (l.routeMode === 'offline') return l.contact === 'Text me' ? 'TEXT AT OPENING' : 'CALL AT OPENING';
+  return l.contact === 'Call me' ? 'CALL NOW' : l.contact === 'Text me' ? 'TEXT NOW' : 'ANY';
 }
 
 const DESIGN_FIELDS = [
   ['style', 'Ring style'], ['shape', 'Stone shape'], ['carat', 'Stone size'], ['stoneType', 'Stone type'],
   ['metal', 'Metal'], ['band', 'Band style'], ['ringSize', 'Ring size'], ['engraving', 'Engraving'], ['designNotes', 'Notes'],
 ];
+
+function leadRecipients(lead) {
+  return Array.from(new Set((lead.routedEmails || []).concat([OWNER_ADDRESS])));
+}
 
 async function handleDesign(fields, env, origin) {
   const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
@@ -189,13 +388,53 @@ async function handleDesign(fields, env, origin) {
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px">` +
     `<div style="display:inline-block;background:#B99C5F;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">RING STYLE</div>` +
     `<h2 style="margin:14px 0 6px">What ${escapeHtml(lead.name)} is looking for</h2>` +
-    `<p style="margin:0 0 14px;color:#333"><strong>Pick 2 to 3 matching designs from the Canva library and send them by hand (${escapeHtml(contactShort(lead.contact))}).</strong></p>` +
+    `<p style="margin:0 0 6px;color:#333"><strong>Pick 2 to 3 matching designs from the Canva library and send them by hand (${escapeHtml(contactShort(lead))}).</strong></p>` +
+    `<p style="margin:0 0 14px;color:#777">Lead is with: ${escapeHtml((lead.routedNames || []).join(', ') || 'everyone')}</p>` +
     `<table cellpadding="7" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') +
     `</table><p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Text ${escapeHtml(lead.name.split(' ')[0])}</a></p></div>`;
-  const sent = await sendEmail(env, { to: [OWNER_ADDRESS, TO_ADDRESS], subject: `RING STYLE: ${lead.name} (${lead.design.style || 'custom'}, ${lead.design.shape || 'any shape'}, ${lead.budget || 'budget not set'})`, html });
+  const sent = await sendEmail(env, { to: leadRecipients(lead), subject: `RING STYLE: ${lead.name} (${lead.design.style || 'custom'}, ${lead.design.shape || 'any shape'}, ${lead.budget || 'budget not set'})`, html });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.designEmailed = true;
+  await env.IG_KV.put(key, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+
+// Optional: the customer leaves an email at the end, and gets a branded recap.
+async function handleLeadEmail(fields, env, origin) {
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const email = String(fields.email || '').trim().slice(0, 160);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ ok: false, error: 'Please check your email address' }, 400, origin);
+  const key = `lead:${id}`;
+  const lead = await env.IG_KV.get(key, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  if (lead.recapSent && lead.email === email) return json({ ok: true, duplicate: true }, 200, origin);
+  lead.email = email;
+  await env.IG_KV.put(key, JSON.stringify(lead));
+
+  const first = escapeHtml(lead.name.split(' ')[0]);
+  let howNext;
+  if (lead.contact === 'Book a call') howNext = `Your 15 minute call is booked for <strong>${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}</strong> (Central). One of our ring specialists will call you then.`;
+  else if (lead.routeMode === 'offline') howNext = `Our ring specialists are away right now. We will ${lead.contact === 'Text me' ? 'text' : 'call'} you during business hours (Mon to Sat, 9 AM to 9 PM).`;
+  else if (lead.contact === 'Call me') howNext = 'One of our ring specialists will be calling you shortly.';
+  else howNext = 'One of our ring specialists will be texting you shortly.';
+  const picks = [['Ring budget', lead.budget], ['How you want to pay', lead.pay], ['Proposing', lead.timeline === 'ASAP' ? 'As soon as possible' : lead.timeline]]
+    .concat(lead.design ? DESIGN_FIELDS.filter(([k]) => lead.design[k]).map(([k, l]) => [l, lead.design[k]]) : [])
+    .filter(([, v]) => v);
+  const html = `<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F3EC;padding:28px;border-radius:18px;color:#453E37">` +
+    `<p style="font-family:Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#B99C5F;margin:0 0 8px">Hidden Gem Engagement Rings</p>` +
+    `<h1 style="font-weight:500;color:#423529;margin:0 0 12px">You're all set, ${first}!</h1>` +
+    `<p style="font-size:17px;line-height:1.55">${howNext}</p>` +
+    `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">Your picks</h3>` +
+    `<table cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:15px">` +
+    picks.map(([k, v]) => `<tr><td style="color:#776C5C;padding-right:14px">${escapeHtml(k)}</td><td style="color:#423529;font-weight:600">${escapeHtml(v)}</td></tr>`).join('') + `</table>` +
+    `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">What happens next</h3>` +
+    `<ol style="font-size:16px;line-height:1.55;padding-left:20px"><li>We send ring designs that match your style and budget.</li><li>You get a secure link to check your payment options with our lending partner, right on your phone.</li><li>You approve your final design and we start making your ring. Delivered within 6 weeks.</li></ol>` +
+    `<p style="margin:24px 0"><a href="${SITE}/collection.html" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
+    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies.html" style="color:#776C5C">Our policies</a></p></div>`;
+  const sent = await sendEmail(env, { to: [email], subject: `Your Hidden Gem ring picks, ${lead.name.split(' ')[0]}`, html, replyTo: PUBLIC_EMAIL, from: CUSTOMER_FROM });
+  if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
+  lead.recapSent = true;
   await env.IG_KV.put(key, JSON.stringify(lead));
   return json({ ok: true }, 200, origin);
 }
@@ -210,7 +449,7 @@ async function handleLead(fields, request, env, origin) {
   }
   const key = `lead:${id}`;
   const existing = await env.IG_KV.get(key, 'json');
-  if (existing && existing.emailed) return json({ ok: true, duplicate: true }, 200, origin);
+  if (existing && existing.emailed) return json({ ok: true, duplicate: true, mode: existing.routeMode, slot: existing.slotDate ? { date: existing.slotDate, time: existing.slotTime, label: `${labelDate(existing.slotDate)} at ${labelTime(existing.slotTime)}` } : null }, 200, origin);
 
   const pick = (k) => String(fields[k] || '').slice(0, 80);
   const lead = existing || {
@@ -221,6 +460,31 @@ async function handleLead(fields, request, env, origin) {
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
   lead.label = leadLabel(lead);
+
+  // Book the call slot (first time only).
+  if (lead.contact === 'Book a call' && !lead.slotDate) {
+    const d = String(fields.slotDate || ''), t = String(fields.slotTime || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !/^\d{2}:\d{2}$/.test(t)) return json({ ok: false, error: 'Please pick a call time' }, 400, origin);
+    const avail = await getAvail(env);
+    const [y, m, dd] = d.split('-').map(Number);
+    const wd = new Date(Date.UTC(y, m - 1, dd)).getUTCDay();
+    const open = await openSlotsFor(env, d, wd, avail, chiNow());
+    if (!open.includes(t)) return json({ ok: false, error: 'slot_taken' }, 409, origin);
+    const booked = (await env.IG_KV.get(`book:${d}`, 'json')) || {};
+    booked[t] = { leadId: id, name, phone };
+    await env.IG_KV.put(`book:${d}`, JSON.stringify(booked));
+    const dates = (await env.IG_KV.get('index:bookdates', 'json')) || [];
+    if (!dates.includes(d)) { dates.push(d); await env.IG_KV.put('index:bookdates', JSON.stringify(dates.sort().slice(-200))); }
+    lead.slotDate = d; lead.slotTime = t;
+  }
+
+  if (!lead.routedEmails) {
+    const r = await routeLead(env, lead.contact);
+    lead.routedEmails = r.reps.map((x) => x.email);
+    lead.routedNames = r.reps.map((x) => x.name);
+    lead.routeReason = r.reason;
+    lead.routeMode = r.mode;
+  }
   await env.IG_KV.put(key, JSON.stringify(lead));
   await addToIndex(env, 'index:leads', id);
 
@@ -234,30 +498,35 @@ async function handleLead(fields, request, env, origin) {
     ['Comfortable monthly', lead.monthly || 'n/a'],
     ['Proposing', lead.timeline],
     ['Credit (self reported)', lead.credit || 'not answered'],
+    ['Sent to', `${(lead.routedNames || []).join(', ')} (${lead.routeReason})`],
     ['Received', chicagoTime(lead.receivedAt)],
   ];
   const color = { 'READY': '#1f7a3a', 'WARM': '#b07a12', 'PLANNING': '#5b6b8a', 'JUST LOOKING': '#777' }[lead.label] || '#54453A';
   const html =
     `<div style="font-family:Arial,sans-serif;max-width:560px">` +
-    `<div style="display:inline-block;background:${color};color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">${lead.label}</div>` +
-    `<h2 style="margin:14px 0 6px">New payment options lead: ${escapeHtml(lead.name)}</h2>` +
-    `<p style="margin:0 0 14px;color:#333;font-size:16px"><strong>${escapeHtml(contactLine(lead.contact))}</strong></p>` +
+    `<div style="display:inline-block;background:${color};color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">${lead.label}</div> ` +
+    `<div style="display:inline-block;background:#423529;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">${escapeHtml(contactShort(lead))}</div>` +
+    `<h2 style="margin:14px 0 6px">New lead: ${escapeHtml(lead.name)}</h2>` +
+    `<p style="margin:0 0 14px;color:#333;font-size:16px"><strong>${escapeHtml(contactLine(lead))}</strong></p>` +
     `<table cellpadding="7" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${k === 'Phone' ? v : escapeHtml(v)}</td></tr>`).join('') +
     `</table>` +
     `<p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700;margin-right:8px">Text ${escapeHtml(lead.name.split(' ')[0])}</a> <a href="tel:+1${tel}" style="background:#fff;color:#54453A;border:2px solid #54453A;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700">Call</a></p>` +
+    `<p style="color:#777;font-size:13px">Team page: <a href="${SITE}/team.html">${SITE}/team.html</a></p>` +
     `</div>`;
 
+  const who = (lead.routedNames || []).length === 1 ? ` for ${lead.routedNames[0]}` : '';
   const sent = await sendEmail(env, {
-    to: [OWNER_ADDRESS, TO_ADDRESS],
-    subject: `${lead.label} lead (${contactShort(lead.contact)}): ${lead.name}, ${lead.budget || 'budget not set'}`,
+    to: leadRecipients(lead),
+    subject: `${contactShort(lead)}${who}: ${lead.label} lead, ${lead.name}, ${lead.budget || 'budget not set'}`,
     html,
   });
+  const slot = lead.slotDate ? { date: lead.slotDate, time: lead.slotTime, label: `${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}` } : null;
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.emailed = true;
   lead.emailedAt = Date.now();
   await env.IG_KV.put(key, JSON.stringify(lead));
-  return json({ ok: true }, 200, origin);
+  return json({ ok: true, mode: lead.routeMode, slot }, 200, origin);
 }
 
 async function addToIndex(env, indexKey, id) {
@@ -370,7 +639,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
     const c = await sendEmail(env, {
       to: [o.customerEmail],
       subject: 'Your Hidden Gem design approval',
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Reply to this email or write to hello@hiddengemrings.com.</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Reply to this email or write to ${PUBLIC_EMAIL}.</p></div>`,
       replyTo: TO_ADDRESS,
     });
     if (c.ok) o.approval.customerEmailed = true;
@@ -420,6 +689,9 @@ export default {
       if (path === '/instagram/set-token') return handleSetToken(url, env);
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
+      if (path === '/team/public') return handlePublicStatus(env, origin);
+      if (path === '/team/state') return handleTeamState(url, env, origin);
+      if (path === '/book/slots') return handleSlots(env, origin);
       let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
       if (m) return handleOrderImage(m[1], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})$/);
@@ -446,6 +718,8 @@ export default {
 
     if (path === '/lead') return handleLead(fields, request, env, origin);
     if (path === '/lead/design') return handleDesign(fields, env, origin);
+    if (path === '/lead/email') return handleLeadEmail(fields, env, origin);
+    if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
     const am = path.match(/^\/order\/([a-z0-9]{6,32})\/approve$/);
@@ -502,9 +776,9 @@ export default {
   },
 };
 
-async function sendEmail(env, { to, subject, html, replyTo }) {
+async function sendEmail(env, { to, subject, html, replyTo, from }) {
   try {
-    const payload = { from: FROM_ADDRESS, to: to || [TO_ADDRESS], subject, html };
+    const payload = { from: from || FROM_ADDRESS, to: to || [OWNER_ADDRESS, TO_ADDRESS], subject, html };
     if (replyTo) payload.reply_to = replyTo;
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',

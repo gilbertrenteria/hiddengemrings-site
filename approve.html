@@ -47,13 +47,13 @@
 </style>
 </head>
 <body>
-<header><div class="nav"><a href="index.html"><img src="logo-brown.png" alt="Hidden Gem"></a><a class="tel" href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></div></header>
+<header><div class="nav"><a href="index.html"><img src="logo-brown.png" alt="Hidden Gem"></a><a class="tel" href="mailto:hiddengembridalrings@gmail.com">hiddengembridalrings@gmail.com</a></div></header>
 <main class="wrap">
   <p class="eyebrow">Design Approval</p>
   <h1>Your Ring, <span class="script">Approved</span></h1>
   <p class="intro" id="intro">Please look over every detail of your ring below. Once you approve, we start making it just for you.</p>
   <div class="card" id="card"><p class="msg" id="loading">Loading your design...</p></div>
-  <p class="fine">Questions before you approve? Reply to our text or email <a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a>. <a href="policies.html">Our policies</a></p>
+  <p class="fine">Questions before you approve? Reply to our text or email <a href="mailto:hiddengembridalrings@gmail.com">hiddengembridalrings@gmail.com</a>. <a href="policies.html">Our policies</a></p>
 </main>
 <script>
 (function () {
@@ -67,11 +67,11 @@
 
   function fetchOrder(tries) {
     fetch(API + '/order/' + id).then(function (r) { return r.json(); }).then(function (j) {
-      if (!j.ok) { card.innerHTML = '<p class="msg">We could not find this design. Please reply to our text or email hello@hiddengemrings.com.</p>'; return; }
+      if (!j.ok) { card.innerHTML = '<p class="msg">We could not find this design. Please reply to our text or email hiddengembridalrings@gmail.com.</p>'; return; }
       render(j.order);
     }).catch(function () {
       if (tries < 4) setTimeout(function () { fetchOrder(tries + 1); }, 1500 * (tries + 1));
-      else card.innerHTML = '<p class="msg">We could not load your design. Check your connection and refresh, or email hello@hiddengemrings.com.</p>';
+      else card.innerHTML = '<p class="msg">We could not load your design. Check your connection and refresh, or email hiddengembridalrings@gmail.com.</p>';
     });
   }
 
@@ -107,7 +107,7 @@
         function again() {
           attempt++;
           if (attempt < delays.length) { st.textContent = 'Still saving... (try ' + (attempt + 1) + ')'; setTimeout(go, delays[attempt]); }
-          else { st.className = 'status err'; st.textContent = 'We could not save yet. Tap Approve again, or email hello@hiddengemrings.com.'; check(); }
+          else { st.className = 'status err'; st.textContent = 'We could not save yet. Tap Approve again, or email hiddengembridalrings@gmail.com.'; check(); }
         }
       })();
     });

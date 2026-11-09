@@ -218,6 +218,12 @@
   @media(min-width:601px){.po-chips.po-pics{grid-template-columns:1fr 1fr 1fr 1fr;}}
   @media(max-width:600px){.po-chips.po-pics{grid-template-columns:1fr 1fr;gap:10px;}}
   .po-done{text-align:center;animation:poIn .5s ease both;}
+  .po-chips.po-days{grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;}
+  .po-chips.po-days button{min-height:50px;padding:10px 6px;font-size:14px;}
+  .po-chips.po-times{grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;max-height:330px;overflow:auto;padding:2px;}
+  .po-chips.po-times button{min-height:46px;padding:10px 4px;font-size:14px;}
+  .po-times:empty,.po-days:empty{display:none;}
+  @media(max-width:600px){.po-chips.po-days,.po-chips.po-times{grid-template-columns:repeat(3,1fr);}}
   .po-lead{font-family:'Newsreader',serif;font-size:20px;color:var(--ink);margin:6px 0 20px;line-height:1.45;}
   .po-next{text-align:left;font-family:'Newsreader',serif;font-size:18px;color:var(--ink);line-height:1.5;padding-left:24px;margin:0 0 18px;}
   .po-next li{margin-bottom:8px;}
@@ -247,7 +253,7 @@
       <a class="btn nav-cta" href="index.html#consult-form">Get Started</a>
     </nav>
     <div class="header-icons">
-      <a href="mailto:hello@hiddengemrings.com" aria-label="Email" title="Email us">
+      <a href="mailto:hiddengembridalrings@gmail.com" aria-label="Email" title="Email us">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
       </a>
     </div>
@@ -334,11 +340,25 @@
 
     <div class="po-step" data-key="contactPref">
       <img class="po-icon" src="icon-conversation.png" alt="">
-      <h2>How would you like us to reach you?</h2>
-      <div class="po-chips po-chips-1">
+      <p class="po-kicker" id="poAway" hidden>Our ring specialists are away right now</p>
+      <h2 id="poPrefH">How would you like us to reach you?</h2>
+      <div class="po-chips po-chips-1" id="poPrefOnline">
         <button type="button" data-v="Call me">Call me</button>
         <button type="button" data-v="Text me">Text me</button>
       </div>
+      <div class="po-chips po-chips-1" id="poPrefOffline" hidden>
+        <button type="button" data-v="Book a call">Book a 15 minute call</button>
+        <button type="button" data-v="Text me">Text me during business hours</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="slot">
+      <img class="po-icon" src="icon-clock.png" alt="">
+      <h2>Pick a time for your call</h2>
+      <p class="po-sub" id="poSlotSub">15 minutes with one of our ring specialists. Times are Central.</p>
+      <p class="po-status err" id="poSlotMsg"></p>
+      <div class="po-chips po-days" id="poDays"></div>
+      <div class="po-chips po-times" id="poTimes"></div>
     </div>
 
     <div class="po-step" data-key="contact">
@@ -354,7 +374,7 @@
       <input type="text" id="poHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="po-honey">
       <button class="btn po-send" id="poSend" type="button" disabled>Send</button>
       <p class="po-status" id="poStatus" role="status" aria-live="polite"></p>
-      <p class="po-consent">By sending, you agree that Hidden Gem may call or text you at this number about your ring. Message and data rates may apply. Reply STOP to opt out.</p>
+      <p class="po-consent">By sending, you agree that Hidden Gem may call or text you at this number about your ring. Message and data rates may apply. Reply STOP to opt out. Consent is not a condition of purchase.</p>
     </div>
 
     <div class="po-design" id="poDesign" hidden>
@@ -461,6 +481,19 @@
     </div>
     </div>
 
+    <div class="po-done" id="poEmailStep" hidden>
+      <img class="po-icon" src="icon-inquiry.png" alt="">
+      <p class="po-kicker">Optional</p>
+      <h2>Want a copy of your picks?</h2>
+      <p class="po-sub">We'll email you a recap and what happens next.</p>
+      <label class="po-field"><span>Email</span>
+        <input id="poEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" maxlength="160">
+      </label>
+      <button class="btn po-send" id="poEmailBtn" type="button" disabled>Email me my picks</button>
+      <p class="po-status" id="poEStatus" role="status" aria-live="polite"></p>
+      <button type="button" class="po-skip" id="poEmailSkip">No thanks</button>
+    </div>
+
     <div class="po-done" id="poDesignDone" hidden>
       <img class="po-icon" src="icon-design.png" alt="">
       <h2>Your design is in<span class="po-firstname"></span>!</h2>
@@ -470,14 +503,15 @@
         <li><strong>Say yes</strong> and we send a secure link to check your payment options with our lending partner.</li>
         <li><strong>Approve your final design</strong> and we start making your ring. Delivered within 6 weeks.</li>
       </ol>
-      <p class="po-fine">Questions anytime? Just reply to our text or email <a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a>. Financing is subject to our lending partners' approval. <a href="policies.html">Our policies</a></p>
+      <p class="po-fine">Questions anytime? Just reply to our text or email <a href="mailto:hiddengembridalrings@gmail.com">hiddengembridalrings@gmail.com</a>. Financing is subject to our lending partners' approval. <a href="policies.html">Our policies</a></p>
       <button type="button" class="po-restart" id="poRestart2">Start over</button>
     </div>
 
     <div class="po-done" id="poDone" hidden>
       <img class="po-icon" src="icon-conversation.png" alt="">
       <h2>You're all set<span id="poFirst"></span>!</h2>
-      <p class="po-lead" id="poDoneLead">Expect to hear from us at <strong id="poPhoneShow"></strong> shortly, usually within 15 minutes during business hours.</p>
+      <p class="po-lead" id="poDoneLead">One of our ring specialists will be reaching out shortly.</p>
+      <p class="po-fine" id="poDoneEmail" hidden></p>
       <ol class="po-next">
         <li><strong>We reach out</strong> with ring designs that match your style and budget.</li>
         <li><strong>You get a secure link</strong> to check your payment options with our lending partner, right on your phone.</li>
@@ -486,24 +520,24 @@
       <p class="po-fine">Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="policies.html">Our policies</a></p>
       <div class="po-done-actions">
         <a class="btn" href="collection.html">Browse Rings</a>
-        <a class="po-tel" href="mailto:hello@hiddengemrings.com">Email us</a>
+        <a class="po-tel" href="mailto:hiddengembridalrings@gmail.com">Email us</a>
       </div>
       <button type="button" class="po-restart" id="poRestart">Start over</button>
     </div>
   </div>
-  <p class="po-note">Business hours: Mon, Tue, Thu, Fri 8:00 to 7:00. Wed, Sat, Sun by appointment.</p>
+  <p class="po-note">Business hours: Mon to Sat, 9 AM to 9 PM.</p>
 </div>
 
 <footer>
   <div class="wrap footer-grid">
     <div>
       <div class="footer-logo"><img src="logo-white.png" alt="Hidden Gem"></div>
-            <p><a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></p>
+            <p><a href="mailto:hiddengembridalrings@gmail.com">hiddengembridalrings@gmail.com</a></p>
     </div>
     <div>
       <h4>Hours</h4>
-      <p>Mon, Tue, Thu, Fri &mdash; 8:00&ndash;7:00</p>
-      <p>Wed, Sat, Sun &mdash; By appointment</p>
+      <p>Mon &ndash; Sat &mdash; 9:00 AM&ndash;9:00 PM</p>
+      <p>Sunday &mdash; Closed</p>
     </div>
   </div>
   <div class="footer-bottom">&copy; <span id="year"></span> Hidden Gem Engagement Rings LLC. All rights reserved. &middot; <a href="policies.html" style="color:inherit;text-decoration:underline">Policies, Warranty &amp; Privacy</a></div>
@@ -557,8 +591,71 @@
     var state = load() || { id: uid(), a: {}, step: 0, sent: false, pending: false };
     state.d = state.d || {}; state.dstep = state.dstep || 0;
 
+    // CALLS ONLY FOR NOW. Set to true to bring back the Text me choices
+    // (online: Call me / Text me, offline: Book a call / Text me later).
+    var TEXT_ENABLED = false;
+    var teamOnline = null; // null = unknown (treated as online)
+
+    function applyStatus() {
+      var off = teamOnline === false;
+      document.getElementById('poAway').hidden = !off;
+      document.getElementById('poPrefH').textContent = off ? 'How would you like to connect?' : 'How would you like us to reach you?';
+      document.getElementById('poPrefOnline').hidden = off;
+      document.getElementById('poPrefOffline').hidden = !off;
+      document.getElementById('poSlotSub').textContent = off
+        ? 'Our ring specialists are away right now. Pick a 15 minute time and we\'ll call you then. Times are Central.'
+        : '15 minutes with one of our ring specialists. Times are Central.';
+      if (!TEXT_ENABLED && !state.sent && !state.pending) {
+        state.a.contactPref = off && !slotsFailed ? 'Book a call' : 'Call me';
+        save();
+      }
+    }
+
     function skipMonthly() { return state.a.pay === '50% deposit' || state.a.pay === 'Pay in full'; }
-    function visibleSteps() { return steps.filter(function (s) { return !(s.dataset.key === 'monthly' && skipMonthly()); }); }
+    function visibleSteps() {
+      return steps.filter(function (s) {
+        var k = s.dataset.key;
+        if (k === 'monthly' && skipMonthly()) return false;
+        if (k === 'contactPref' && !TEXT_ENABLED) return false;
+        if (k === 'slot' && state.a.contactPref !== 'Book a call') return false;
+        return true;
+      });
+    }
+
+    // ----- call booking (shown when everyone is offline) -----
+    var slotsFailed = false, slotDays = null;
+    var daysEl = document.getElementById('poDays'), timesEl = document.getElementById('poTimes'), slotMsg = document.getElementById('poSlotMsg');
+    function loadSlots() {
+      daysEl.innerHTML = ''; timesEl.innerHTML = '';
+      fetch(API + '/book/slots').then(function (r) { return r.json(); }).then(function (j) {
+        if (!j.ok || !j.days || !j.days.length) throw new Error('none');
+        slotDays = j.days; renderDays();
+      }).catch(function () {
+        // can't load times: fall back to a call during business hours
+        slotsFailed = true; state.a.contactPref = 'Call me'; state.a.slotDate = ''; save();
+        show(visibleSteps().length - 1);
+      });
+    }
+    function renderDays() {
+      daysEl.innerHTML = slotDays.map(function (d) {
+        return '<button type="button" data-date="' + d.date + '" class="' + (state.a.pickDay === d.date ? 'selected' : '') + '">' + d.label + '</button>';
+      }).join('');
+      var cur = slotDays.filter(function (d) { return d.date === state.a.pickDay; })[0] || slotDays[0];
+      state.a.pickDay = cur.date; save();
+      Array.prototype.forEach.call(daysEl.children, function (b) { b.classList.toggle('selected', b.dataset.date === cur.date); });
+      timesEl.innerHTML = cur.times.map(function (t) {
+        return '<button type="button" data-time="' + t.t + '" data-label="' + cur.label + ' at ' + t.label + '" class="' + (state.a.slotDate === cur.date && state.a.slotTime === t.t ? 'selected' : '') + '">' + t.label + '</button>';
+      }).join('');
+    }
+    daysEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.a.pickDay = b.dataset.date; save(); renderDays(); });
+    timesEl.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      state.a.slotDate = state.a.pickDay; state.a.slotTime = b.dataset.time; state.a.slotLabel = b.dataset.label; save();
+      slotMsg.textContent = '';
+      Array.prototype.forEach.call(timesEl.children, function (x) { x.classList.toggle('selected', x === b); });
+      var vis = visibleSteps(), idx = vis.indexOf(card.querySelector('.po-step[data-key=slot]'));
+      setTimeout(function () { show(idx + 1); nameEl.focus({ preventScroll: true }); }, 260);
+    });
 
     function show(i) {
       var vis = visibleSteps();
@@ -574,7 +671,14 @@
       vis[i].querySelectorAll('.po-chips button').forEach(function (b) {
         b.classList.toggle('selected', state.a[key] === b.dataset.v);
       });
-      if (key === 'contact') { validate(); }
+      if (key === 'contact') {
+        validate();
+        var sub = document.getElementById('poContactSub');
+        if (state.a.contactPref === 'Book a call' && state.a.slotLabel) sub.textContent = 'Your call: ' + state.a.slotLabel + '. Where should we call you?';
+        else if (teamOnline === false) sub.textContent = 'Our ring specialists are away right now. We\'ll call you during business hours.';
+        else sub.textContent = 'We\'ll call you to talk through your options. No spam, ever.';
+      }
+      if (key === 'slot') loadSlots();
     }
 
     steps.forEach(function (s) {
@@ -624,7 +728,8 @@
         id: state.id, name: (state.a.name || '').trim(), phone: state.a.phone || '',
         budget: state.a.budget || '', pay: state.a.pay || '',
         monthly: skipMonthly() ? '' : (state.a.monthly || ''),
-        timeline: state.a.timeline || '', credit: state.a.credit || '', contact: state.a.contactPref || '',
+        timeline: state.a.timeline || '', credit: state.a.credit || '', contact: state.a.contactPref || 'Call me',
+        slotDate: state.a.contactPref === 'Book a call' ? (state.a.slotDate || '') : '', slotTime: state.a.contactPref === 'Book a call' ? (state.a.slotTime || '') : '',
         page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
       };
     }
@@ -640,7 +745,8 @@
         fetch(API + '/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload()), keepalive: true })
           .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
           .then(function (res) {
-            if (res.r.ok && res.j.ok) { done(); return; }
+            if (res.r.ok && res.j.ok) { done(res.j); return; }
+            if (res.r.status === 409) { slotTaken(); return; }
             if (res.r.status === 400) { fail(res.j.error || 'Please check your name and phone.'); return; }
             retry();
           })
@@ -651,7 +757,7 @@
             statusEl.textContent = 'Still sending... (try ' + (attempt + 1) + ')';
             setTimeout(tryOnce, delays[attempt]);
           } else {
-            fail('We could not send yet. Tap Send to try again, or email hello@hiddengemrings.com.');
+            fail('We could not send yet. Tap Send to try again, or email hiddengembridalrings@gmail.com.');
           }
         }
       })();
@@ -660,9 +766,18 @@
       sending = false; validate();
       statusEl.className = 'po-status err'; statusEl.textContent = msg;
     }
-    function done() {
-      sending = false; state.sent = true; state.pending = false; save();
+    function done(j) {
+      sending = false; state.sent = true; state.pending = false;
+      state.mode = (j && j.mode) || (teamOnline === false ? 'offline' : 'online');
+      if (j && j.slot) state.a.slotLabel = j.slot.label;
+      save();
       startDesign();
+    }
+    function slotTaken() {
+      sending = false; state.pending = false; state.a.slotDate = ''; state.a.slotTime = ''; state.a.slotLabel = ''; save(); validate();
+      statusEl.textContent = '';
+      var vis = visibleSteps(); show(vis.indexOf(card.querySelector('.po-step[data-key=slot]')));
+      slotMsg.textContent = 'That time was just booked. Please pick another.';
     }
 
     // ----- online design flow (after the lead is saved) -----
@@ -722,14 +837,48 @@
         function retry() {
           attempt++;
           if (attempt < delays.length) { dStatus.textContent = 'Still sending... (try ' + (attempt + 1) + ')'; setTimeout(tryOnce, delays[attempt]); }
-          else { dSending = false; dStatus.className = 'po-status err'; dStatus.textContent = 'We could not send yet. Tap Send my design, or email hello@hiddengemrings.com.'; }
+          else { dSending = false; dStatus.className = 'po-status err'; dStatus.textContent = 'We could not send yet. Tap Send my design, or email hiddengembridalrings@gmail.com.'; }
         }
       })();
     }
     function finishAll() {
       designEl.hidden = true; mode = 'lead';
-      document.querySelector('.po-top').style.display = '';
-      renderDone();
+      if (!state.eSent && !state.eSkipped) showEmailStep(); else renderDone();
+    }
+    // ----- optional email recap -----
+    var eStep = document.getElementById('poEmailStep'), eInput = document.getElementById('poEmail'), eBtn = document.getElementById('poEmailBtn'), eStatus = document.getElementById('poEStatus'), eSending = false;
+    function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eInput.value.trim()); }
+    function showEmailStep() {
+      steps.forEach(function (s) { s.classList.remove('active'); });
+      document.querySelector('.po-top').style.display = 'none';
+      document.querySelector('.po-bar').style.display = 'none';
+      eInput.value = state.email || ''; eBtn.disabled = !emailOk();
+      eStep.hidden = false;
+      if (state.ePending) submitEmail();
+    }
+    eInput.addEventListener('input', function () { state.email = eInput.value; save(); eBtn.disabled = !emailOk() || eSending; });
+    eInput.addEventListener('keydown', function (e) { if (e.key === 'Enter' && emailOk()) submitEmail(); });
+    eBtn.addEventListener('click', submitEmail);
+    document.getElementById('poEmailSkip').addEventListener('click', function () { state.eSkipped = true; save(); eStep.hidden = true; renderDone(); });
+    function submitEmail() {
+      if (eSending || state.eSent || !emailOk()) return;
+      eSending = true; state.ePending = true; state.email = eInput.value.trim(); save(); eBtn.disabled = true;
+      eStatus.className = 'po-status'; eStatus.textContent = 'Sending...';
+      var attempt = 0;
+      (function tryOnce() {
+        fetch(API + '/lead/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: state.id, email: state.email }), keepalive: true })
+          .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
+          .then(function (res) {
+            if (res.r.ok && res.j.ok) { eSending = false; state.eSent = true; state.ePending = false; save(); eStep.hidden = true; renderDone(); return; }
+            if (res.r.status === 400) { eSending = false; state.ePending = false; save(); eBtn.disabled = false; eStatus.className = 'po-status err'; eStatus.textContent = res.j.error || 'Please check your email.'; return; }
+            retry();
+          }).catch(retry);
+        function retry() {
+          attempt++;
+          if (attempt < delays.length) { eStatus.textContent = 'Still sending... (try ' + (attempt + 1) + ')'; setTimeout(tryOnce, delays[attempt]); }
+          else { eSending = false; eBtn.disabled = false; eStatus.className = 'po-status err'; eStatus.textContent = 'We could not send yet. Tap the button to try again.'; }
+        }
+      })();
     }
     document.getElementById('poSkip').addEventListener('click', function () { state.dSkipped = true; save(); finishAll(); });
     function renderDesignDone() {
@@ -747,14 +896,21 @@
       document.querySelector('.po-bar').style.display = 'none';
       var first = (state.a.name || '').trim().split(/\s+/)[0];
       document.getElementById('poFirst').textContent = first ? ', ' + first : '';
-      document.getElementById('poPhoneShow').textContent = state.a.phone || 'your phone';
-      var how = state.a.contactPref === 'Text me' ? 'Expect a text from us at ' : 'Expect a quick text, then a call from us at ';
-      document.getElementById('poDoneLead').firstChild.textContent = how;
+      var msg;
+      if (state.a.contactPref === 'Book a call' && state.a.slotLabel) msg = 'Your 15 minute call is booked for <strong>' + state.a.slotLabel + '</strong> (Central). One of our ring specialists will call you then.';
+      else if (state.mode === 'offline') msg = 'Our ring specialists are away right now. We\'ll ' + (state.a.contactPref === 'Text me' ? 'text' : 'call') + ' you during business hours (Mon to Sat, 9 AM to 9 PM).';
+      else if (state.a.contactPref === 'Text me') msg = 'One of our ring specialists will be texting you shortly.';
+      else msg = 'One of our ring specialists will be calling you shortly.';
+      document.getElementById('poDoneLead').innerHTML = msg;
+      var de = document.getElementById('poDoneEmail');
+      if (state.eSent && state.email) { de.hidden = false; de.textContent = 'We emailed a copy of your picks to ' + state.email + '.'; } else de.hidden = true;
+      eStep.hidden = true;
       doneEl.hidden = false;
     }
     function restart() {
       state = { id: uid(), a: {}, step: 0, sent: false, pending: false, d: {}, dstep: 0 }; save();
-      mode = 'lead'; designEl.hidden = true; document.getElementById('poDesignDone').hidden = true;
+      mode = 'lead'; designEl.hidden = true; document.getElementById('poDesignDone').hidden = true; eStep.hidden = true;
+      slotsFailed = false; applyStatus();
       doneEl.hidden = true;
       document.querySelector('.po-top').style.display = '';
       document.querySelector('.po-bar').style.display = '';
@@ -767,14 +923,24 @@
     // restore
     nameEl.value = state.a.name || '';
     phoneEl.value = state.a.phone || '';
+    applyStatus();
     if (state.sent) {
-      if (state.dSent || state.dSkipped) renderDone(); else startDesign();
+      if (state.dSent || state.dSkipped) finishAll(); else startDesign();
     }
     else {
       show(state.step || 0);
       if (state.pending) submit(); // reopened with an unsent copy: resend it
     }
-    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); if (state.dPending && !state.dSent) submitDesign(); });
+    // Is anyone on the team online? Decides call now vs. book a call.
+    (function () {
+      var ctl = window.AbortController ? new AbortController() : null;
+      var tm = setTimeout(function () { if (ctl) ctl.abort(); }, 5000);
+      fetch(API + '/team/public', ctl ? { signal: ctl.signal } : {}).then(function (r) { return r.json(); }).then(function (j) {
+        clearTimeout(tm);
+        if (j && j.ok) { teamOnline = !!j.online; applyStatus(); if (!state.sent && mode === 'lead' && doneEl.hidden) show(Math.min(state.step || 0, visibleSteps().length - 1)); }
+      }).catch(function () { clearTimeout(tm); });
+    })();
+    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); if (state.dPending && !state.dSent) submitDesign(); if (state.ePending && !state.eSent) submitEmail(); });
   })();
 
   // ===== WAVE HEADING REVEAL (same base as the rest of the site) =====

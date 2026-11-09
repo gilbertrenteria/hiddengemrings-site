@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Team | Hidden Gem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--cream:#F6F3EC;--cream-alt:#EEEBE2;--taupe:#A0948A;--taupe-dark:#776C5C;--brown:#54453A;--brown-dark:#423529;--ink:#453E37;--gold:#B99C5F;--green:#1f7a3a;--red:#9a3b2e;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;font-size:16px;line-height:1.5}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(92,77,64,.12);background:var(--cream);position:sticky;top:0;z-index:5}
+  header img{height:38px;display:block}
+  header .who{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--taupe-dark)}
+  main{max-width:880px;margin:0 auto;padding:22px 18px 80px}
+  h1{font-family:'Newsreader',serif;font-weight:500;font-size:clamp(30px,5vw,40px);color:var(--brown-dark);margin:6px 0 4px}
+  .sub{color:var(--taupe-dark);margin:0 0 22px}
+  .card{background:#fff;border:1px solid rgba(92,77,64,.14);border-radius:22px;padding:22px;margin-bottom:18px;box-shadow:0 10px 30px rgba(66,53,41,.07)}
+  .card h2{font-family:'Newsreader',serif;font-weight:500;font-size:24px;color:var(--brown-dark);margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  .card h2 img{width:30px;height:30px;object-fit:contain}
+  .hint{font-size:14px;color:var(--taupe-dark);margin:0 0 16px}
+  .reps{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .rep{border:1.5px solid rgba(92,77,64,.16);border-radius:18px;padding:18px;text-align:center;background:var(--cream)}
+  .rep .nm{font-family:'Newsreader',serif;font-size:24px;color:var(--brown-dark)}
+  .rep .st{font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:4px 0 14px;color:var(--taupe-dark)}
+  .rep.on{border-color:var(--green);background:#eef6ef}
+  .rep.on .st{color:var(--green);font-weight:700}
+  .switch{width:100%;border:none;border-radius:999px;padding:16px;font:600 15px 'Work Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--brown),var(--brown-dark));box-shadow:0 6px 16px rgba(33,26,20,.25)}
+  .rep.on .switch{background:#fff;color:var(--brown-dark);border:2px solid var(--brown-dark);box-shadow:none}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#bbb;margin-right:6px;vertical-align:middle}
+  .rep.on .dot{background:var(--green);box-shadow:0 0 0 4px rgba(31,122,58,.15)}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .seg button{border:1.5px solid rgba(92,77,64,.18);background:var(--cream);border-radius:14px;padding:14px 8px;font:500 15px 'Work Sans',sans-serif;color:var(--brown-dark);cursor:pointer}
+  .seg button.sel{background:linear-gradient(135deg,var(--brown),var(--brown-dark));color:#fff;border-color:transparent}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:14px;background:var(--cream);border:1px solid rgba(92,77,64,.1)}
+  .row .l{min-width:0}
+  .row .t{font-weight:600;color:var(--brown-dark)}
+  .row .m{font-size:13.5px;color:var(--taupe-dark)}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:6px;color:#fff;background:var(--brown);margin-right:4px}
+  .tag.READY{background:var(--green)}.tag.WARM{background:#b07a12}.tag.PLANNING{background:#5b6b8a}.tag.JUST{background:#777}
+  .row a.act,.row button.act{flex-shrink:0;font:600 12px 'Work Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--brown-dark);border:1.5px solid var(--brown-dark);border-radius:999px;padding:8px 12px;background:#fff;text-decoration:none;cursor:pointer}
+  .empty{color:var(--taupe-dark);font-style:italic;padding:6px 2px}
+  .days{display:flex;flex-direction:column;gap:8px}
+  .day{display:grid;grid-template-columns:110px 1fr 1fr;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--cream)}
+  .day label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--brown-dark)}
+  .day input[type=checkbox]{width:20px;height:20px;accent-color:var(--brown)}
+  select,input[type=date],input[type=text],input[type=email],input[type=password]{width:100%;font:16px 'Work Sans',sans-serif;color:var(--ink);background:#fff;border:1.5px solid rgba(92,77,64,.2);border-radius:12px;padding:11px 12px}
+  .day.off select{opacity:.4}
+  .btn{display:inline-block;border:none;border-radius:999px;padding:14px 26px;font:600 13px 'Work Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--brown),var(--brown-dark));cursor:pointer;box-shadow:0 6px 16px rgba(33,26,20,.25)}
+  .btn.ghost{background:#fff;color:var(--brown-dark);border:2px solid var(--brown-dark);box-shadow:none}
+  .inline{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .inline > *{flex:1;min-width:150px}
+  .inline .btn{flex:0 0 auto}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{background:var(--cream-alt);border-radius:999px;padding:6px 8px 6px 14px;font-size:14px;display:flex;align-items:center;gap:6px}
+  .chip button{border:none;background:var(--brown-dark);color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;line-height:1}
+  .msg{font-size:14px;color:var(--green);min-height:20px;margin-top:10px}
+  .msg.err{color:var(--red)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field span{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--taupe-dark);margin-bottom:6px}
+  #login{max-width:420px;margin:60px auto;text-align:center}
+  #app[hidden],#login[hidden]{display:none}
+  @media(max-width:640px){
+    .reps,.grid2{grid-template-columns:1fr}
+    .seg{grid-template-columns:1fr}
+    .day{grid-template-columns:1fr 1fr}
+    .day label{grid-column:1/-1}
+    .row{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="logo-brown.png" alt="Hidden Gem">
+  <span class="who">Team</span>
+</header>
+
+<main>
+  <div id="login" class="card">
+    <h1>Team sign in</h1>
+    <p class="hint">Enter the team password.</p>
+    <input type="password" id="pw" placeholder="Team password" autocomplete="current-password">
+    <p class="msg err" id="loginMsg"></p>
+    <button class="btn" id="loginBtn" type="button">Sign in</button>
+  </div>
+
+  <div id="app" hidden>
+    <h1>Who's online?</h1>
+    <p class="sub">Tap your switch when you're ready to take calls. The website updates right away.</p>
+
+    <div class="card">
+      <h2><img src="icon-conversation.png" alt="">Online now</h2>
+      <p class="hint" id="onlineHint"></p>
+      <div class="reps" id="reps"></div>
+    </div>
+
+    <div class="card">
+      <h2><img src="icon-personal.png" alt="">Who gets leads first</h2>
+      <p class="hint">When you're both online, this decides who gets the next lead.</p>
+      <div class="seg" id="order"></div>
+    </div>
+
+    <div class="card">
+      <h2><img src="icon-inquiry.png" alt="">Today's leads</h2>
+      <div class="list" id="leads"></div>
+    </div>
+
+    <div class="card">
+      <h2><img src="icon-clock.png" alt="">Booked calls</h2>
+      <p class="hint">15 minute calls customers booked while you were both offline.</p>
+      <div class="list" id="bookings"></div>
+    </div>
+
+    <div class="card">
+      <h2><img src="icon-consult.png" alt="">Call hours customers can book</h2>
+      <p class="hint">Customers only see open 15 minute times inside these hours. Booked times disappear automatically.</p>
+      <div class="days" id="days"></div>
+      <div class="inline">
+        <div class="field"><span>Block a full day off</span><input type="date" id="blockDate"></div>
+        <button class="btn ghost" id="blockBtn" type="button">Block day</button>
+      </div>
+      <div class="chips" id="blocked"></div>
+      <div class="inline"><button class="btn" id="saveHours" type="button">Save call hours</button></div>
+      <p class="msg" id="hoursMsg"></p>
+    </div>
+
+    <div class="card">
+      <h2><img src="icon-family.png" alt="">Team names and emails</h2>
+      <p class="hint">Lead emails go to these addresses. Gilbert always gets a copy.</p>
+      <div id="repEdit"></div>
+      <div class="inline"><button class="btn" id="saveReps" type="button">Save names and emails</button></div>
+      <p class="msg" id="repsMsg"></p>
+    </div>
+
+    <p class="hint" style="text-align:center">Updates every 20 seconds. <a href="#" id="logout" style="color:inherit">Sign out</a></p>
+  </div>
+</main>
+
+<script>
+(function () {
+  var API = (new URLSearchParams(location.search).get('api')) || 'https://long-bar-d49d.gilbertrenteria.workers.dev';
+  var KEY_STORE = 'hg_team_key';
+  var key = '';
+  try { key = localStorage.getItem(KEY_STORE) || ''; } catch (e) {}
+  var data = null, availDraft = null;
+  var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function timeLabel(hm) { var p = hm.split(':').map(Number), h = p[0] % 12 || 12; return h + ':' + String(p[1]).padStart(2, '0') + ' ' + (p[0] >= 12 ? 'PM' : 'AM'); }
+  function timeOptions(sel) {
+    var o = '';
+    for (var m = 6 * 60; m <= 22 * 60; m += 15) {
+      var hm = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+      o += '<option value="' + hm + '"' + (hm === sel ? ' selected' : '') + '>' + timeLabel(hm) + '</option>';
+    }
+    return o;
+  }
+
+  function call(method, path, body) {
+    var url = API + path + (method === 'GET' ? (path.indexOf('?') > -1 ? '&' : '?') + 'key=' + encodeURIComponent(key) : '');
+    var opt = { method: method, headers: { 'Content-Type': 'application/json' } };
+    if (body) { body.key = key; opt.body = JSON.stringify(body); }
+    return fetch(url, opt).then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }); });
+  }
+
+  function load(first) {
+    return call('GET', '/team/state').then(function (j) {
+      if (j._status === 403) { showLogin('Wrong password. Try again.'); return; }
+      if (!j.ok) throw new Error(j.error || 'Could not load');
+      data = j;
+      if (first || !availDraft) availDraft = JSON.parse(JSON.stringify(j.avail));
+      $('login').hidden = true; $('app').hidden = false;
+      render(first);
+    }).catch(function () { if (first) showLogin('Could not reach the server. Check your connection.'); });
+  }
+
+  function showLogin(msg) { $('app').hidden = true; $('login').hidden = false; $('loginMsg').textContent = msg || ''; }
+
+  function render(first) {
+    var cfg = data.config;
+    var on = cfg.reps.filter(function (r) { return r.online; });
+    $('onlineHint').textContent = on.length ? 'Customers can ask for a call right now.' : 'You are both offline. Customers can book a 15 minute call.';
+    $('reps').innerHTML = cfg.reps.map(function (r) {
+      return '<div class="rep' + (r.online ? ' on' : '') + '"><div class="nm">' + esc(r.name) + '</div>' +
+        '<div class="st"><span class="dot"></span>' + (r.online ? 'Online' : 'Offline') + '</div>' +
+        '<button class="switch" type="button" data-rep="' + esc(r.id) + '" data-on="' + (r.online ? '0' : '1') + '">' + (r.online ? 'Go offline' : 'Go online') + '</button></div>';
+    }).join('');
+    var opts = cfg.reps.map(function (r) { return [r.id, esc(r.name) + ' first']; }).concat([['turns', 'Take turns']]);
+    $('order').innerHTML = opts.map(function (o) { return '<button type="button" data-order="' + o[0] + '" class="' + (cfg.order === o[0] ? 'sel' : '') + '">' + o[1] + '</button>'; }).join('');
+
+    $('leads').innerHTML = data.leads.length ? data.leads.map(function (l) {
+      var tag = (l.label || 'NEW').split(' ')[0];
+      return '<div class="row"><div class="l"><div class="t"><span class="tag ' + tag + '">' + esc(l.label) + '</span>' + esc(l.name) + '</div>' +
+        '<div class="m">' + esc(l.at) + ' · ' + esc(l.contact) + (l.slot ? ' (' + esc(l.slot) + ')' : '') + ' · ' + esc(l.budget || 'no budget') + '</div>' +
+        '<div class="m">Went to ' + esc(l.routedTo || 'n/a') + (l.reason ? ' · ' + esc(l.reason) : '') + '</div></div>' +
+        '<a class="act" href="sms:' + esc(l.phone.replace(/\D/g, '')) + '">' + esc(l.phone) + '</a></div>';
+    }).join('') : '<div class="empty">No leads yet today.</div>';
+
+    $('bookings').innerHTML = data.bookings.length ? data.bookings.map(function (b) {
+      return '<div class="row"><div class="l"><div class="t">' + esc(b.label) + '</div><div class="m">' + esc(b.name) + ' · ' + esc(b.phone) + '</div></div>' +
+        '<button class="act" type="button" data-cancel="' + esc(b.date) + '|' + esc(b.time) + '">Cancel</button></div>';
+    }).join('') : '<div class="empty">No calls booked.</div>';
+
+    if (first) { renderDays(); renderReps(); }
+  }
+
+  function renderDays() {
+    var order = [1, 2, 3, 4, 5, 6, 0];
+    $('days').innerHTML = order.map(function (i) {
+      var d = availDraft.days[i];
+      return '<div class="day' + (d.on ? '' : ' off') + '" data-day="' + i + '"><label><input type="checkbox"' + (d.on ? ' checked' : '') + '> ' + DAYS[i] + '</label>' +
+        '<select data-k="from" aria-label="' + DAYS[i] + ' from">' + timeOptions(d.from) + '</select>' +
+        '<select data-k="to" aria-label="' + DAYS[i] + ' to">' + timeOptions(d.to) + '</select></div>';
+    }).join('');
+    $('blocked').innerHTML = (availDraft.blocked || []).map(function (d) { return '<span class="chip">' + esc(d) + ' <button type="button" data-unblock="' + esc(d) + '" aria-label="Unblock">&times;</button></span>'; }).join('');
+  }
+
+  function renderReps() {
+    $('repEdit').innerHTML = data.config.reps.map(function (r) {
+      return '<div class="grid2" style="margin-bottom:12px" data-rid="' + esc(r.id) + '">' +
+        '<label class="field"><span>Name</span><input type="text" data-k="name" value="' + esc(r.name) + '" maxlength="40"></label>' +
+        '<label class="field"><span>Email for leads</span><input type="email" data-k="email" value="' + esc(r.email) + '"></label></div>';
+    }).join('');
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button');
+    if (!t) return;
+    if (t.dataset.rep) {
+      t.disabled = true;
+      call('POST', '/team/update', { action: 'online', rep: t.dataset.rep, online: t.dataset.on === '1' }).then(function () { return load(); });
+    } else if (t.dataset.order) {
+      call('POST', '/team/update', { action: 'order', order: t.dataset.order }).then(function () { return load(); });
+    } else if (t.dataset.cancel) {
+      var p = t.dataset.cancel.split('|');
+      if (!confirmCancel(t)) return;
+      call('POST', '/team/update', { action: 'cancelBooking', date: p[0], time: p[1] }).then(function () { return load(); });
+    } else if (t.dataset.unblock) {
+      availDraft.blocked = availDraft.blocked.filter(function (d) { return d !== t.dataset.unblock; }); renderDays();
+    }
+  });
+  // two-tap cancel instead of a browser confirm dialog
+  function confirmCancel(btn) {
+    if (btn.dataset.armed) return true;
+    btn.dataset.armed = '1'; btn.textContent = 'Tap again';
+    setTimeout(function () { delete btn.dataset.armed; btn.textContent = 'Cancel'; }, 3000);
+    return false;
+  }
+
+  $('days').addEventListener('change', function (e) {
+    var row = e.target.closest('.day'); if (!row) return;
+    var d = availDraft.days[row.dataset.day];
+    if (e.target.type === 'checkbox') { d.on = e.target.checked; row.classList.toggle('off', !d.on); }
+    else d[e.target.dataset.k] = e.target.value;
+  });
+  $('blockBtn').addEventListener('click', function () {
+    var v = $('blockDate').value; if (!v) return;
+    availDraft.blocked = availDraft.blocked || [];
+    if (availDraft.blocked.indexOf(v) < 0) availDraft.blocked.push(v);
+    availDraft.blocked.sort(); $('blockDate').value = ''; renderDays();
+  });
+  $('saveHours').addEventListener('click', function () {
+    var bad = Object.keys(availDraft.days).some(function (k) { var d = availDraft.days[k]; return d.on && d.from >= d.to; });
+    if (bad) { $('hoursMsg').className = 'msg err'; $('hoursMsg').textContent = 'Each open day needs an end time after its start time.'; return; }
+    call('POST', '/team/update', { action: 'avail', avail: availDraft }).then(function (j) {
+      $('hoursMsg').className = 'msg' + (j.ok ? '' : ' err'); $('hoursMsg').textContent = j.ok ? 'Call hours saved.' : (j.error || 'Could not save');
+    });
+  });
+  $('saveReps').addEventListener('click', function () {
+    var reps = Array.prototype.map.call(document.querySelectorAll('#repEdit [data-rid]'), function (row) {
+      return { id: row.dataset.rid, name: row.querySelector('[data-k=name]').value, email: row.querySelector('[data-k=email]').value };
+    });
+    call('POST', '/team/update', { action: 'reps', reps: reps }).then(function (j) {
+      $('repsMsg').className = 'msg' + (j.ok ? '' : ' err'); $('repsMsg').textContent = j.ok ? 'Saved.' : (j.error || 'Could not save');
+      if (j.ok) load();
+    });
+  });
+
+  $('loginBtn').addEventListener('click', function () {
+    key = $('pw').value.trim(); if (!key) return;
+    try { localStorage.setItem(KEY_STORE, key); } catch (e) {}
+    load(true);
+  });
+  $('pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('loginBtn').click(); });
+  $('logout').addEventListener('click', function (e) { e.preventDefault(); try { localStorage.removeItem(KEY_STORE); } catch (x) {} key = ''; showLogin(''); });
+
+  if (key) load(true); else showLogin('');
+  setInterval(function () { if (key && !$('app').hidden) load(); }, 20000);
+})();
+</script>
+</body>
+</html>
