@@ -254,24 +254,33 @@
   .covered-item p{margin:0;font-size:15.5px;color:var(--ink);line-height:1.6;}
   @media(max-width:860px){.covered-grid{grid-template-columns:1fr;gap:28px;}}
   .operate-body{
-    max-width:var(--maxw);margin:36px auto 0;padding:0 32px 80px;
-    display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;
+    max-width:var(--maxw);margin:44px auto 0;padding:0 32px 90px;
+    display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center;
   }
-  .operate-steps-col .steps-label{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--taupe-dark);margin:0 0 14px;}
-  .steps-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:16px;}
-  .steps-list li{display:flex;gap:14px;align-items:flex-start;}
-  .steps-list li img{
-    width:36px;height:36px;flex-shrink:0;margin-top:2px;padding:7px;box-sizing:border-box;
-    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
-    object-fit:contain;box-shadow:0 2px 8px rgba(92,77,64,.10);
+  .operate-steps-col .steps-label{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--taupe-dark);margin:0 0 20px;}
+  .steps-list{list-style:none;margin:0 0 28px;padding:0;}
+  .steps-list li{display:flex;gap:18px;align-items:flex-start;position:relative;padding-bottom:30px;}
+  .steps-list li:last-child{padding-bottom:0;}
+  .steps-list li:not(:last-child)::before{
+    content:'';position:absolute;left:21px;top:46px;bottom:4px;width:1px;
+    background:linear-gradient(to bottom, rgba(185,156,95,.55), rgba(185,156,95,.08));
   }
-  .steps-list li span{flex:1;padding-top:3px;font-size:17px;color:var(--ink);line-height:1.5;}
+  .step-num{
+    flex-shrink:0;width:43px;height:43px;border-radius:50%;position:relative;z-index:1;
+    background:var(--white);border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Newsreader',serif;font-weight:600;font-size:17px;color:var(--brown-dark);
+    box-shadow:0 4px 12px rgba(92,77,64,.14);
+  }
+  .steps-list li .step-body{flex:1;padding-top:5px;}
+  .steps-list li .step-body h4{margin:0 0 4px;font-family:'Work Sans',sans-serif;font-weight:600;font-size:16px;color:var(--brown-dark);}
+  .steps-list li .step-body p{margin:0;font-size:16px;color:var(--ink);line-height:1.6;}
   .operate-steps-col .note{font-size:16.5px;font-style:italic;color:var(--brown);margin:0 0 26px;}
-  .operate-photo img{width:100%;height:440px;object-fit:cover;border-radius:4px;}
+  .operate-photo img{width:100%;height:480px;object-fit:cover;border-radius:18px;box-shadow:0 24px 50px rgba(40,30,22,.28);display:block;}
   @media(max-width:860px){
-    .operate-body{grid-template-columns:1fr;gap:34px;}
+    .operate-body{grid-template-columns:1fr;gap:38px;}
     .operate-photo{order:-1;}
-    .operate-photo img{height:280px;}
+    .operate-photo img{height:300px;}
   }
 
   /* ===== RING GALLERY TEASER ===== */
@@ -701,15 +710,15 @@
     <div class="operate-steps-col">
       <div class="steps-label">What happens next</div>
       <ul class="steps-list">
-        <li><img src="icon-inquiry.png" alt=""><span>Share your name, email, and phone &mdash; it takes about 30 seconds.</span></li>
-        <li><img src="icon-conversation.png" alt=""><span>We call you to talk through your style, budget, and vision.</span></li>
-        <li><img src="icon-design.png" alt=""><span>We send a custom quote and design for your approval.</span></li>
-        <li><img src="icon-shipping.png" alt=""><span>Once approved, we create your ring and keep you updated until it's in your hands.</span></li>
+        <li><div class="step-num">01</div><div class="step-body"><h4>Reach Out</h4><p>Share your name, email, and phone &mdash; it takes about 30 seconds.</p></div></li>
+        <li><div class="step-num">02</div><div class="step-body"><h4>We Talk It Through</h4><p>We call you to talk through your style, budget, and vision.</p></div></li>
+        <li><div class="step-num">03</div><div class="step-body"><h4>Your Design, Approved</h4><p>We send a custom quote and design for your approval.</p></div></li>
+        <li><div class="step-num">04</div><div class="step-body"><h4>Crafted &amp; Delivered</h4><p>Once approved, we create your ring and keep you updated until it's in your hands.</p></div></li>
       </ul>
       <p class="note">No pressure, no pushy sales &mdash; just a real conversation about what you're looking for.</p>
       <a class="btn" href="#consult-form">Get Started</a>
     </div>
-    <div class="operate-photo"><img src="ringbox.jpg" alt="Hidden Gem ring box with a pear-shaped diamond engagement ring, resting on sand" loading="lazy"></div>
+    <div class="operate-photo"><img src="guided-photo.jpg" alt="Close-up of a couple's hands with engagement and wedding rings resting against a bridal gown" loading="lazy"></div>
   </div>
 </section>
 
