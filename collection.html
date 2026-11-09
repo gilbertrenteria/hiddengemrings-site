@@ -116,12 +116,11 @@
   .design-card-media{
     border-radius:8px;overflow:hidden;background:var(--white);
     border:1px solid rgba(92,77,64,.14);box-shadow:0 8px 20px rgba(92,77,64,.1);
-    margin-bottom:18px;
+    margin-bottom:14px;
   }
-  .design-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;}
-  .design-card-media.pair{display:grid;grid-template-columns:1fr 1fr;}
-  .design-card-media.pair img{aspect-ratio:.43;}
-  .design-card h3{font-family:'Newsreader',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:0 0 8px;}
+  .design-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;transition:opacity .2s ease;}
+  .design-card h3{font-family:'Newsreader',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:0 0 6px;}
+  .design-card .metal-label{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--taupe-dark);margin:0 0 10px;}
   .design-card p{font-size:15.5px;color:var(--ink);line-height:1.65;margin:0 0 16px;}
   .design-card .btn{padding:11px 22px;font-size:11px;}
   @media(max-width:900px){.design-grid{grid-template-columns:repeat(2,1fr);}}
@@ -211,55 +210,94 @@
 
 <div class="design-grid">
 
-  <div class="design-card" id="aurora">
-    <div class="design-card-media pair">
-      <img src="design-aurora.jpg" alt="Aurora curved diamond wedding band with marquise, baguette, and round stones" loading="lazy">
-      <img src="design-aurora-band.jpg" alt="Aurora chevron diamond wedding band in white gold" loading="lazy">
+  <div class="design-card" id="aurora" data-white="design-aurora-white.jpg" data-yellow="design-aurora-yellow.jpg" data-rose="design-aurora-rose.jpg">
+    <div class="design-card-media"><img src="design-aurora-yellow.jpg" alt="The Aurora, a curved diamond wedding band with marquise, baguette, and round stones" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
     </div>
     <h3>The Aurora</h3>
-    <p>A curved wedding band built to hug any center stone &mdash; marquise, baguette, and round diamonds set in a soft arc of white gold.</p>
+    <p class="metal-label">Yellow Gold</p>
+    <p>A curved wedding band built to hug any center stone &mdash; marquise, baguette, and round diamonds in a soft arc.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
-  <div class="design-card" id="allison">
-    <div class="design-card-media"><img src="design-allison.jpg" alt="The Allison engagement ring, a bezel-set cushion diamond with a split shank in yellow gold" loading="lazy"></div>
+  <div class="design-card" id="allison" data-white="design-allison-white.jpg" data-yellow="design-allison-yellow.jpg" data-rose="design-allison-rose.jpg">
+    <div class="design-card-media"><img src="design-allison-yellow.jpg" alt="The Allison engagement ring, a bezel-set cushion diamond with a split shank" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
     <h3>The Allison</h3>
-    <p>A bezel-set cushion-cut diamond on a delicate split shank &mdash; soft, modern, and quietly glamorous in warm yellow gold.</p>
+    <p class="metal-label">Yellow Gold</p>
+    <p>A bezel-set cushion-cut diamond on a delicate split shank &mdash; soft, modern, and quietly glamorous.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
-  <div class="design-card" id="nova">
-    <div class="design-card-media"><img src="design-nova.jpg" alt="The Nova engagement ring, a bezel-set oval diamond in yellow gold" loading="lazy"></div>
+  <div class="design-card" id="nova" data-white="design-nova-white.jpg" data-yellow="design-nova-yellow.jpg" data-rose="design-nova-rose.jpg">
+    <div class="design-card-media"><img src="design-nova-yellow.jpg" alt="The Nova engagement ring, a bezel-set oval diamond" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
     <h3>The Nova</h3>
-    <p>An oval diamond held in a sculptural bezel setting, framed by hand-finished prongs in yellow gold.</p>
+    <p class="metal-label">Yellow Gold</p>
+    <p>An oval diamond held in a sculptural bezel setting, framed by hand-finished prongs.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
-  <div class="design-card" id="penelope">
-    <div class="design-card-media"><img src="design-penelope.jpg" alt="The Penelope engagement ring, a classic pear-shaped diamond solitaire in yellow gold" loading="lazy"></div>
+  <div class="design-card" id="penelope" data-white="design-penelope-white.jpg" data-yellow="design-penelope-yellow.jpg" data-rose="design-penelope-rose.jpg">
+    <div class="design-card-media"><img src="design-penelope-yellow.jpg" alt="The Penelope engagement ring, a classic pear-shaped diamond solitaire" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
     <h3>The Penelope</h3>
+    <p class="metal-label">Yellow Gold</p>
     <p>A classic pear-shaped diamond solitaire on a simple polished band &mdash; timeless, the way an engagement ring should be.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
-  <div class="design-card" id="selah">
-    <div class="design-card-media"><img src="design-selah.jpg" alt="The Selah engagement ring, an elongated cushion-cut diamond with double claw prongs in yellow gold" loading="lazy"></div>
+  <div class="design-card" id="selah" data-white="design-selah-white.jpg" data-yellow="design-selah-yellow.jpg" data-rose="design-selah-rose.jpg">
+    <div class="design-card-media"><img src="design-selah-yellow.jpg" alt="The Selah engagement ring, an elongated cushion-cut diamond with double claw prongs" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
     <h3>The Selah</h3>
+    <p class="metal-label">Yellow Gold</p>
     <p>An elongated cushion-cut diamond set between double claw prongs for extra brilliance from every angle.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
-  <div class="design-card" id="souline">
-    <div class="design-card-media"><img src="design-souline.jpg" alt="The Souline engagement ring, a round rose-cut diamond bezel with a split shank in yellow gold" loading="lazy"></div>
+  <div class="design-card" id="souline" data-white="design-souline-white.jpg" data-yellow="design-souline-yellow.jpg" data-rose="design-souline-rose.jpg">
+    <div class="design-card-media"><img src="design-souline-yellow.jpg" alt="The Souline engagement ring, a round rose-cut diamond bezel with a split shank" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
     <h3>The Souline</h3>
+    <p class="metal-label">Yellow Gold</p>
     <p>A round rose-cut diamond in a split-shank bezel &mdash; an old-world cut with a modern silhouette.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
-  <div class="design-card" id="setlla">
-    <div class="design-card-media"><img src="design-setlla.jpg" alt="Setlla curved wedding band with pear, round, and marquise diamonds in yellow gold" loading="lazy"></div>
+  <div class="design-card" id="setlla" data-white="design-setlla-white.jpg" data-yellow="design-setlla-yellow.jpg" data-rose="design-setlla-rose.jpg">
+    <div class="design-card-media"><img src="design-setlla-yellow.jpg" alt="Setlla curved wedding band with pear, round, and marquise diamonds" loading="lazy"></div>
+    <div class="metal-swatches">
+      <button data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
+      <button class="active" data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
+      <button data-metal="rose" style="background:#E3B6AC" aria-label="Rose Gold" title="Rose Gold"></button>
+    </div>
     <h3>Setlla</h3>
-    <p>A curved contour band finished with a line of pear, round, and marquise diamonds in warm yellow gold.</p>
+    <p class="metal-label">Yellow Gold</p>
+    <p>A curved contour band finished with a line of pear, round, and marquise diamonds.</p>
     <a class="btn" href="index.html#consult-form">Build This Design</a>
   </div>
 
@@ -485,8 +523,8 @@
   const primaryNav = document.getElementById('primaryNav');
   menuToggle.addEventListener('click', () => primaryNav.classList.toggle('open'));
 
-  document.querySelectorAll('.style-card').forEach(card => {
-    const img = card.querySelector('.style-card-media img');
+  document.querySelectorAll('.style-card, .design-card').forEach(card => {
+    const img = card.querySelector('.style-card-media img, .design-card-media img');
     const label = card.querySelector('.metal-label');
     const names = {white:'White Gold', yellow:'Yellow Gold', rose:'Rose Gold'};
     card.querySelectorAll('.metal-swatches button').forEach(sw => {
