@@ -445,36 +445,77 @@
   @media(max-width:700px){.trust-grid{grid-template-columns:1fr;gap:36px;}}
 
   /* ===== FOLLOW US ===== */
+  :root{
+    --ig-gradient: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 55%, #6228d7 100%);
+  }
   .follow{text-align:center;padding:30px 20px 90px;background:var(--cream);}
   .follow .script{font-size:42px;color:var(--taupe-dark);display:block;margin-bottom:4px;}
-  .follow-handle-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:46px;}
-  .follow-handle-row svg{width:26px;height:26px;color:var(--gold);flex:none;}
+  .follow-handle-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px;}
+  .follow-avatar{
+    flex:none;width:58px;height:58px;border-radius:50%;padding:3px;
+    background:var(--ig-gradient);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .follow-avatar span{
+    width:100%;height:100%;border-radius:50%;background:var(--cream);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .follow-avatar svg{width:24px;height:24px;color:var(--gold);}
+  .follow-handle-col{text-align:left;}
   .follow .handle{
     font-family:'Work Sans',sans-serif;font-weight:600;letter-spacing:.05em;
-    font-size:clamp(26px,5vw,44px);color:var(--gold);
+    font-size:clamp(22px,4vw,36px);color:var(--brown-dark);display:inline-block;
   }
+  .follow-sub{
+    margin:2px 0 0;font-family:'Work Sans',sans-serif;font-size:14px;
+    letter-spacing:.03em;color:var(--taupe-dark);
+  }
+  .follow-cta{
+    display:inline-flex;align-items:center;gap:8px;margin:28px 0 46px;
+    padding:12px 26px;border-radius:999px;position:relative;
+    font-family:'Work Sans',sans-serif;font-weight:600;font-size:13px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--brown-dark);
+    background:var(--cream);isolation:isolate;transition:color .25s ease;
+  }
+  .follow-cta::before{
+    content:'';position:absolute;inset:0;border-radius:999px;padding:1.5px;
+    background:var(--ig-gradient);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    z-index:-2;
+  }
+  .follow-cta::after{
+    content:'';position:absolute;inset:1.5px;border-radius:999px;
+    background:var(--ig-gradient);opacity:0;transition:opacity .25s ease;z-index:-1;
+  }
+  .follow-cta:hover{color:var(--white);}
+  .follow-cta:hover::after{opacity:1;}
   .insta-grid{
     display:grid;grid-template-columns:repeat(6,1fr);gap:10px;
     max-width:var(--maxw);margin:0 auto;
   }
   .insta-grid a{
-    position:relative;display:block;aspect-ratio:1/1;overflow:hidden;border-radius:6px;
+    position:relative;display:block;aspect-ratio:1/1;overflow:hidden;border-radius:10px;
+    box-shadow:0 1px 3px rgba(92,77,64,.12);
   }
   .insta-grid img{
     width:100%;height:100%;object-fit:cover;display:block;
     transition:transform .5s ease;
   }
   .insta-grid .insta-hover{
-    position:absolute;inset:0;background:rgba(40,30,22,.42);
-    display:flex;align-items:center;justify-content:center;
+    position:absolute;inset:0;
+    background:linear-gradient(135deg, rgba(249,206,52,.28) 0%, rgba(238,42,123,.42) 55%, rgba(98,40,215,.5) 100%);
+    display:flex;align-items:center;justify-content:center;gap:14px;
     opacity:0;transition:opacity .3s ease;
   }
-  .insta-grid .insta-hover svg{width:26px;height:26px;color:var(--white);}
+  .insta-grid .insta-hover svg{width:22px;height:22px;color:var(--white);}
   .insta-grid a:hover img{transform:scale(1.08);}
   .insta-grid a:hover .insta-hover{opacity:1;}
   @media(max-width:700px){
     .insta-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
-    .follow-handle-row{margin-bottom:28px;}
+    .follow-cta{margin:22px 0 32px;}
+    .follow-handle-row{margin-bottom:6px;}
+    .follow-sub{display:none;}
   }
 
   /* ===== FOOTER ===== */
@@ -598,7 +639,7 @@
     <a class="btn ghost hero-cta" href="#consult-form">Start Your Ring Journey</a>
   </div>
   <div class="hero-socials">
-    <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></a>
+    <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg></a>
   </div>
 </section>
 
@@ -784,35 +825,62 @@
 <section class="follow reveal">
   <span class="script">Follow us</span>
   <div class="follow-handle-row">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg>
-    <a class="handle" href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener">@HIDDENGEMRINGS</a>
+    <a class="follow-avatar" href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="Hidden Gem on Instagram">
+      <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg></span>
+    </a>
+    <div class="follow-handle-col">
+      <a class="handle" href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener">@hiddengemrings</a>
+      <p class="follow-sub">Engagement rings &amp; fine jewelry, Houston TX</p>
+    </div>
   </div>
   <div class="insta-grid" id="instaGrid">
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="View on Instagram">
       <img src="lifestyle-summerlove.jpg" alt="Hidden Gem ring box on sand" loading="lazy">
-      <span class="insta-hover"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></span>
+      <span class="insta-hover">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+      </span>
     </a>
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="View on Instagram">
       <img src="lifestyle-pear.jpg" alt="Pear diamond ring on hand with tropical fruit" loading="lazy">
-      <span class="insta-hover"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></span>
+      <span class="insta-hover">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+      </span>
     </a>
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="View on Instagram">
       <img src="lifestyle-threestone.jpg" alt="Three-stone oval engagement ring macro" loading="lazy">
-      <span class="insta-hover"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></span>
+      <span class="insta-hover">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+      </span>
     </a>
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="View on Instagram">
       <img src="lifestyle-hishers.jpg" alt="His and hers wedding rings stacked" loading="lazy">
-      <span class="insta-hover"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></span>
+      <span class="insta-hover">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+      </span>
     </a>
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="View on Instagram">
       <img src="ring-set-2.jpg" alt="Marquise diamond engagement ring macro" loading="lazy">
-      <span class="insta-hover"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></span>
+      <span class="insta-hover">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+      </span>
     </a>
     <a href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener" aria-label="View on Instagram">
       <img src="lifestyle-bride.jpg" alt="Hand wearing pear diamond ring among florals" loading="lazy">
-      <span class="insta-hover"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.07.05 1.8.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.63.42 1.36.47 2.43.05 1.07.06 1.42.06 4.12s-.01 3.05-.06 4.12c-.05 1.07-.22 1.8-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.63.25-1.36.42-2.43.47-1.07.05-1.42.06-4.12.06s-3.05-.01-4.12-.06c-1.07-.05-1.8-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.63-.42-1.36-.47-2.43C2.01 15.05 2 14.7 2 12s.01-3.05.06-4.12c.05-1.07.22-1.8.47-2.43.26-.66.6-1.22 1.15-1.77A4.9 4.9 0 0 1 5.45.53C6.08.28 6.81.11 7.88.06 8.95.01 9.3 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.2A3.2 3.2 0 1 1 12 6.8a3.2 3.2 0 0 1 0 6.4ZM17.4 5.4a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0Z" transform="translate(0,2)"/></svg></span>
+      <span class="insta-hover">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+      </span>
     </a>
   </div>
+  <a class="follow-cta" href="https://instagram.com/hiddengemrings" target="_blank" rel="noopener">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+    Follow @hiddengemrings
+  </a>
 </section>
 
 <footer>
@@ -963,23 +1031,27 @@
     });
   }
 
-    // Live Instagram feed — pulled via our own Cloudflare Worker (which calls
-    // Instagram's own API with Gilbert's own credentials), not a third-party
-    // embed widget. Falls back silently to the static photos already in the
-    // page if the feed isn't set up yet or the request fails.
-    (function loadInstagramFeed() {
-      const grid = document.getElementById('instaGrid');
-      if (!grid) return;
-      const igIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 1.802c-2.67 0-2.986.01-4.04.059-.976.045-1.505.207-1.858.344-.466.182-.8.399-1.15.748-.35.35-.566.684-.748 1.15-.137.353-.3.882-.344 1.857-.049 1.055-.059 1.37-.059 4.041 0 2.67.01 2.986.059 4.04.045.976.207 1.505.344 1.858.182.466.399.8.748 1.15.35.35.684.566 1.15.748.353.137.882.3 1.857.344 1.054.049 1.37.059 4.041.059 2.67 0 2.986-.01 4.04-.059.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.684.748-1.15.137-.353.3-.882.344-1.857.049-1.055.059-1.37.059-4.041 0-2.67-.01-2.986-.059-4.04-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 0 0-.748-1.15 3.098 3.098 0 0 0-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.055-.049-1.37-.059-4.041-.059zm0 4.587a4.611 4.611 0 1 1 0 9.222 4.611 4.611 0 0 1 0-9.222zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm5.884-7.804a1.078 1.078 0 1 1-2.157 0 1.078 1.078 0 0 1 2.157 0z"/></svg>';
-      fetch('https://long-bar-d49d.gilbertrenteria.workers.dev/instagram/feed', { cache: 'no-store' })
-        .then((r) => r.ok ? r.json() : null)
-        .then((data) => {
-          if (!data || !data.ok || !Array.isArray(data.images) || data.images.length < 3) return;
-          grid.innerHTML = data.images.slice(0, 6).map((img) => '<a href="' + (img.permalink || 'https://instagram.com/hiddengemrings') + '" target="_blank" rel="noopener" aria-label="View on Instagram"><img src="' + img.url + '" alt="Hidden Gem on Instagram" loading="lazy"><span class="insta-hover">' + igIcon + '</span></a>').join('');
-        })
-        .catch(function(){});
-    })();
-    </script>
-
+  // Live Instagram feed — pulled via our own Cloudflare Worker (which calls
+  // Instagram's own API with Gilbert's own credentials), not a third-party
+  // embed widget. Falls back silently to the static photos already in the
+  // page if the feed isn't set up yet or the request fails.
+  (function loadInstagramFeed() {
+    const grid = document.getElementById('instaGrid');
+    if (!grid) return;
+    const igIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.4-4.6-9.9-9.1C.6 8.6 2.1 5 5.7 5c2 0 3.3 1 4.3 2.5C11 6 12.4 5 14.4 5 18 5 19.5 8.6 17.9 11.9 15.4 16.4 12 21 12 21Z"/></svg>'
+      + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm4.4 3.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6ZM17.6 5.8a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>';
+    fetch('https://long-bar-d49d.gilbertrenteria.workers.dev/instagram/feed', { cache: 'no-store' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data || !data.ok || !Array.isArray(data.images) || data.images.length < 3) return; // keep the static fallback already in the page
+        grid.innerHTML = data.images.slice(0, 6).map((img) => `
+          <a href="${img.permalink || 'https://instagram.com/hiddengemrings'}" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="${img.url}" alt="Hidden Gem on Instagram" loading="lazy">
+            <span class="insta-hover">${igIcon}</span>
+          </a>`).join('');
+      })
+      .catch(() => { /* keep the static fallback already in the page */ });
+  })();
+</script>
 
 </body></html>
