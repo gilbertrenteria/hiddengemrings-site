@@ -199,6 +199,7 @@
     font-family:'Newsreader',serif;font-style:italic;font-weight:400;
     font-size:clamp(32px,4vw,52px);margin:0 0 26px;color:var(--white);
   }
+  .story-copy h2 .script{color:var(--gold);}
   .story-copy p{margin:0 0 20px;font-size:17px;font-family:'Work Sans',sans-serif;color:rgba(255,255,255,.92);line-height:1.8;}
   .story-copy p:last-child{margin-bottom:0;}
   @media(max-width:860px){
@@ -581,18 +582,21 @@
      Same base as the scroll reveal above (same trigger, same observer),
      applied per-word so the heading text rises in as one coordinated wave
      rather than a single block. Used consistently on every major section
-     heading across the site. */
+     heading across the site. Trigger point is deliberately later (see the
+     observer's rootMargin below) and the motion deliberately bigger than a
+     plain card reveal, so the wave is still mid-flight -- not already
+     finished -- by the time a heading scrolls into a visitor's eye line. */
   .wave-word{
     display:inline-block;
     opacity:0;
-    transform:translateY(34px);
-    filter:blur(6px);
-    transition:opacity 1s cubic-bezier(.19,1,.22,1), transform 1s cubic-bezier(.19,1,.22,1), filter 1s cubic-bezier(.19,1,.22,1);
+    transform:translateY(46px);
+    filter:blur(10px);
+    transition:opacity 1.15s cubic-bezier(.19,1,.22,1), transform 1.15s cubic-bezier(.19,1,.22,1), filter 1.15s cubic-bezier(.19,1,.22,1);
     will-change:opacity, transform, filter;
   }
   .wave-target.is-visible .wave-word{opacity:1;transform:translateY(0);filter:blur(0);}
   @media(max-width:700px){
-    .wave-word{transform:translateY(18px);filter:blur(3px);transition-duration:.85s;}
+    .wave-word{transform:translateY(24px);filter:blur(5px);transition-duration:1s;}
   }
   @media(prefers-reduced-motion: reduce){
     .wave-word{opacity:1;transform:none;filter:none;transition:none;}
@@ -720,7 +724,7 @@
   </div>
   <div class="gallery-grid reveal-stagger">
     <a class="gallery-card" href="collection.html#aurora">
-      <div class="gallery-card-media"><img src="design-aurora.jpg" alt="Aurora, a curved diamond wedding band with marquise and baguette stones" loading="lazy"></div>
+      <div class="gallery-card-media"><img src="design-aurora-yellow.jpg" alt="Aurora, a curved diamond wedding band with marquise and baguette stones in yellow gold" loading="lazy"></div>
       <span class="gallery-card-name">Aurora</span>
     </a>
     <a class="gallery-card" href="collection.html#allison">
@@ -755,7 +759,7 @@
       <img src="story-veil-original.jpg" alt="A hand wearing a round diamond engagement ring with a pave wedding band resting gently on a sheer bridal lace veil" loading="lazy">
     </div>
     <div class="story-copy">
-      <h2 class="wave-target">Why We're Different</h2>
+      <h2 class="wave-target">Why We're <span class="script">Different</span></h2>
       <p>Most jewelry stores are built to move inventory &mdash; rows of cases, a sales floor, and a name on the box you're really paying for. We built Hidden Gem to work the opposite way: no showroom pressure, no commissioned upsells, just an honest conversation about the ring you actually want.</p>
       <p>There's no brand markup here. What you pay goes into the stone and the craftsmanship, not a storefront lease or a name on the box. You'll always know exactly what you're paying for, and why.</p>
       <p>Every ring starts with a real conversation, not a form that disappears into a queue. We get on the phone, talk through your style, your budget, and your story, and design around you &mdash; not the other way around.</p>
@@ -1044,7 +1048,7 @@
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.35, rootMargin: '0px 0px -22% 0px' });
+    }, { threshold: 0.3, rootMargin: '0px 0px -38% 0px' });
     items.forEach(function (el) { io.observe(el); });
   })();
 

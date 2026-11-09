@@ -8,10 +8,10 @@
     --cream:#F6F3EC;
     --cream-alt:#EEEBE2;
     --taupe:#A0948A;
-    --taupe-dark:#8A7F6E;
-    --brown:#6B5B4C;
-    --brown-dark:#5C4D40;
-    --ink:#5C534B;
+    --taupe-dark:#776C5C;
+    --brown:#54453A;
+    --brown-dark:#423529;
+    --ink:#453E37;
     --gold:#B99C5F;
     --white:#FFFFFF;
     --maxw:1180px;
@@ -44,13 +44,20 @@
     font-size:13px;
     font-weight:600;
     padding:16px 34px;
-    background:var(--brown-dark);
+    border-radius:999px;
+    border:none;
+    background:linear-gradient(135deg, var(--brown) 0%, var(--brown-dark) 100%);
     color:var(--white);
-    border:1px solid var(--brown-dark);
+    box-shadow:0 6px 18px rgba(33,26,20,.32);
     cursor:pointer;
-    transition:background .25s ease, color .25s ease;
+    transition:background .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease;
   }
-  .btn:hover{background:transparent;color:var(--brown-dark);transform:translateY(-2px);box-shadow:0 8px 18px rgba(92,77,64,.16);}
+  .btn:hover{
+    background:linear-gradient(135deg, var(--brown-dark) 0%, var(--brown) 100%);
+    color:var(--white);
+    transform:translateY(-3px);
+    box-shadow:0 10px 26px rgba(33,26,20,.42);
+  }
   .script{font-family:'Newsreader',serif;font-style:italic;font-weight:500;}
   @media(prefers-reduced-motion: reduce){.btn:hover{transform:none;}}
 
@@ -75,7 +82,7 @@
   nav.primary a:hover{color:var(--gold);}
   nav.primary a.current{color:var(--gold);}
   nav.primary a.btn.nav-cta{color:var(--white);}
-  nav.primary a.btn.nav-cta:hover{color:var(--brown-dark);}
+  nav.primary a.btn.nav-cta:hover{color:var(--white);}
   nav.primary .dot{color:var(--taupe);}
   .nav-cta{padding:10px 20px;font-size:11px;margin-left:10px;}
   .header-icons{display:flex;gap:16px;align-items:center;flex-shrink:0;}
@@ -176,6 +183,23 @@
   footer p, footer a{font-size:16px;color:rgba(246,243,236,.85);}
   .footer-bottom{max-width:var(--maxw);margin:40px auto 0;padding:20px 32px 0;border-top:1px solid rgba(255,255,255,.15);text-align:center;font-size:14px;color:rgba(246,243,236,.6);}
   @media(max-width:800px){.footer-grid{grid-template-columns:1fr;gap:34px;}}
+
+  /* ===== WAVE HEADING REVEAL (same base as the rest of the site) ===== */
+  .wave-word{
+    display:inline-block;
+    opacity:0;
+    transform:translateY(46px);
+    filter:blur(10px);
+    transition:opacity 1.15s cubic-bezier(.19,1,.22,1), transform 1.15s cubic-bezier(.19,1,.22,1), filter 1.15s cubic-bezier(.19,1,.22,1);
+    will-change:opacity, transform, filter;
+  }
+  .wave-target.is-visible .wave-word{opacity:1;transform:translateY(0);filter:blur(0);}
+  @media(max-width:700px){
+    .wave-word{transform:translateY(24px);filter:blur(5px);transition-duration:1s;}
+  }
+  @media(prefers-reduced-motion: reduce){
+    .wave-word{opacity:1;transform:none;filter:none;transition:none;}
+  }
 </style>
 <header>
   <div class="nav-row">
@@ -204,7 +228,7 @@
 
 <section class="page-head">
   <p class="eyebrow">The Collection</p>
-  <h1>Designs We've <span class="script">Loved Creating</span></h1>
+  <h1 class="wave-target">Designs We've <span class="script">Loved Creating</span></h1>
   <p>Every ring starts as a conversation and ends up one of a kind &mdash; here's a look at some of the pieces we've designed for other couples. See something close to what you're picturing? That's the perfect place to start your own.</p>
 </section>
 
@@ -305,7 +329,7 @@
 
 <div class="section-head">
   <p class="eyebrow">Explore The Collection</p>
-  <h2>Find Your <span class="script">Setting</span></h2>
+  <h2 class="wave-target">Find Your <span class="script">Setting</span></h2>
   <p style="max-width:640px;margin:14px auto 0;font-size:16.5px;">Some of the cuts and settings our couples come back to again and again. Tap a swatch to see each one in white, yellow, or rose gold.</p>
 </div>
 
@@ -484,7 +508,7 @@
 
 <div class="section-head">
   <p class="eyebrow">A Little More Inspiration</p>
-  <h2>Moments From Our <span class="script">Workbench</span></h2>
+  <h2 class="wave-target">Moments From Our <span class="script">Workbench</span></h2>
 </div>
 
 <div class="inspo-grid">
@@ -550,6 +574,63 @@
       });
     });
   });
+
+  // ===== WAVE HEADING REVEAL (same base as the rest of the site) =====
+  (function () {
+    var targets = document.querySelectorAll('.wave-target');
+    targets.forEach(function (heading) {
+      var isFlexRow = getComputedStyle(heading).display === 'flex';
+      var wordIndex = 0;
+      function makeWordSpan(text) {
+        var span = document.createElement('span');
+        span.className = 'wave-word';
+        span.textContent = text;
+        span.style.transitionDelay = (wordIndex * 0.07) + 's';
+        wordIndex++;
+        return span;
+      }
+      function splitTextInto(text, container) {
+        text.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) container.appendChild(document.createTextNode(part));
+          else container.appendChild(makeWordSpan(part));
+        });
+      }
+      var nodes = Array.prototype.slice.call(heading.childNodes);
+      var wrap = isFlexRow ? document.createElement('span') : null;
+      if (wrap) wrap.className = 'wave-text-wrap';
+      var tail = document.createDocumentFragment();
+      nodes.forEach(function (node) {
+        if (node.nodeType === 3) {
+          splitTextInto(node.textContent, wrap || tail);
+        } else if (node.nodeType === 1) {
+          node.classList.add('wave-word');
+          node.style.transitionDelay = (wordIndex * 0.07) + 's';
+          wordIndex++;
+          tail.appendChild(node);
+        }
+      });
+      heading.innerHTML = '';
+      if (wrap) heading.appendChild(wrap);
+      heading.appendChild(tail);
+    });
+
+    if (!targets.length) return;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '0px 0px -38% 0px' });
+    targets.forEach(function (el) { io.observe(el); });
+  })();
 </script>
 
 </body></html>
