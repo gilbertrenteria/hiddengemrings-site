@@ -199,7 +199,7 @@
     font-family:'Newsreader',serif;font-style:italic;font-weight:400;
     font-size:clamp(32px,4vw,52px);margin:0 0 26px;color:var(--white);
   }
-  .story-copy h2 .script{color:var(--gold);}
+  .story-copy h2 .script{color:var(--brown-dark);}
   .story-copy p{margin:0 0 20px;font-size:17px;font-family:'Work Sans',sans-serif;color:rgba(255,255,255,.92);line-height:1.8;}
   .story-copy p:last-child{margin-bottom:0;}
   @media(max-width:860px){
@@ -224,10 +224,11 @@
     position:relative;z-index:1;
     display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;
   }
+  .set-in-stone-copy{container-type:inline-size;}
   .set-in-stone-copy h2{
     font-family:'Space Mono',monospace;font-weight:400;
-    font-size:clamp(28px,4.2vw,46px);color:rgba(246,243,236,.5);
-    margin:0 0 30px;line-height:1.3;
+    font-size:clamp(15px,5.7cqw,46px);color:rgba(246,243,236,.5);
+    margin:0 0 30px;line-height:1.3;white-space:nowrap;
   }
   .set-in-stone-copy p{
     font-family:'Space Mono',monospace;font-size:15px;
@@ -1075,25 +1076,46 @@
   // the rest of the site, even though the typing heading keeps its own
   // typewriter look instead of the word-wave.
   (function () {
-    var items = document.querySelectorAll('.reveal, .reveal-stagger, .wave-target, .typing-target');
-    if (!items.length) return;
+    var allItems = Array.prototype.slice.call(document.querySelectorAll('.reveal, .reveal-stagger, .wave-target, .typing-target'));
+    if (!allItems.length) return;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // A wave-target/typing-target heading nested inside a much taller
+    // .reveal/.reveal-stagger ancestor crosses its own 30% visibility
+    // threshold long before that ancestor does, so its word-by-word (or
+    // character-by-character) reveal finishes silently while still hidden
+    // behind the ancestor's own fade-in -- the heading is already fully
+    // "revealed" and static by the time the section actually appears, so
+    // no motion is ever seen. Sync those headings to fire together with
+    // the ancestor instead of watching them on their own.
+    var syncedToAncestor = [];
+    var items = allItems.filter(function (el) {
+      if (!el.classList.contains('wave-target') && !el.classList.contains('typing-target')) return true;
+      var ancestor = el.parentElement ? el.parentElement.closest('.reveal, .reveal-stagger') : null;
+      if (ancestor) {
+        syncedToAncestor.push({ ancestor: ancestor, child: el });
+        return false;
+      }
+      return true;
+    });
+
+    function revealEl(el) {
+      el.classList.add('is-visible');
+      if (el.classList.contains('typing-target')) typeOutHeading(el);
+    }
+
     if (reduceMotion || !('IntersectionObserver' in window)) {
-      items.forEach(function (el) {
-        el.classList.add('is-visible');
-        if (el.classList.contains('typing-target')) {
-          el.textContent = el.getAttribute('data-full-text') || el.textContent;
-        }
-      });
+      items.forEach(revealEl);
+      syncedToAncestor.forEach(function (pair) { revealEl(pair.child); });
       return;
     }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          if (entry.target.classList.contains('typing-target')) {
-            typeOutHeading(entry.target);
-          }
+          revealEl(entry.target);
+          syncedToAncestor.forEach(function (pair) {
+            if (pair.ancestor === entry.target) revealEl(pair.child);
+          });
           io.unobserve(entry.target);
         }
       });
