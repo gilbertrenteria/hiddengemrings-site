@@ -1,0 +1,617 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Payment Options | Hidden Gem Engagement Rings</title>
+<meta name="description" content="See your engagement ring payment options with Hidden Gem in six quick taps. Monthly payments through our lending partners, a 50% deposit, or pay in full.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F3EC;
+    --cream-alt:#EEEBE2;
+    --taupe:#A0948A;
+    --taupe-dark:#776C5C;
+    --brown:#54453A;
+    --brown-dark:#423529;
+    --ink:#453E37;
+    --gold:#B99C5F;
+    --white:#FFFFFF;
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:17px;
+    line-height:1.6;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
+  .eyebrow{
+    font-family:'Work Sans',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    font-size:13px;
+    font-weight:500;
+  }
+  .btn{
+    display:inline-block;
+    font-family:'Work Sans',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:13px;
+    font-weight:600;
+    padding:16px 34px;
+    border-radius:999px;
+    border:none;
+    background:linear-gradient(135deg, var(--brown) 0%, var(--brown-dark) 100%);
+    color:var(--white);
+    box-shadow:0 6px 18px rgba(33,26,20,.32);
+    cursor:pointer;
+    transition:background .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease;
+  }
+  .btn:hover{
+    background:linear-gradient(135deg, var(--brown-dark) 0%, var(--brown) 100%);
+    color:var(--white);
+    transform:translateY(-3px);
+    box-shadow:0 10px 26px rgba(33,26,20,.42);
+  }
+  .script{font-family:'Newsreader',serif;font-style:italic;font-weight:500;}
+  @media(prefers-reduced-motion: reduce){.btn:hover{transform:none;}}
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:var(--cream);
+    border-bottom:1px solid rgba(92,77,64,.12);
+  }
+  .nav-row{
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:var(--maxw);margin:0 auto;padding:22px 32px;
+    gap:20px;
+  }
+  .logo-word{display:block;}
+  .logo-word img{height:46px;width:auto;display:block;}
+  nav.primary{display:flex;align-items:center;gap:14px;font-family:'Work Sans',sans-serif;}
+  nav.primary a{
+    text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:500;
+    color:var(--ink);white-space:nowrap;
+  }
+  nav.primary a:hover{color:var(--gold);}
+  nav.primary a.current{color:var(--gold);}
+  nav.primary a.btn.nav-cta{color:var(--white);}
+  nav.primary a.btn.nav-cta:hover{color:var(--white);}
+  nav.primary .dot{color:var(--taupe);}
+  .nav-cta{padding:10px 20px;font-size:11px;margin-left:10px;}
+  .header-icons{display:flex;gap:16px;align-items:center;flex-shrink:0;}
+  .header-icons a{color:var(--ink);opacity:.75;}
+  .header-icons a:hover{opacity:1;color:var(--gold);}
+  .menu-toggle{display:none;background:none;border:none;cursor:pointer;color:var(--brown-dark);}
+  @media(max-width:900px){
+    nav.primary{display:none;position:absolute;top:100%;left:0;right:0;background:var(--cream);
+      flex-direction:column;align-items:flex-start;padding:18px 32px 26px;border-bottom:1px solid rgba(92,77,64,.12);}
+    nav.primary.open{display:flex;}
+    nav.primary .dot{display:none;}
+    nav.primary a{padding:8px 0;}
+    .nav-cta{margin:10px 0 0;padding:12px 22px;}
+    .menu-toggle{display:block;}
+  }
+
+  /* ===== PAGE HEADING ===== */
+  .page-head{text-align:center;padding:80px 20px 50px;}
+  .page-head .eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
+  .page-head h1{
+    font-family:'Newsreader',serif;font-weight:500;
+    font-size:clamp(38px,6vw,60px);color:var(--brown-dark);margin:0 0 18px;
+  }
+  .page-head h1 .script{font-size:1.2em;color:var(--gold);}
+  .page-head p{max-width:600px;margin:0 auto;font-size:18px;color:var(--ink);}
+
+  /* ===== FAQ GROUPS ===== */
+  .faq-groups{max-width:860px;margin:0 auto;padding:0 32px 90px;}
+  .faq-group{margin-bottom:54px;}
+  .faq-group-title{
+    font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.14em;
+    font-size:13px;font-weight:600;color:var(--gold);margin:0 0 16px;
+  }
+  .faq-item{
+    background:var(--white);border:1px solid rgba(92,77,64,.12);border-radius:16px;
+    margin-bottom:14px;box-shadow:0 3px 14px rgba(92,77,64,.07);
+    transition:box-shadow .25s ease, border-color .25s ease;
+    overflow:hidden;
+  }
+  .faq-item.open{border-color:rgba(185,156,95,.5);box-shadow:0 10px 26px rgba(92,77,64,.14);}
+  .faq-q{
+    display:flex;align-items:center;gap:16px;
+    padding:22px 24px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;
+    font-family:'Newsreader',serif;font-size:clamp(18px,2.2vw,21px);color:var(--brown-dark);font-weight:600;
+  }
+  .faq-q-icon{
+    width:30px;height:30px;flex-shrink:0;padding:6px;box-sizing:border-box;
+    background:var(--cream-alt);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;
+  }
+  .faq-q-text{flex:1;}
+  .faq-q .chev{
+    flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--brown-dark);
+    display:flex;align-items:center;justify-content:center;color:var(--white);font-size:16px;
+    transition:transform .25s ease, background .25s ease;
+  }
+  .faq-item.open .faq-q .chev{transform:rotate(180deg);background:var(--gold);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .faq-item.open .faq-a{max-height:400px;}
+  .faq-a-inner{
+    margin:0 16px 18px;padding:18px 20px;font-size:16.5px;color:var(--ink);line-height:1.7;
+    background:var(--cream-alt);border-left:3px solid var(--gold);border-radius:10px;
+  }
+
+  /* ===== CTA BAND ===== */
+  .faq-cta{text-align:center;padding:60px 20px 100px;}
+  .faq-cta p{font-family:'Newsreader',serif;font-style:italic;font-size:21px;color:var(--brown-dark);margin:0 0 24px;}
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--brown-dark);color:var(--cream);padding:60px 0 30px;}
+  .footer-grid{display:grid;grid-template-columns:1.1fr 1.1fr;gap:40px;}
+  footer h4{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:15px;margin:0 0 16px;color:var(--white);}
+  footer .footer-logo{margin:0 0 14px;}
+  footer .footer-logo img{height:40px;width:auto;}
+  footer p, footer a{font-size:16px;color:rgba(246,243,236,.85);}
+  .footer-bottom{max-width:var(--maxw);margin:40px auto 0;padding:20px 32px 0;border-top:1px solid rgba(255,255,255,.15);text-align:center;font-size:14px;color:rgba(246,243,236,.6);}
+  @media(max-width:800px){.footer-grid{grid-template-columns:1fr;gap:34px;}}
+
+  /* ===== WAVE HEADING REVEAL (same base as the rest of the site) ===== */
+  .wave-word{
+    display:inline-block;
+    opacity:0;
+    transform:translateY(46px);
+    filter:blur(10px);
+    transition:opacity 1.15s cubic-bezier(.19,1,.22,1), transform 1.15s cubic-bezier(.19,1,.22,1), filter 1.15s cubic-bezier(.19,1,.22,1);
+    will-change:opacity, transform, filter;
+  }
+  .wave-target.is-visible .wave-word{opacity:1;transform:translateY(0);filter:blur(0);}
+  @media(max-width:700px){
+    .wave-word{transform:translateY(24px);filter:blur(5px);transition-duration:1s;}
+  }
+  @media(prefers-reduced-motion: reduce){
+    .wave-word{opacity:1;transform:none;filter:none;transition:none;}
+  }
+  /* ===== PAYMENT OPTIONS FORM ===== */
+  .po-wrap{max-width:640px;margin:0 auto;padding:0 20px 80px;}
+  .po-card{background:var(--white);border:1px solid rgba(92,77,64,.14);border-radius:26px;padding:26px 30px 34px;box-shadow:0 18px 50px rgba(66,53,41,.10);position:relative;overflow:hidden;}
+  .po-top{display:flex;justify-content:space-between;align-items:center;min-height:30px;}
+  .po-back{background:none;border:none;font-family:'Work Sans',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--taupe-dark);cursor:pointer;padding:6px 0;visibility:hidden;}
+  .po-back.show{visibility:visible;}
+  .po-count{font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--taupe-dark);}
+  .po-bar{height:4px;background:var(--cream-alt);border-radius:99px;margin:10px 0 26px;overflow:hidden;}
+  .po-bar span{display:block;height:100%;width:16%;background:linear-gradient(90deg,var(--gold),var(--brown));border-radius:99px;transition:width .45s ease;}
+  .po-step{display:none;text-align:center;animation:poIn .45s ease both;}
+  .po-step.active{display:block;}
+  @keyframes poIn{from{opacity:0;transform:translateX(26px);}to{opacity:1;transform:none;}}
+  .po-icon{width:64px;height:64px;object-fit:contain;display:block;margin:0 auto 14px;}
+  .po-card h2{font-family:'Newsreader',serif;font-weight:500;font-size:clamp(26px,4.4vw,34px);color:var(--brown-dark);margin:0 0 8px;line-height:1.15;}
+  .po-sub{font-family:'Work Sans',sans-serif;font-size:14px;color:var(--taupe-dark);margin:0 0 6px;}
+  .po-chips{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px;}
+  .po-chips button{font-family:'Work Sans',sans-serif;font-size:15px;font-weight:500;color:var(--brown-dark);background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:16px;padding:17px 12px;cursor:pointer;transition:all .2s ease;min-height:58px;}
+  .po-chips button:hover{border-color:var(--gold);background:#fff;transform:translateY(-1px);}
+  .po-chips button.selected{background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(33,26,20,.25);}
+  .po-chips button:focus-visible,.po-field input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .po-field{display:block;text-align:left;margin:18px 0 0;}
+  .po-field span{display:block;font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--taupe-dark);margin-bottom:7px;}
+  .po-field input{width:100%;font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink);background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:14px;padding:15px 16px;}
+  .po-honey{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+  .po-send{margin-top:24px;width:100%;}
+  .po-send:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  .po-status{font-family:'Work Sans',sans-serif;font-size:14px;color:var(--taupe-dark);min-height:20px;margin:12px 0 0;}
+  .po-status.err{color:#9a3b2e;}
+  .po-done{text-align:center;animation:poIn .5s ease both;}
+  .po-lead{font-family:'Newsreader',serif;font-size:20px;color:var(--ink);margin:6px 0 20px;line-height:1.45;}
+  .po-next{text-align:left;font-family:'Newsreader',serif;font-size:18px;color:var(--ink);line-height:1.5;padding-left:24px;margin:0 0 18px;}
+  .po-next li{margin-bottom:8px;}
+  .po-fine{font-family:'Work Sans',sans-serif;font-size:12.5px;color:var(--taupe-dark);line-height:1.55;margin:0 0 22px;}
+  .po-fine a{color:inherit;}
+  .po-done-actions{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;}
+  .po-tel{font-family:'Work Sans',sans-serif;font-size:14px;font-weight:600;color:var(--brown-dark);}
+  .po-restart{margin-top:18px;background:none;border:none;font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe);cursor:pointer;text-decoration:underline;}
+  .po-note{text-align:center;font-family:'Work Sans',sans-serif;font-size:13px;color:var(--taupe-dark);margin:18px 0 0;}
+  @media(max-width:600px){
+    .po-card{padding:20px 18px 26px;border-radius:22px;}
+    .po-chips{grid-template-columns:1fr;gap:10px;}
+    .po-chips button{min-height:54px;padding:15px 12px;}
+    .po-icon{width:56px;height:56px;}
+  }
+  @media(prefers-reduced-motion: reduce){.po-step,.po-done{animation:none;}.po-bar span{transition:none;}}
+</style>
+<header>
+  <div class="nav-row">
+    <a class="logo-word" href="index.html#top"><img src="logo-brown.png" alt="Hidden Gem"></a>
+    <nav class="primary" id="primaryNav">
+      <a href="index.html#top">Home</a><span class="dot">&middot;</span>
+      <a href="index.html#story">Our Story</a><span class="dot">&middot;</span>
+      <a href="collection.html">Collection</a><span class="dot">&middot;</span>
+      <a href="index.html#operate">How It Works</a><span class="dot">&middot;</span>
+      <a href="faq.html">FAQ</a>
+      <a class="btn nav-cta" href="index.html#consult-form">Get Started</a>
+    </nav>
+    <div class="header-icons">
+      <a href="mailto:hello@hiddengemrings.com" aria-label="Email" title="Email us">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
+      </a>
+      <a href="https://wa.me/18324746344" aria-label="WhatsApp" title="Message us on WhatsApp">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.52 0-10 4.48-10 10 0 1.77.46 3.45 1.26 4.9L2 22l5.25-1.38A9.96 9.96 0 0 0 12.04 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.8 14.2c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.1-1.8-.12-.42-.13-.96-.3-1.64-.6-2.9-1.25-4.78-4.15-4.93-4.35-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.4.27-.3.58-.37.78-.37h.56c.18 0 .42-.07.65.5.24.58.8 2 .87 2.15.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.3.38-.44.5-.14.14-.3.3-.13.6.17.3.77 1.27 1.65 2.05 1.13 1.01 2.08 1.33 2.38 1.48.3.15.48.13.65-.08.18-.2.76-.88.97-1.19.2-.3.4-.25.68-.15.28.1 1.78.84 2.08 1 .3.14.5.22.58.33.08.13.08.73-.16 1.4z"/></svg>
+      </a>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<section class="page-head">
+  <p class="eyebrow">Payment Options</p>
+  <h1 class="wave-target">See Your <span class="script">Options</span></h1>
+  <p>Six quick taps and we'll call you with payment options that fit your budget. This is not a credit application and won't affect your credit.</p>
+</section>
+
+<div class="po-wrap">
+  <div class="po-card" id="poCard">
+    <div class="po-top">
+      <button class="po-back" id="poBack" type="button" aria-label="Go back">&#8249; Back</button>
+      <span class="po-count" id="poCount">1 of 6</span>
+    </div>
+    <div class="po-bar"><span id="poBar"></span></div>
+
+    <div class="po-step" data-key="budget">
+      <img class="po-icon" src="icon-pricing.png" alt="">
+      <h2>What's your ring budget?</h2>
+      <div class="po-chips">
+        <button type="button" data-v="Under $2,000">Under $2,000</button>
+        <button type="button" data-v="$2,000 to $4,000">$2,000 to $4,000</button>
+        <button type="button" data-v="$4,000 to $7,000">$4,000 to $7,000</button>
+        <button type="button" data-v="$7,000 to $10,000">$7,000 to $10,000</button>
+        <button type="button" data-v="$10,000+">$10,000+</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="pay">
+      <img class="po-icon" src="icon-payment.png" alt="">
+      <h2>How would you like to pay?</h2>
+      <div class="po-chips">
+        <button type="button" data-v="Monthly payments">Monthly payments</button>
+        <button type="button" data-v="50% deposit">50% deposit</button>
+        <button type="button" data-v="Pay in full">Pay in full</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="monthly">
+      <img class="po-icon" src="icon-financing.png" alt="">
+      <h2>What monthly payment feels comfortable?</h2>
+      <div class="po-chips">
+        <button type="button" data-v="Under $100">Under $100</button>
+        <button type="button" data-v="$100 to $200">$100 to $200</button>
+        <button type="button" data-v="$200 to $350">$200 to $350</button>
+        <button type="button" data-v="$350 to $500">$350 to $500</button>
+        <button type="button" data-v="$500+">$500+</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="timeline">
+      <img class="po-icon" src="icon-clock.png" alt="">
+      <h2>When are you planning to propose?</h2>
+      <div class="po-chips">
+        <button type="button" data-v="ASAP">As soon as possible</button>
+        <button type="button" data-v="1-3 months">In 1 to 3 months</button>
+        <button type="button" data-v="3-6 months">In 3 to 6 months</button>
+        <button type="button" data-v="Just looking">Just looking for now</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="credit">
+      <img class="po-icon" src="icon-checkmark.png" alt="">
+      <h2>How would you describe your credit?</h2>
+      <p class="po-sub">Optional. It just helps us suggest the right option.</p>
+      <div class="po-chips">
+        <button type="button" data-v="Excellent">Excellent</button>
+        <button type="button" data-v="Good">Good</button>
+        <button type="button" data-v="Fair">Fair</button>
+        <button type="button" data-v="Rebuilding">Rebuilding</button>
+        <button type="button" data-v="Prefer not to say">Prefer not to say</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="contact">
+      <img class="po-icon" src="icon-personal.png" alt="">
+      <h2>Where can Gilbert reach you?</h2>
+      <p class="po-sub">We'll call you to talk through your options. No spam, ever.</p>
+      <label class="po-field"><span>First and last name</span>
+        <input id="poName" type="text" autocomplete="name" placeholder="Your name" maxlength="120">
+      </label>
+      <label class="po-field"><span>Mobile phone</span>
+        <input id="poPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(832) 555-0123" maxlength="20">
+      </label>
+      <input type="text" id="poHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="po-honey">
+      <button class="btn po-send" id="poSend" type="button" disabled>Send</button>
+      <p class="po-status" id="poStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="po-done" id="poDone" hidden>
+      <img class="po-icon" src="icon-conversation.png" alt="">
+      <h2>You're all set<span id="poFirst"></span>!</h2>
+      <p class="po-lead">Expect a call from Gilbert at <strong id="poPhoneShow"></strong> shortly, usually within 15 minutes during business hours.</p>
+      <ol class="po-next">
+        <li><strong>We call you</strong> to talk through the ring and your budget.</li>
+        <li><strong>You get a secure link</strong> to check your payment options with our lending partner, right on your phone.</li>
+        <li><strong>Once you're approved,</strong> we finalize your design and start making your ring.</li>
+      </ol>
+      <p class="po-fine">Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="policies.html">Our policies</a></p>
+      <div class="po-done-actions">
+        <a class="btn" href="collection.html">Browse Rings</a>
+        <a class="po-tel" href="tel:+18324746344">Call (832) 474-6344</a>
+      </div>
+      <button type="button" class="po-restart" id="poRestart">Start over</button>
+    </div>
+  </div>
+  <p class="po-note">Business hours: Mon, Tue, Thu, Fri 8:00 to 7:00. Wed, Sat, Sun by appointment.</p>
+</div>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-logo"><img src="logo-white.png" alt="Hidden Gem"></div>
+      <p><a href="tel:+18324746344">(832) 474-6344</a></p>
+      <p><a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></p>
+    </div>
+    <div>
+      <h4>Hours</h4>
+      <p>Mon, Tue, Thu, Fri &mdash; 8:00&ndash;7:00</p>
+      <p>Wed, Sat, Sun &mdash; By appointment</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; <span id="year"></span> Hidden Gem Engagement Rings LLC. All rights reserved. &middot; <a href="policies.html" style="color:inherit;text-decoration:underline">Policies, Warranty &amp; Privacy</a></div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const menuToggle = document.getElementById('menuToggle');
+  const primaryNav = document.getElementById('primaryNav');
+  menuToggle.addEventListener('click', () => primaryNav.classList.toggle('open'));
+
+  document.querySelectorAll('.faq-q').forEach(q=>{
+    q.addEventListener('click', ()=>{
+      const item = q.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      item.closest('.faq-group').querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+      if(!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // ===== PAYMENT OPTIONS FORM =====
+  // Answers are sent to Gilbert's own Worker the moment the last answer is in.
+  // Never silently fails: automatic retries with backoff, a pending copy is
+  // kept on this device and resent when the page is reopened or the
+  // connection comes back, and the Send button is always there as a backup.
+  (function () {
+    var API = (new URLSearchParams(location.search).get('api')) || 'https://long-bar-d49d.gilbertrenteria.workers.dev';
+    var STORE = 'hg_payopts_v1';
+    var card = document.getElementById('poCard');
+    if (!card) return;
+    var steps = Array.prototype.slice.call(card.querySelectorAll('.po-step'));
+    var backBtn = document.getElementById('poBack');
+    var countEl = document.getElementById('poCount');
+    var barEl = document.getElementById('poBar');
+    var nameEl = document.getElementById('poName');
+    var phoneEl = document.getElementById('poPhone');
+    var sendBtn = document.getElementById('poSend');
+    var statusEl = document.getElementById('poStatus');
+    var doneEl = document.getElementById('poDone');
+    var autoTimer = null, sending = false;
+
+    function load() { try { return JSON.parse(localStorage.getItem(STORE)) || null; } catch (e) { return null; } }
+    function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+    function uid() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    }
+    var state = load() || { id: uid(), a: {}, step: 0, sent: false, pending: false };
+
+    function skipMonthly() { return state.a.pay === '50% deposit' || state.a.pay === 'Pay in full'; }
+    function visibleSteps() { return steps.filter(function (s) { return !(s.dataset.key === 'monthly' && skipMonthly()); }); }
+
+    function show(i) {
+      var vis = visibleSteps();
+      if (i < 0) i = 0;
+      if (i > vis.length - 1) i = vis.length - 1;
+      state.step = i; save();
+      steps.forEach(function (s) { s.classList.remove('active'); });
+      vis[i].classList.add('active');
+      countEl.textContent = (i + 1) + ' of ' + vis.length;
+      barEl.style.width = Math.round(((i + 1) / vis.length) * 100) + '%';
+      backBtn.classList.toggle('show', i > 0);
+      var key = vis[i].dataset.key;
+      vis[i].querySelectorAll('.po-chips button').forEach(function (b) {
+        b.classList.toggle('selected', state.a[key] === b.dataset.v);
+      });
+      if (key === 'contact') { validate(); }
+    }
+
+    steps.forEach(function (s) {
+      s.querySelectorAll('.po-chips button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          state.a[s.dataset.key] = b.dataset.v; save();
+          s.querySelectorAll('.po-chips button').forEach(function (x) { x.classList.remove('selected'); });
+          b.classList.add('selected');
+          var vis = visibleSteps();
+          var idx = vis.indexOf(s);
+          setTimeout(function () { show(idx + 1); if (vis[idx + 1] && vis[idx + 1].dataset.key === 'contact') nameEl.focus({ preventScroll: true }); }, 260);
+        });
+      });
+    });
+    backBtn.addEventListener('click', function () { show(state.step - 1); });
+
+    function digits(v) { return String(v || '').replace(/\D/g, ''); }
+    function phoneOk() { var d = digits(phoneEl.value).replace(/^1(?=\d{10}$)/, ''); return d.length === 10; }
+    function nameOk() { return nameEl.value.trim().length >= 2; }
+    function formatPhone() {
+      var d = digits(phoneEl.value).replace(/^1(?=\d{10}$)/, '').slice(0, 10);
+      var out = d;
+      if (d.length > 6) out = '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
+      else if (d.length > 3) out = '(' + d.slice(0, 3) + ') ' + d.slice(3);
+      phoneEl.value = out;
+    }
+    function validate() {
+      var ok = nameOk() && phoneOk();
+      sendBtn.disabled = !ok || sending;
+      return ok;
+    }
+    function onType() {
+      state.a.name = nameEl.value; state.a.phone = phoneEl.value; save();
+      clearTimeout(autoTimer);
+      if (validate()) {
+        statusEl.className = 'po-status'; statusEl.textContent = 'Sending your answers...';
+        autoTimer = setTimeout(submit, 1200); // last answer is in: send automatically
+      } else { statusEl.textContent = ''; }
+    }
+    nameEl.addEventListener('input', onType);
+    phoneEl.addEventListener('input', function () { formatPhone(); onType(); });
+    phoneEl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && validate()) { clearTimeout(autoTimer); submit(); } });
+    sendBtn.addEventListener('click', function () { clearTimeout(autoTimer); submit(); });
+
+    function payload() {
+      return {
+        id: state.id, name: (state.a.name || '').trim(), phone: state.a.phone || '',
+        budget: state.a.budget || '', pay: state.a.pay || '',
+        monthly: skipMonthly() ? '' : (state.a.monthly || ''),
+        timeline: state.a.timeline || '', credit: state.a.credit || '',
+        page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
+      };
+    }
+
+    var delays = [0, 2000, 5000, 10000, 20000, 40000];
+    function submit() {
+      if (sending || state.sent) return;
+      if (!(state.a.name && digits(state.a.phone).length >= 10)) return;
+      sending = true; state.pending = true; save(); validate();
+      statusEl.className = 'po-status'; statusEl.textContent = 'Sending your answers...';
+      var attempt = 0;
+      (function tryOnce() {
+        fetch(API + '/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload()), keepalive: true })
+          .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
+          .then(function (res) {
+            if (res.r.ok && res.j.ok) { done(); return; }
+            if (res.r.status === 400) { fail(res.j.error || 'Please check your name and phone.'); return; }
+            retry();
+          })
+          .catch(retry);
+        function retry() {
+          attempt++;
+          if (attempt < delays.length) {
+            statusEl.textContent = 'Still sending... (try ' + (attempt + 1) + ')';
+            setTimeout(tryOnce, delays[attempt]);
+          } else {
+            fail('We could not send yet. Tap Send to try again, or call (832) 474-6344.');
+          }
+        }
+      })();
+    }
+    function fail(msg) {
+      sending = false; validate();
+      statusEl.className = 'po-status err'; statusEl.textContent = msg;
+    }
+    function done() {
+      sending = false; state.sent = true; state.pending = false; save();
+      renderDone();
+    }
+    function renderDone() {
+      steps.forEach(function (s) { s.classList.remove('active'); });
+      document.querySelector('.po-top').style.display = 'none';
+      document.querySelector('.po-bar').style.display = 'none';
+      var first = (state.a.name || '').trim().split(/\s+/)[0];
+      document.getElementById('poFirst').textContent = first ? ', ' + first : '';
+      document.getElementById('poPhoneShow').textContent = state.a.phone || 'your phone';
+      doneEl.hidden = false;
+    }
+    document.getElementById('poRestart').addEventListener('click', function () {
+      state = { id: uid(), a: {}, step: 0, sent: false, pending: false }; save();
+      doneEl.hidden = true;
+      document.querySelector('.po-top').style.display = '';
+      document.querySelector('.po-bar').style.display = '';
+      nameEl.value = ''; phoneEl.value = ''; statusEl.textContent = '';
+      show(0);
+    });
+
+    // restore
+    nameEl.value = state.a.name || '';
+    phoneEl.value = state.a.phone || '';
+    if (state.sent) { renderDone(); }
+    else {
+      show(state.step || 0);
+      if (state.pending) submit(); // reopened with an unsent copy: resend it
+    }
+    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); });
+  })();
+
+  // ===== WAVE HEADING REVEAL (same base as the rest of the site) =====
+  (function () {
+    var targets = document.querySelectorAll('.wave-target');
+    targets.forEach(function (heading) {
+      var isFlexRow = getComputedStyle(heading).display === 'flex';
+      var wordIndex = 0;
+      function makeWordSpan(text) {
+        var span = document.createElement('span');
+        span.className = 'wave-word';
+        span.textContent = text;
+        span.style.transitionDelay = (wordIndex * 0.07) + 's';
+        wordIndex++;
+        return span;
+      }
+      function splitTextInto(text, container) {
+        text.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) container.appendChild(document.createTextNode(part));
+          else container.appendChild(makeWordSpan(part));
+        });
+      }
+      var nodes = Array.prototype.slice.call(heading.childNodes);
+      var wrap = isFlexRow ? document.createElement('span') : null;
+      if (wrap) wrap.className = 'wave-text-wrap';
+      var tail = document.createDocumentFragment();
+      nodes.forEach(function (node) {
+        if (node.nodeType === 3) {
+          splitTextInto(node.textContent, wrap || tail);
+        } else if (node.nodeType === 1) {
+          node.classList.add('wave-word');
+          node.style.transitionDelay = (wordIndex * 0.07) + 's';
+          wordIndex++;
+          tail.appendChild(node);
+        }
+      });
+      heading.innerHTML = '';
+      if (wrap) heading.appendChild(wrap);
+      heading.appendChild(tail);
+    });
+
+    if (!targets.length) return;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '0px 0px -38% 0px' });
+    targets.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+
+</body></html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Approve Your Design | Hidden Gem Engagement Rings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--cream:#F6F3EC;--cream-alt:#EEEBE2;--taupe:#A0948A;--taupe-dark:#776C5C;--brown:#54453A;--brown-dark:#423529;--ink:#453E37;--gold:#B99C5F;--white:#fff;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Newsreader',serif;-webkit-font-smoothing:antialiased;}
+  header{background:var(--cream);border-bottom:1px solid rgba(92,77,64,.12);}
+  .nav{max-width:1100px;margin:0 auto;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;}
+  .nav img{height:42px;display:block;}
+  .nav a.tel{font-family:'Work Sans',sans-serif;font-size:13px;letter-spacing:.08em;color:var(--brown-dark);text-decoration:none;font-weight:600;}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 80px;}
+  .eyebrow{font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--taupe-dark);text-align:center;margin:0 0 10px;}
+  h1{font-family:'Newsreader',serif;font-weight:500;font-size:clamp(34px,6vw,50px);color:var(--brown-dark);text-align:center;margin:0 0 10px;line-height:1.1;}
+  h1 .script{font-style:italic;color:var(--gold);}
+  .intro{text-align:center;font-size:19px;margin:0 auto 30px;max-width:540px;line-height:1.5;}
+  .card{background:var(--white);border:1px solid rgba(92,77,64,.14);border-radius:26px;padding:26px;box-shadow:0 18px 50px rgba(66,53,41,.10);}
+  .render{width:100%;border-radius:18px;display:block;background:var(--cream-alt);margin-bottom:22px;}
+  .specs{width:100%;border-collapse:collapse;font-size:18px;}
+  .specs td{padding:11px 4px;border-bottom:1px solid rgba(92,77,64,.10);vertical-align:top;}
+  .specs td:first-child{font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--taupe-dark);width:38%;padding-top:15px;}
+  .specs tr.price td:last-child{font-size:24px;font-weight:600;color:var(--brown-dark);}
+  .agree{display:flex;gap:14px;align-items:flex-start;margin:26px 0 6px;font-size:18px;line-height:1.5;cursor:pointer;}
+  .agree input{width:24px;height:24px;flex:0 0 24px;margin-top:3px;accent-color:var(--brown);}
+  .agree a{color:var(--brown-dark);}
+  label.field{display:block;margin-top:20px;}
+  label.field span{display:block;font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--taupe-dark);margin-bottom:7px;}
+  label.field input{width:100%;font-family:'Newsreader',serif;font-size:22px;font-style:italic;color:var(--ink);background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:14px;padding:13px 16px;}
+  .btn{display:block;width:100%;margin-top:24px;font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:14px;font-weight:600;padding:18px 30px;border-radius:999px;border:none;background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%);color:#fff;box-shadow:0 6px 18px rgba(33,26,20,.32);cursor:pointer;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+  .status{font-family:'Work Sans',sans-serif;font-size:14px;text-align:center;min-height:20px;margin:12px 0 0;color:var(--taupe-dark);}
+  .status.err{color:#9a3b2e;}
+  .approved{text-align:center;padding:10px 0 4px;}
+  .approved .badge{display:inline-block;font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;background:#1f7a3a;color:#fff;padding:7px 14px;border-radius:999px;margin-bottom:12px;}
+  .approved p{font-size:19px;line-height:1.5;margin:6px 0;}
+  .msg{text-align:center;font-size:20px;padding:40px 10px;}
+  .fine{font-family:'Work Sans',sans-serif;font-size:12.5px;color:var(--taupe-dark);line-height:1.55;text-align:center;margin:22px 0 0;}
+  .fine a{color:inherit;}
+  @media(max-width:600px){.card{padding:18px;border-radius:22px;}.specs{font-size:17px;}.specs td:first-child{width:42%;}}
+</style>
+</head>
+<body>
+<header><div class="nav"><a href="index.html"><img src="logo-brown.png" alt="Hidden Gem"></a><a class="tel" href="tel:+18324746344">(832) 474-6344</a></div></header>
+<main class="wrap">
+  <p class="eyebrow">Design Approval</p>
+  <h1>Your Ring, <span class="script">Approved</span></h1>
+  <p class="intro" id="intro">Please look over every detail of your ring below. Once you approve, we start making it just for you.</p>
+  <div class="card" id="card"><p class="msg" id="loading">Loading your design...</p></div>
+  <p class="fine">Questions before you approve? Call or text (832) 474-6344 or email <a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a>. <a href="policies.html">Our policies</a></p>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var API = params.get('api') || 'https://long-bar-d49d.gilbertrenteria.workers.dev';
+  var id = (params.get('id') || '').replace(/[^a-z0-9]/g, '');
+  var card = document.getElementById('card');
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function when(ms) { return new Date(ms).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }); }
+  if (!id) { card.innerHTML = '<p class="msg">This approval link is missing its order number. Please use the link Gilbert texted you.</p>'; return; }
+
+  function fetchOrder(tries) {
+    fetch(API + '/order/' + id).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) { card.innerHTML = '<p class="msg">We could not find this design. Please call (832) 474-6344.</p>'; return; }
+      render(j.order);
+    }).catch(function () {
+      if (tries < 4) setTimeout(function () { fetchOrder(tries + 1); }, 1500 * (tries + 1));
+      else card.innerHTML = '<p class="msg">We could not load your design. Check your connection and refresh, or call (832) 474-6344.</p>';
+    });
+  }
+
+  function specs(o) {
+    var rows = [['Ring', o.ring], ['Metal', o.metal], ['Stone', o.stone], ['Ring size', o.size], ['Engraving', o.engraving || 'None'],
+      ['Payment', o.payment], ['Delivery', o.delivery], ['Notes', o.notes]].filter(function (r) { return r[1]; });
+    return '<table class="specs">' + rows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') +
+      '<tr class="price"><td>Price</td><td>' + esc(o.price) + '</td></tr></table>';
+  }
+
+  function render(o) {
+    var img = o.hasImage ? '<img class="render" src="' + API + '/order/' + o.id + '/image" alt="Your ring design">' : '';
+    if (o.approved) { renderApproved(o, img); return; }
+    card.innerHTML = img + specs(o) +
+      '<label class="agree"><input type="checkbox" id="agree"><span>I approve this design, metal, stone, size and price. I understand this is a custom order made just for me and is <strong>final sale once approved</strong>, as described in the <a href="policies.html" target="_blank">Hidden Gem Policies</a>.</span></label>' +
+      '<label class="field"><span>Type your full name to sign</span><input id="sig" type="text" autocomplete="name" placeholder="' + esc(o.customerName) + '" maxlength="120"></label>' +
+      '<button class="btn" id="approveBtn" type="button" disabled>Approve My Design</button>' +
+      '<p class="status" id="status" role="status" aria-live="polite"></p>';
+    var agree = document.getElementById('agree'), sig = document.getElementById('sig'), btn = document.getElementById('approveBtn'), st = document.getElementById('status');
+    function check() { btn.disabled = !(agree.checked && sig.value.trim().length >= 3); }
+    agree.addEventListener('change', check); sig.addEventListener('input', check);
+    btn.addEventListener('click', function () {
+      btn.disabled = true; st.className = 'status'; st.textContent = 'Saving your approval...';
+      var delays = [0, 2000, 5000, 10000, 20000], attempt = 0;
+      (function go() {
+        fetch(API + '/order/' + o.id + '/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: sig.value.trim(), agree: agree.checked }), keepalive: true })
+          .then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+          .then(function (res) {
+            if (res.j.ok) { renderApproved(res.j.order, img); return; }
+            if (res.r.status === 400) { st.className = 'status err'; st.textContent = res.j.error; check(); return; }
+            again();
+          }).catch(again);
+        function again() {
+          attempt++;
+          if (attempt < delays.length) { st.textContent = 'Still saving... (try ' + (attempt + 1) + ')'; setTimeout(go, delays[attempt]); }
+          else { st.className = 'status err'; st.textContent = 'We could not save yet. Tap Approve again, or call (832) 474-6344.'; check(); }
+        }
+      })();
+    });
+  }
+
+  function renderApproved(o, img) {
+    document.getElementById('intro').textContent = 'Thank you! Your design is approved and we are starting on your ring.';
+    card.innerHTML = '<div class="approved"><span class="badge">Approved</span><p>Signed by <strong>' + esc(o.approval.name) + '</strong></p><p>' + esc(when(o.approval.at)) + '</p></div>' + img + specs(o) +
+      '<p class="fine">A copy of this approval was saved and sent to Hidden Gem' + ' and to your email if you gave us one. Your ring will be delivered within 6 weeks.</p>';
+  }
+
+  fetchOrder(0);
+})();
+</script>
+</body>
+</html>
