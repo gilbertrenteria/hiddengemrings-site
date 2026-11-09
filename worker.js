@@ -165,7 +165,7 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DEFAULT_CONFIG = {
   reps: [
     { id: 'gilbert', name: 'Gilbert', email: OWNER_ADDRESS, online: false },
-    { id: 'partner', name: 'Partner', email: PUBLIC_EMAIL, online: false },
+    { id: 'partner', name: 'Kim', email: PUBLIC_EMAIL, online: false },
   ],
   order: 'turns', // 'turns' or a rep id
   turn: 0,
