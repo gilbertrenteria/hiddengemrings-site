@@ -320,7 +320,7 @@
   .appointment-wrap{max-width:var(--maxw);margin:0 auto;padding:40px 32px;}
   .appointment{
     position:relative;
-    display:grid;grid-template-columns:1.25fr .75fr;
+    display:grid;grid-template-columns:1.1fr .9fr;
     border-radius:22px;overflow:hidden;
   }
   .appointment-inner{
@@ -341,19 +341,20 @@
   }
   .appointment .btn.ghost:hover{background:var(--taupe);color:var(--brown-dark);border-color:var(--taupe);}
   .appointment-accent{
-    background:var(--taupe);
+    background:linear-gradient(165deg, var(--taupe), var(--brown));
     display:flex;align-items:center;justify-content:center;
-    padding:30px;
+    padding:36px;
   }
   .appointment-accent img{
-    width:70%;max-width:190px;aspect-ratio:2/3;object-fit:cover;border-radius:50%;
-    box-shadow:0 18px 40px rgba(40,30,22,.3);
+    width:100%;max-width:320px;aspect-ratio:3/4;object-fit:cover;object-position:center 46%;
+    border-radius:16px;border:3px solid rgba(255,255,255,.18);
+    box-shadow:0 24px 50px rgba(40,30,22,.38);
   }
   @media(max-width:700px){
     .appointment{grid-template-columns:1fr;}
     .appointment-inner{padding:50px 28px;}
-    .appointment-accent{min-height:220px;padding:28px;}
-    .appointment-accent img{max-width:150px;}
+    .appointment-accent{min-height:300px;padding:30px;}
+    .appointment-accent img{max-width:280px;}
     .appointment-wrap{padding:0 16px;}
   }
 
