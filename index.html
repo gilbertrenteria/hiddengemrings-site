@@ -386,6 +386,15 @@
     grid-column:1 / -1;font-family:'Work Sans',sans-serif;font-size:12.5px;letter-spacing:.02em;
     color:var(--taupe-dark);margin:16px 0 0;
   }
+  .contact-accent{display:flex;justify-content:center;margin:48px 0 4px;}
+  .contact-accent img{
+    width:300px;height:440px;object-fit:cover;border-radius:50%;
+    box-shadow:0 24px 54px rgba(40,30,22,.28);
+  }
+  @media(max-width:700px){
+    .contact-accent{margin:36px 0 0;}
+    .contact-accent img{width:220px;height:330px;}
+  }
   .stage-options{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
   .stage-opt{
     font-family:'Work Sans',sans-serif;font-size:13.5px;font-weight:500;
@@ -574,20 +583,6 @@
   </div>
 </section>
 
-<section class="story" id="story">
-  <div class="wrap story-grid reveal">
-    <div class="story-media">
-      <img src="story-veil-original.jpg" alt="A hand wearing a round diamond engagement ring with a pave wedding band resting gently on a sheer bridal lace veil" loading="lazy">
-    </div>
-    <div class="story-copy">
-      <h2>How It Began</h2>
-      <p>We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
-      <p>We believe every good thing starts with a calling, and that search is what led us here, to build something placed on our hearts: a ring that starts with your story, not a catalog page.</p>
-      <p>No markup for a brand name, no pushy sales, no guessing what you're actually paying for. Just honest pricing and a design built around you, not a name on a box.</p>
-    </div>
-  </div>
-</section>
-
 <section class="gallery-teaser" id="collection-preview">
   <div class="gallery-head reveal">
     <p class="eyebrow gallery-eyebrow">The Collection</p>
@@ -622,6 +617,20 @@
   </div>
   <div class="gallery-cta reveal">
     <a class="btn" href="collection.html">View The Full Collection</a>
+  </div>
+</section>
+
+<section class="story" id="story">
+  <div class="wrap story-grid reveal">
+    <div class="story-media">
+      <img src="story-veil-original.jpg" alt="A hand wearing a round diamond engagement ring with a pave wedding band resting gently on a sheer bridal lace veil" loading="lazy">
+    </div>
+    <div class="story-copy">
+      <h2>How It Began</h2>
+      <p>We know what it's like to search for the right ring. The showrooms, the pressure to decide fast, paying extra for a name instead of the ring itself. Nothing about it felt personal, and none of it felt right.</p>
+      <p>We believe every good thing starts with a calling, and that search is what led us here, to build something placed on our hearts: a ring that starts with your story, not a catalog page.</p>
+      <p>No markup for a brand name, no pushy sales, no guessing what you're actually paying for. Just honest pricing and a design built around you, not a name on a box.</p>
+    </div>
   </div>
 </section>
 
@@ -675,6 +684,10 @@
       </div>
       <p class="form-trust">Takes about 30 seconds. We'll never share your information or spam you &mdash; just a real conversation about your ring.</p>
     </form>
+  </div>
+
+  <div class="contact-accent reveal">
+    <img src="contact-martini-olive.jpg" alt="A hand wearing a gold diamond engagement ring resting on a crystal coupe glass garnished with olives at a candlelit table" loading="lazy">
   </div>
 </div>
 
