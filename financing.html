@@ -206,6 +206,7 @@
   .po-send:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
   .po-status{font-family:'Work Sans',sans-serif;font-size:14px;color:var(--taupe-dark);min-height:20px;margin:12px 0 0;}
   .po-status.err{color:#9a3b2e;}
+  .po-consent{font-family:'Work Sans',sans-serif;font-size:11.5px;line-height:1.5;color:var(--taupe-dark);margin:10px 0 0;}
   .po-done{text-align:center;animation:poIn .5s ease both;}
   .po-lead{font-family:'Newsreader',serif;font-size:20px;color:var(--ink);margin:6px 0 20px;line-height:1.45;}
   .po-next{text-align:left;font-family:'Newsreader',serif;font-size:18px;color:var(--ink);line-height:1.5;padding-left:24px;margin:0 0 18px;}
@@ -337,6 +338,7 @@
       <input type="text" id="poHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="po-honey">
       <button class="btn po-send" id="poSend" type="button" disabled>Send</button>
       <p class="po-status" id="poStatus" role="status" aria-live="polite"></p>
+      <p class="po-consent">By sending, you agree that Hidden Gem may call or text you at this number about your ring. Message and data rates may apply. Reply STOP to opt out.</p>
     </div>
 
     <div class="po-done" id="poDone" hidden>
