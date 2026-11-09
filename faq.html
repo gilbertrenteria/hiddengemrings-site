@@ -2,7 +2,7 @@
 <title>FAQ — Hidden Gem Rings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@400;500;600&family=Beau+Rivage&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --cream:#F6F3EC;
@@ -22,15 +22,15 @@
     margin:0;
     background:var(--cream);
     color:var(--ink);
-    font-family:'Cormorant Garamond', serif;
-    font-size:19px;
+    font-family:'Work Sans', sans-serif;
+    font-size:17px;
     line-height:1.6;
   }
   img{max-width:100%;display:block;}
   a{color:inherit;text-decoration:none;}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
   .eyebrow{
-    font-family:'Jost',sans-serif;
+    font-family:'Work Sans',sans-serif;
     text-transform:uppercase;
     letter-spacing:.18em;
     font-size:13px;
@@ -38,7 +38,7 @@
   }
   .btn{
     display:inline-block;
-    font-family:'Jost',sans-serif;
+    font-family:'Work Sans',sans-serif;
     text-transform:uppercase;
     letter-spacing:.12em;
     font-size:13px;
@@ -51,7 +51,7 @@
     transition:background .25s ease, color .25s ease;
   }
   .btn:hover{background:transparent;color:var(--brown-dark);transform:translateY(-2px);box-shadow:0 8px 18px rgba(92,77,64,.16);}
-  .script{font-family:'Beau Rivage',cursive;font-weight:400;}
+  .script{font-family:'Newsreader',serif;font-style:italic;font-weight:500;}
   @media(prefers-reduced-motion: reduce){.btn:hover{transform:none;}}
 
   /* ===== HEADER ===== */
@@ -67,7 +67,7 @@
   }
   .logo-word{display:block;}
   .logo-word img{height:46px;width:auto;display:block;}
-  nav.primary{display:flex;align-items:center;gap:14px;font-family:'Jost',sans-serif;}
+  nav.primary{display:flex;align-items:center;gap:14px;font-family:'Work Sans',sans-serif;}
   nav.primary a{
     text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:500;
     color:var(--ink);white-space:nowrap;
@@ -96,7 +96,7 @@
   .page-head{text-align:center;padding:80px 20px 50px;}
   .page-head .eyebrow{color:var(--taupe-dark);margin:0 0 14px;}
   .page-head h1{
-    font-family:'Cormorant Garamond',serif;font-weight:500;
+    font-family:'Newsreader',serif;font-weight:500;
     font-size:clamp(38px,6vw,60px);color:var(--brown-dark);margin:0 0 18px;
   }
   .page-head h1 .script{font-size:1.2em;color:var(--gold);}
@@ -106,39 +106,48 @@
   .faq-groups{max-width:860px;margin:0 auto;padding:0 32px 90px;}
   .faq-group{margin-bottom:54px;}
   .faq-group-title{
-    font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.14em;
+    font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.14em;
     font-size:13px;font-weight:600;color:var(--gold);margin:0 0 16px;
   }
-  .faq-item{border-bottom:1px solid rgba(92,77,64,.18);}
+  .faq-item{
+    background:var(--white);border:1px solid rgba(92,77,64,.12);border-radius:16px;
+    margin-bottom:14px;box-shadow:0 3px 14px rgba(92,77,64,.07);
+    transition:box-shadow .25s ease, border-color .25s ease;
+    overflow:hidden;
+  }
+  .faq-item.open{border-color:rgba(185,156,95,.5);box-shadow:0 10px 26px rgba(92,77,64,.14);}
   .faq-q{
     display:flex;align-items:center;gap:16px;
-    padding:24px 4px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;
-    font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.2vw,21px);color:var(--brown-dark);font-weight:600;
+    padding:22px 24px;cursor:pointer;background:transparent;border:none;width:100%;text-align:left;
+    font-family:'Newsreader',serif;font-size:clamp(18px,2.2vw,21px);color:var(--brown-dark);font-weight:600;
   }
   .faq-q-icon{
     width:30px;height:30px;flex-shrink:0;padding:6px;box-sizing:border-box;
-    background:var(--white);border-radius:50%;border:1px solid rgba(92,77,64,.14);
-    object-fit:contain;box-shadow:0 2px 8px rgba(92,77,64,.08);
+    background:var(--cream-alt);border-radius:50%;border:1px solid rgba(92,77,64,.14);
+    object-fit:contain;
   }
   .faq-q-text{flex:1;}
   .faq-q .chev{
     flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--brown-dark);
     display:flex;align-items:center;justify-content:center;color:var(--white);font-size:16px;
-    transition:transform .25s ease;
+    transition:transform .25s ease, background .25s ease;
   }
-  .faq-item.open .faq-q .chev{transform:rotate(180deg);}
+  .faq-item.open .faq-q .chev{transform:rotate(180deg);background:var(--gold);}
   .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;}
   .faq-item.open .faq-a{max-height:400px;}
-  .faq-a-inner{padding:0 4px 24px;font-size:16.5px;color:var(--ink);line-height:1.7;}
+  .faq-a-inner{
+    margin:0 16px 18px;padding:18px 20px;font-size:16.5px;color:var(--ink);line-height:1.7;
+    background:var(--cream-alt);border-left:3px solid var(--gold);border-radius:10px;
+  }
 
   /* ===== CTA BAND ===== */
   .faq-cta{text-align:center;padding:60px 20px 100px;}
-  .faq-cta p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:21px;color:var(--brown);margin:0 0 24px;}
+  .faq-cta p{font-family:'Newsreader',serif;font-style:italic;font-size:21px;color:var(--brown-dark);margin:0 0 24px;}
 
   /* ===== FOOTER ===== */
   footer{background:var(--brown-dark);color:var(--cream);padding:60px 0 30px;}
   .footer-grid{display:grid;grid-template-columns:1.1fr 1.1fr;gap:40px;}
-  footer h4{font-family:'Jost',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:15px;margin:0 0 16px;color:var(--white);}
+  footer h4{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:15px;margin:0 0 16px;color:var(--white);}
   footer .footer-logo{margin:0 0 14px;}
   footer .footer-logo img{height:40px;width:auto;}
   footer p, footer a{font-size:16px;color:rgba(246,243,236,.85);}
