@@ -602,6 +602,27 @@
     .wave-word{opacity:1;transform:none;filter:none;transition:none;}
   }
 
+  /* ===== TYPING REVEAL =====
+     Dedicated to "Your Story, Set in Stone." -- this one keeps the original
+     typewriter request instead of the word-wave treatment, in its own
+     monospace voice, but fires from the exact same scroll observer/trigger
+     as every other heading so the timing stays coordinated with the rest
+     of the site. */
+  .typing-target.is-visible::after{
+    content:'';
+    display:inline-block;
+    width:2px;
+    height:.85em;
+    background:var(--gold);
+    margin-left:4px;
+    vertical-align:text-bottom;
+    animation:typing-blink .8s step-end infinite;
+  }
+  @keyframes typing-blink{50%{opacity:0;}}
+  @media(prefers-reduced-motion: reduce){
+    .typing-target.is-visible::after{animation:none;opacity:0;}
+  }
+
   /* ===== MODERN IMAGE SHAPES =====
      A coordinated pair of asymmetric, soft-cornered frames (percentage
      radius so it scales with each image's own size) used across the
@@ -701,7 +722,7 @@
 <section class="set-in-stone-banner" id="set-in-stone">
   <div class="wrap set-in-stone-grid reveal">
     <div class="set-in-stone-copy">
-      <h2 class="wave-target">Your Story, Set in Stone</h2>
+      <h2 class="typing-target">Your Story, Set in Stone.</h2>
       <p>Whether you're celebrating an engagement, anniversary, or milestone moment, we are here to work closely with you to create a piece that tells your story.</p>
       <p>Unlike traditional jewelry stores, we take a personal approach from selecting the perfect stone to refining every detail, we're here to guide you through each step with honesty, care and exceptional craftsmanship.</p>
       <div class="set-in-stone-photos">
@@ -1029,22 +1050,50 @@
     });
   })();
 
+  // Typing targets: clear their text up front (same moment the wave
+  // headings above get split into words) so there's no flash of the full
+  // line before the typewriter reveal starts.
+  var typingTargets = document.querySelectorAll('.typing-target');
+  typingTargets.forEach(function (heading) {
+    heading.setAttribute('data-full-text', heading.textContent);
+    heading.textContent = '';
+  });
+  function typeOutHeading(heading) {
+    var full = heading.getAttribute('data-full-text') || '';
+    var i = 0;
+    (function step() {
+      heading.textContent = full.slice(0, i);
+      i++;
+      if (i <= full.length) setTimeout(step, 42);
+    })();
+  }
+
   // scroll reveal: sections/elements fade and rise into place as the
   // visitor scrolls to them. Fires once per element, then stops watching it.
-  // Wave headings (above) share this exact same trigger/timing base so
-  // every section's motion stays coordinated with the rest of the site.
+  // Wave headings and the typing heading (above) share this exact same
+  // trigger/timing base so every section's motion stays coordinated with
+  // the rest of the site, even though the typing heading keeps its own
+  // typewriter look instead of the word-wave.
   (function () {
-    var items = document.querySelectorAll('.reveal, .reveal-stagger, .wave-target');
+    var items = document.querySelectorAll('.reveal, .reveal-stagger, .wave-target, .typing-target');
     if (!items.length) return;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion || !('IntersectionObserver' in window)) {
-      items.forEach(function (el) { el.classList.add('is-visible'); });
+      items.forEach(function (el) {
+        el.classList.add('is-visible');
+        if (el.classList.contains('typing-target')) {
+          el.textContent = el.getAttribute('data-full-text') || el.textContent;
+        }
+      });
       return;
     }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
+          if (entry.target.classList.contains('typing-target')) {
+            typeOutHeading(entry.target);
+          }
           io.unobserve(entry.target);
         }
       });
