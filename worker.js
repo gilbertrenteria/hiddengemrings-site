@@ -149,6 +149,45 @@ async function handleInstagramFeed(env, origin) {
   return json({ ok: true, images }, 200, origin);
 }
 
+// === Input checks (same rules as form-check.js on the site) ===
+function capName(v) {
+  return String(v || '').replace(/\s+/g, ' ').trim().replace(/(^|[\s\-'’])([a-zà-öø-ÿ])/g, (m, sep, ch) => sep + ch.toUpperCase());
+}
+function phoneOkServer(v) {
+  const d = digits(v).replace(/^1(?=\d{10}$)/, '');
+  if (!/^[2-9]\d{2}[2-9]\d{6}$/.test(d)) return false;
+  if (/^(\d)\1{9}$/.test(d) || /^\d11/.test(d)) return false;
+  if (d.slice(3, 6) === '555' && /^01/.test(d.slice(6))) return false;
+  if ('01234567890123456789'.includes(d) || '98765432109876543210'.includes(d)) return false;
+  return true;
+}
+const FAKE_LOCAL = /^(test|testing|tester|asdf|asdfgh|qwerty|fake|none|noemail|nomail|no|na|abc|abcd|abc123|123|1234|12345|example|sample|email|user|aaa+|xxx+|zzz+|nobody|noreply|no-reply|donotreply|a|b|x)$/i;
+const FAKE_DOMAIN = /^(example\.(com|org|net)|test\.com|testing\.com|fake\.com|email\.test|domain\.com|mailinator\.com|guerrillamail\.com|10minutemail\.com|tempmail\.com|temp-mail\.org|yopmail\.com|trashmail\.com|sharklasers\.com|getnada\.com|dispostable\.com|throwawaymail\.com|maildrop\.cc)$/i;
+// Returns { ok, email } or { ok:false, error }. Looks up the domain's mail
+// servers (MX) over Cloudflare DNS; if that lookup itself fails we allow it.
+async function checkEmailReal(raw, env) {
+  const v = String(raw || '').trim().toLowerCase();
+  const m = v.match(/^([a-z0-9._%+'-]+)@([a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,})$/);
+  if (!m || v.includes('..') || m[1].startsWith('.') || m[1].endsWith('.')) return { ok: false, error: 'Please enter a full email, like name@gmail.com.' };
+  if (FAKE_LOCAL.test(m[1]) || FAKE_DOMAIN.test(m[2])) return { ok: false, error: 'Please use your real email.' };
+  const domain = m[2];
+  const cached = await env.IG_KV.get(`mx:${domain}`);
+  if (cached === 'good') return { ok: true, email: v };
+  if (cached === 'bad') return { ok: false, error: 'That email domain can\'t receive email. Please check it.' };
+  try {
+    const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=MX`, { headers: { accept: 'application/dns-json' } });
+    const j = await r.json();
+    const hasMx = (j.Answer || []).some((a) => a.type === 15 && !/^0\s+\.?$/.test(String(a.data).trim()));
+    if (j.Status === 0 && hasMx) { await env.IG_KV.put(`mx:${domain}`, 'good', { expirationTtl: 86400 * 30 }); return { ok: true, email: v }; }
+    if (j.Status === 3 || (j.Status === 0 && !hasMx)) { await env.IG_KV.put(`mx:${domain}`, 'bad', { expirationTtl: 86400 }); return { ok: false, error: 'That email domain can\'t receive email. Please check it.' }; }
+  } catch (e) { /* DNS lookup failed: don't block the customer */ }
+  return { ok: true, email: v, unknown: true };
+}
+async function handleEmailCheck(url, env, origin) {
+  const r = await checkEmailReal(url.searchParams.get('email'), env);
+  return json(r.ok ? { ok: true, unknown: !!r.unknown } : { ok: false, error: r.error }, 200, origin);
+}
+
 // === Team status, lead routing and call booking ===
 // The team page (team.html, password = ADMIN_KEY) sets who is Online, who
 // gets leads first, the weekly call hours and the rep names and emails.
@@ -403,8 +442,9 @@ async function handleDesign(fields, env, origin) {
 // Optional: the customer leaves an email at the end, and gets a branded recap.
 async function handleLeadEmail(fields, env, origin) {
   const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
-  const email = String(fields.email || '').trim().slice(0, 160);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ ok: false, error: 'Please check your email address' }, 400, origin);
+  const chk = await checkEmailReal(String(fields.email || '').slice(0, 160), env);
+  if (!chk.ok) return json({ ok: false, error: chk.error }, 400, origin);
+  const email = chk.email;
   const key = `lead:${id}`;
   const lead = await env.IG_KV.get(key, 'json');
   if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
@@ -442,11 +482,10 @@ async function handleLeadEmail(fields, env, origin) {
 async function handleLead(fields, request, env, origin) {
   if (fields._honey) return json({ ok: true }, 200, origin);
   const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
-  const name = String(fields.name || '').trim().slice(0, 120);
-  const phone = String(fields.phone || '').trim().slice(0, 40);
-  if (!id || name.length < 2 || digits(phone).length < 10) {
-    return json({ ok: false, error: 'Name and a 10 digit phone are required' }, 400, origin);
-  }
+  const name = capName(fields.name).slice(0, 120);
+  const phone = fmtPhone(String(fields.phone || '').trim().slice(0, 40));
+  if (!id || name.length < 2 || /\d/.test(name)) return json({ ok: false, error: 'Please enter your first and last name.' }, 400, origin);
+  if (!phoneOkServer(phone)) return json({ ok: false, error: 'Please enter a real 10 digit mobile number.' }, 400, origin);
   const key = `lead:${id}`;
   const existing = await env.IG_KV.get(key, 'json');
   if (existing && existing.emailed) return json({ ok: true, duplicate: true, mode: existing.routeMode, slot: existing.slotDate ? { date: existing.slotDate, time: existing.slotTime, label: `${labelDate(existing.slotDate)} at ${labelTime(existing.slotTime)}` } : null }, 200, origin);
@@ -692,6 +731,7 @@ export default {
       if (path === '/team/public') return handlePublicStatus(env, origin);
       if (path === '/team/state') return handleTeamState(url, env, origin);
       if (path === '/book/slots') return handleSlots(env, origin);
+      if (path === '/email/check') return handleEmailCheck(url, env, origin);
       let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
       if (m) return handleOrderImage(m[1], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})$/);
@@ -733,10 +773,9 @@ export default {
     const formType = fields.Form === 'Newsletter Signup' ? 'newsletter' : 'consultation';
 
     if (formType === 'newsletter') {
-      const email = (fields.Email || '').trim();
-      if (!email || !email.includes('@')) {
-        return json({ ok: false, error: 'A valid email is required' }, 400, origin);
-      }
+      const chk = await checkEmailReal(fields.Email, env);
+      if (!chk.ok) return json({ ok: false, error: chk.error }, 400, origin);
+      const email = chk.email;
       const html = `<h2>New newsletter signup</h2><p><strong>Email:</strong> ${escapeHtml(email)}</p>`;
       const sent = await sendEmail(env, {
         subject: 'New newsletter signup — Hidden Gem website',
