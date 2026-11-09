@@ -161,13 +161,12 @@ function leadLabel(l) {
 }
 
 function contactLine(c) {
-  if (c === 'Call me') return 'Wants a CALL. Text first, then call within 5 minutes.';
-  if (c === 'Text me') return 'Wants TEXT only. Text within 5 minutes with 2 to 3 ring photos.';
-  if (c === 'Design it online') return 'Chose DESIGN IT ONLINE. Their design picks arrive in a second email. Text a concept and price within 24 hours.';
+  if (c === 'Call me') return 'Wants a CALL. Text first, then call within 5 minutes. Their ring style picks (if any) arrive in a RING STYLE email.';
+  if (c === 'Text me') return 'Wants TEXT only. Text within 5 minutes with 2 to 3 matching designs from the Canva library.';
   return 'Reach out within 5 minutes.';
 }
 function contactShort(c) {
-  return c === 'Call me' ? 'CALL' : c === 'Text me' ? 'TEXT' : c === 'Design it online' ? 'ONLINE' : 'ANY';
+  return c === 'Call me' ? 'CALL' : c === 'Text me' ? 'TEXT' : 'ANY';
 }
 
 const DESIGN_FIELDS = [
@@ -186,15 +185,15 @@ async function handleDesign(fields, env, origin) {
   await env.IG_KV.put(key, JSON.stringify(lead));
   const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
   const rows = DESIGN_FIELDS.map(([k, label]) => [label, lead.design[k] || 'not answered'])
-    .concat([['Budget', lead.budget], ['Pay', lead.pay], ['Proposing', lead.timeline], ['Phone', fmtPhone(lead.phone)]]);
+    .concat([['Budget', lead.budget], ['Pay', lead.pay], ['Proposing', lead.timeline], ['Reach by', lead.contact || 'n/a'], ['Phone', fmtPhone(lead.phone)]]);
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px">` +
-    `<div style="display:inline-block;background:#B99C5F;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">ONLINE DESIGN</div>` +
-    `<h2 style="margin:14px 0 6px">${escapeHtml(lead.name)} designed a ring online</h2>` +
-    `<p style="margin:0 0 14px;color:#333"><strong>Text a concept and exact price within 24 hours.</strong></p>` +
+    `<div style="display:inline-block;background:#B99C5F;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">RING STYLE</div>` +
+    `<h2 style="margin:14px 0 6px">What ${escapeHtml(lead.name)} is looking for</h2>` +
+    `<p style="margin:0 0 14px;color:#333"><strong>Pick 2 to 3 matching designs from the Canva library and send them by hand (${escapeHtml(contactShort(lead.contact))}).</strong></p>` +
     `<table cellpadding="7" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') +
     `</table><p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Text ${escapeHtml(lead.name.split(' ')[0])}</a></p></div>`;
-  const sent = await sendEmail(env, { to: [OWNER_ADDRESS, TO_ADDRESS], subject: `ONLINE DESIGN: ${lead.name} (${lead.design.style || 'custom'}, ${lead.budget || 'budget not set'})`, html });
+  const sent = await sendEmail(env, { to: [OWNER_ADDRESS, TO_ADDRESS], subject: `RING STYLE: ${lead.name} (${lead.design.style || 'custom'}, ${lead.design.shape || 'any shape'}, ${lead.budget || 'budget not set'})`, html });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.designEmailed = true;
   await env.IG_KV.put(key, JSON.stringify(lead));
@@ -371,7 +370,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
     const c = await sendEmail(env, {
       to: [o.customerEmail],
       subject: 'Your Hidden Gem design approval',
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Call or text (832) 474-6344 or email hello@hiddengemrings.com.</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Reply to this email or write to hello@hiddengemrings.com.</p></div>`,
       replyTo: TO_ADDRESS,
     });
     if (c.ok) o.approval.customerEmailed = true;

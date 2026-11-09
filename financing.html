@@ -213,6 +213,8 @@
   .po-pics button.pic img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;display:block;background:#fff;}
   .po-pics button.pic.selected span{color:#fff;}
   .po-design-send{text-align:center;}
+  .po-kicker{font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 8px;}
+  .po-skip{display:block;margin:18px auto 0;background:none;border:none;font-family:'Work Sans',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe-dark);text-decoration:underline;cursor:pointer;}
   @media(min-width:601px){.po-chips.po-pics{grid-template-columns:1fr 1fr 1fr 1fr;}}
   @media(max-width:600px){.po-chips.po-pics{grid-template-columns:1fr 1fr;gap:10px;}}
   .po-done{text-align:center;animation:poIn .5s ease both;}
@@ -247,9 +249,6 @@
     <div class="header-icons">
       <a href="mailto:hello@hiddengemrings.com" aria-label="Email" title="Email us">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
-      </a>
-      <a href="https://wa.me/18324746344" aria-label="WhatsApp" title="Message us on WhatsApp">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.52 0-10 4.48-10 10 0 1.77.46 3.45 1.26 4.9L2 22l5.25-1.38A9.96 9.96 0 0 0 12.04 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.8 14.2c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.1-1.8-.12-.42-.13-.96-.3-1.64-.6-2.9-1.25-4.78-4.15-4.93-4.35-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.4.27-.3.58-.37.78-.37h.56c.18 0 .42-.07.65.5.24.58.8 2 .87 2.15.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.3.38-.44.5-.14.14-.3.3-.13.6.17.3.77 1.27 1.65 2.05 1.13 1.01 2.08 1.33 2.38 1.48.3.15.48.13.65-.08.18-.2.76-.88.97-1.19.2-.3.4-.25.68-.15.28.1 1.78.84 2.08 1 .3.14.5.22.58.33.08.13.08.73-.16 1.4z"/></svg>
       </a>
     </div>
     <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
@@ -335,11 +334,10 @@
 
     <div class="po-step" data-key="contactPref">
       <img class="po-icon" src="icon-conversation.png" alt="">
-      <h2>How would you like to continue?</h2>
+      <h2>How would you like us to reach you?</h2>
       <div class="po-chips po-chips-1">
         <button type="button" data-v="Call me">Call me</button>
         <button type="button" data-v="Text me">Text me</button>
-        <button type="button" data-v="Design it online">Design my ring online</button>
       </div>
     </div>
 
@@ -361,8 +359,9 @@
 
     <div class="po-design" id="poDesign" hidden>
     <div class="po-step po-dstep" data-dkey="style">
+      <p class="po-kicker">Almost done! Want us to send rings that match your style?</p>
       <h2>Pick a ring style you love</h2>
-      <p class="po-sub">Tap the closest one. We'll customize it for you.</p>
+      <p class="po-sub">Tap the closest one. A few quick taps and we'll send you matching designs.</p>
       <div class="po-chips po-pics">
         <button type="button" class="pic" data-v="The Aurora"><img src="design-aurora-yellow.jpg" alt="" loading="lazy"><span>The Aurora</span></button>
         <button type="button" class="pic" data-v="The Selah"><img src="design-selah-yellow.jpg" alt="" loading="lazy"><span>The Selah</span></button>
@@ -455,6 +454,7 @@
         <button type="button" data-v="Maybe">Maybe</button>
       </div>
     </div>
+    <button type="button" class="po-skip" id="poSkip">Skip for now</button>
     <div class="po-design-send" id="poDesignSend" hidden>
       <p class="po-status" id="poDStatus" role="status" aria-live="polite">Sending your design...</p>
       <button class="btn po-send" id="poDSendBtn" type="button">Send my design</button>
@@ -470,7 +470,7 @@
         <li><strong>Say yes</strong> and we send a secure link to check your payment options with our lending partner.</li>
         <li><strong>Approve your final design</strong> and we start making your ring. Delivered within 6 weeks.</li>
       </ol>
-      <p class="po-fine">Questions anytime? Just reply to our text or call <a href="tel:+18324746344">(832) 474-6344</a>. Financing is subject to our lending partners' approval. <a href="policies.html">Our policies</a></p>
+      <p class="po-fine">Questions anytime? Just reply to our text or email <a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a>. Financing is subject to our lending partners' approval. <a href="policies.html">Our policies</a></p>
       <button type="button" class="po-restart" id="poRestart2">Start over</button>
     </div>
 
@@ -479,14 +479,14 @@
       <h2>You're all set<span id="poFirst"></span>!</h2>
       <p class="po-lead" id="poDoneLead">Expect to hear from us at <strong id="poPhoneShow"></strong> shortly, usually within 15 minutes during business hours.</p>
       <ol class="po-next">
-        <li><strong>We reach out</strong> with ring photos in your budget and talk through your style.</li>
+        <li><strong>We reach out</strong> with ring designs that match your style and budget.</li>
         <li><strong>You get a secure link</strong> to check your payment options with our lending partner, right on your phone.</li>
         <li><strong>Once you're approved,</strong> we finalize your design and start making your ring.</li>
       </ol>
       <p class="po-fine">Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="policies.html">Our policies</a></p>
       <div class="po-done-actions">
         <a class="btn" href="collection.html">Browse Rings</a>
-        <a class="po-tel" href="tel:+18324746344">Call (832) 474-6344</a>
+        <a class="po-tel" href="mailto:hello@hiddengemrings.com">Email us</a>
       </div>
       <button type="button" class="po-restart" id="poRestart">Start over</button>
     </div>
@@ -498,8 +498,7 @@
   <div class="wrap footer-grid">
     <div>
       <div class="footer-logo"><img src="logo-white.png" alt="Hidden Gem"></div>
-      <p><a href="tel:+18324746344">(832) 474-6344</a></p>
-      <p><a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></p>
+            <p><a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></p>
     </div>
     <div>
       <h4>Hours</h4>
@@ -652,7 +651,7 @@
             statusEl.textContent = 'Still sending... (try ' + (attempt + 1) + ')';
             setTimeout(tryOnce, delays[attempt]);
           } else {
-            fail('We could not send yet. Tap Send to try again, or call (832) 474-6344.');
+            fail('We could not send yet. Tap Send to try again, or email hello@hiddengemrings.com.');
           }
         }
       })();
@@ -663,7 +662,7 @@
     }
     function done() {
       sending = false; state.sent = true; state.pending = false; save();
-      if (state.a.contactPref === 'Design it online') startDesign(); else renderDone();
+      startDesign();
     }
 
     // ----- online design flow (after the lead is saved) -----
@@ -681,10 +680,10 @@
     function dshow(i) {
       if (i < 0) i = 0; if (i > dsteps.length - 1) i = dsteps.length - 1;
       state.dstep = i; save();
-      dSendWrap.hidden = true;
+      dSendWrap.hidden = true; document.getElementById('poSkip').hidden = false;
       dsteps.forEach(function (s) { s.classList.remove('active'); });
       dsteps[i].classList.add('active');
-      countEl.textContent = 'Design ' + (i + 1) + ' of ' + dsteps.length;
+      countEl.textContent = 'Style ' + (i + 1) + ' of ' + dsteps.length;
       barEl.style.width = Math.round(((i + 1) / dsteps.length) * 100) + '%';
       backBtn.classList.toggle('show', i > 0);
       var key = dsteps[i].dataset.dkey;
@@ -705,7 +704,7 @@
     });
     function showSendArea() {
       dsteps.forEach(function (s) { s.classList.remove('active'); });
-      dSendWrap.hidden = false; backBtn.classList.add('show');
+      dSendWrap.hidden = false; backBtn.classList.add('show'); document.getElementById('poSkip').hidden = true;
       countEl.textContent = 'Sending'; barEl.style.width = '100%';
     }
     document.getElementById('poDSendBtn').addEventListener('click', function () { submitDesign(); });
@@ -718,15 +717,21 @@
       (function tryOnce() {
         fetch(API + '/lead/design', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true })
           .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
-          .then(function (res) { if (res.r.ok && res.j.ok) { dSending = false; state.dSent = true; state.dPending = false; save(); renderDesignDone(); } else retry(); })
+          .then(function (res) { if (res.r.ok && res.j.ok) { dSending = false; state.dSent = true; state.dPending = false; save(); finishAll(); } else retry(); })
           .catch(retry);
         function retry() {
           attempt++;
           if (attempt < delays.length) { dStatus.textContent = 'Still sending... (try ' + (attempt + 1) + ')'; setTimeout(tryOnce, delays[attempt]); }
-          else { dSending = false; dStatus.className = 'po-status err'; dStatus.textContent = 'We could not send yet. Tap Send my design, or call (832) 474-6344.'; }
+          else { dSending = false; dStatus.className = 'po-status err'; dStatus.textContent = 'We could not send yet. Tap Send my design, or email hello@hiddengemrings.com.'; }
         }
       })();
     }
+    function finishAll() {
+      designEl.hidden = true; mode = 'lead';
+      document.querySelector('.po-top').style.display = '';
+      renderDone();
+    }
+    document.getElementById('poSkip').addEventListener('click', function () { state.dSkipped = true; save(); finishAll(); });
     function renderDesignDone() {
       designEl.hidden = true;
       document.querySelector('.po-top').style.display = 'none';
@@ -743,7 +748,7 @@
       var first = (state.a.name || '').trim().split(/\s+/)[0];
       document.getElementById('poFirst').textContent = first ? ', ' + first : '';
       document.getElementById('poPhoneShow').textContent = state.a.phone || 'your phone';
-      var how = state.a.contactPref === 'Text me' ? 'Expect a text from us at ' : state.a.contactPref === 'Call me' ? 'Expect a quick text, then a call from us at ' : 'Expect to hear from us at ';
+      var how = state.a.contactPref === 'Text me' ? 'Expect a text from us at ' : 'Expect a quick text, then a call from us at ';
       document.getElementById('poDoneLead').firstChild.textContent = how;
       doneEl.hidden = false;
     }
@@ -763,8 +768,7 @@
     nameEl.value = state.a.name || '';
     phoneEl.value = state.a.phone || '';
     if (state.sent) {
-      if (state.a.contactPref === 'Design it online') { if (state.dSent) renderDesignDone(); else startDesign(); }
-      else renderDone();
+      if (state.dSent || state.dSkipped) renderDone(); else startDesign();
     }
     else {
       show(state.step || 0);
