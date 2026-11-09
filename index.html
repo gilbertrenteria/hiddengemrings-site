@@ -287,11 +287,11 @@
   }
   .gallery-card{display:block;text-align:center;}
   .gallery-card-media{
-    border-radius:8px;overflow:hidden;background:var(--white);
+    border-radius:50%;overflow:hidden;background:var(--white);
     border:1px solid rgba(92,77,64,.14);box-shadow:0 8px 20px rgba(92,77,64,.1);
     transition:transform .3s ease, box-shadow .3s ease;
   }
-  .gallery-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;}
+  .gallery-card-media img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
   .gallery-card:hover .gallery-card-media{transform:translateY(-5px);box-shadow:0 14px 28px rgba(92,77,64,.18);}
   .gallery-card-name{
     display:block;margin-top:12px;font-family:'Work Sans',sans-serif;text-transform:uppercase;
@@ -328,15 +328,17 @@
   .appointment-accent{
     background:var(--taupe);
     display:flex;align-items:center;justify-content:center;
+    padding:30px;
   }
-  .appointment-accent svg{width:46%;height:auto;max-width:150px;}
-  .appointment-accent svg circle,
-  .appointment-accent svg path{fill:none;stroke:var(--brown-dark);stroke-width:2;opacity:.45;}
+  .appointment-accent img{
+    width:70%;max-width:190px;aspect-ratio:2/3;object-fit:cover;border-radius:50%;
+    box-shadow:0 18px 40px rgba(40,30,22,.3);
+  }
   @media(max-width:700px){
     .appointment{grid-template-columns:1fr;}
     .appointment-inner{padding:50px 28px;}
-    .appointment-accent{min-height:140px;padding:20px;}
-    .appointment-accent svg{max-width:110px;}
+    .appointment-accent{min-height:220px;padding:28px;}
+    .appointment-accent img{max-width:150px;}
     .appointment-wrap{padding:0 16px;}
   }
 
@@ -385,15 +387,6 @@
   .form-trust{
     grid-column:1 / -1;font-family:'Work Sans',sans-serif;font-size:12.5px;letter-spacing:.02em;
     color:var(--taupe-dark);margin:16px 0 0;
-  }
-  .contact-accent{display:flex;justify-content:center;margin:48px 0 4px;}
-  .contact-accent img{
-    width:300px;height:440px;object-fit:cover;border-radius:50%;
-    box-shadow:0 24px 54px rgba(40,30,22,.28);
-  }
-  @media(max-width:700px){
-    .contact-accent{margin:36px 0 0;}
-    .contact-accent img{width:220px;height:330px;}
   }
   .stage-options{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
   .stage-opt{
@@ -641,11 +634,8 @@
       <h2>Start Your Ring <span class="script">Journey</span></h2>
       <p>Leave your name, email, and phone number below &mdash; we'll call you to talk through your style, budget, and vision.</p>
     </div>
-    <div class="appointment-accent" aria-hidden="true">
-      <svg viewBox="0 0 200 240">
-        <circle cx="100" cy="150" r="55"></circle>
-        <path d="M100 55 L130 95 L100 135 L70 95 Z"></path>
-      </svg>
+    <div class="appointment-accent">
+      <img src="contact-martini-olive.jpg" alt="A hand wearing a gold diamond engagement ring resting on a crystal coupe glass garnished with olives at a candlelit table" loading="lazy">
     </div>
   </section>
 
@@ -686,9 +676,6 @@
     </form>
   </div>
 
-  <div class="contact-accent reveal">
-    <img src="contact-martini-olive.jpg" alt="A hand wearing a gold diamond engagement ring resting on a crystal coupe glass garnished with olives at a candlelit table" loading="lazy">
-  </div>
 </div>
 
 <section class="pathways" id="operate">
