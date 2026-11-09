@@ -135,9 +135,9 @@
   .style-card-media{
     position:relative;border-radius:8px;overflow:hidden;background:var(--white);
     border:1px solid rgba(92,77,64,.14);box-shadow:0 8px 20px rgba(92,77,64,.1);
-    margin-bottom:14px;
+    margin-bottom:14px;width:100%;aspect-ratio:.86;background-repeat:no-repeat;transition:opacity .2s ease;
   }
-  .style-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;transition:opacity .2s ease;}
+  .style-card-media img{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;padding:0;margin:-1px;}
   .metal-swatches{display:flex;justify-content:center;gap:10px;margin-bottom:14px;}
   .metal-swatches button{
     width:22px;height:22px;border-radius:50%;cursor:pointer;
@@ -312,7 +312,7 @@
 <div class="style-grid">
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-white.webp" alt="Cushion-cut diamond in a bezel setting" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-white.webp');background-size:200.45% 115.0%;background-position:49.06% 40.13%"><img src="https://ring.gilbertrenteria.dev/img/ring/cushion-bezel-white.webp" alt="Cushion-cut diamond in a bezel setting" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -325,7 +325,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-white.webp" alt="Elongated cushion-cut diamond with side stones" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/elcushion-side-white.webp');background-size:200.45% 115.0%;background-position:50.31% 59.87%"><img src="https://ring.gilbertrenteria.dev/img/ring/elcushion-side-white.webp" alt="Elongated cushion-cut diamond with side stones" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -338,7 +338,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-white.webp" alt="Elongated cushion-cut diamond with five stones" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/elcushion-five-white.webp');background-size:200.45% 115.0%;background-position:47.2% 38.33%"><img src="https://ring.gilbertrenteria.dev/img/ring/elcushion-five-white.webp" alt="Elongated cushion-cut diamond with five stones" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -351,7 +351,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/emerald-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/emerald-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/emerald-three-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/emerald-three-white.webp" alt="Emerald-cut diamond three stone ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/emerald-three-white.webp');background-size:200.45% 115.0%;background-position:48.44% 65.26%"><img src="https://ring.gilbertrenteria.dev/img/ring/emerald-three-white.webp" alt="Emerald-cut diamond three stone ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -364,7 +364,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-white.webp" alt="Marquise-cut diamond solitaire ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-white.webp');background-size:200.45% 115.0%;background-position:49.69% 25.76%"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-solitaire-white.webp" alt="Marquise-cut diamond solitaire ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -377,7 +377,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-white.webp" alt="Marquise-cut diamond with hidden halo" loading="lazy" style="object-position:20% center"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-white.webp');background-size:200.45% 115.0%;background-position:22.56% 6.01%"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-hidden-white.webp" alt="Marquise-cut diamond with hidden halo" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -390,7 +390,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/marquise-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/marquise-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/marquise-three-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-three-white.webp" alt="Marquise-cut diamond three stone ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/marquise-three-white.webp');background-size:200.45% 115.0%;background-position:50.0% 40.13%"><img src="https://ring.gilbertrenteria.dev/img/ring/marquise-three-white.webp" alt="Marquise-cut diamond three stone ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -403,7 +403,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/oval-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/oval-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/oval-three-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/oval-three-white.webp" alt="Oval-cut diamond three stone ring" loading="lazy" style="object-position:35% center"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/oval-three-white.webp');background-size:200.45% 115.0%;background-position:18.19% 45.5%"><img src="https://ring.gilbertrenteria.dev/img/ring/oval-three-white.webp" alt="Oval-cut diamond three stone ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -416,7 +416,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-white.webp" alt="Pear-shaped diamond solitaire ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-white.webp');background-size:200.45% 115.0%;background-position:49.06% 43.72%"><img src="https://ring.gilbertrenteria.dev/img/ring/pear-solitaire-white.webp" alt="Pear-shaped diamond solitaire ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -429,7 +429,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/pear-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/pear-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/pear-three-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/pear-three-white.webp" alt="Pear-shaped diamond three stone ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/pear-three-white.webp');background-size:200.45% 115.0%;background-position:49.38% 25.76%"><img src="https://ring.gilbertrenteria.dev/img/ring/pear-three-white.webp" alt="Pear-shaped diamond three stone ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -442,7 +442,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-white.webp" alt="Round brilliant diamond solitaire ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/round-solitaire-white.webp');background-size:200.45% 115.0%;background-position:48.13% 47.31%"><img src="https://ring.gilbertrenteria.dev/img/ring/round-solitaire-white.webp" alt="Round brilliant diamond solitaire ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -455,7 +455,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/round-side-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/round-side-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/round-side-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/round-side-white.webp" alt="Round brilliant diamond with side stones" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/round-side-white.webp');background-size:200.45% 115.0%;background-position:49.06% 61.67%"><img src="https://ring.gilbertrenteria.dev/img/ring/round-side-white.webp" alt="Round brilliant diamond with side stones" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -468,7 +468,7 @@
   </div>
 
   <div class="style-card" data-white="https://ring.gilbertrenteria.dev/img/ring/round-three-white.webp" data-yellow="https://ring.gilbertrenteria.dev/img/ring/round-three-yellow.webp" data-rose="https://ring.gilbertrenteria.dev/img/ring/round-three-rose.webp">
-    <div class="style-card-media"><img src="https://ring.gilbertrenteria.dev/img/ring/round-three-white.webp" alt="Round brilliant diamond three stone ring" loading="lazy"></div>
+    <div class="style-card-media" style="background-image:url('https://ring.gilbertrenteria.dev/img/ring/round-three-white.webp');background-size:200.45% 115.0%;background-position:33.79% 72.44%"><img src="https://ring.gilbertrenteria.dev/img/ring/round-three-white.webp" alt="Round brilliant diamond three stone ring" loading="lazy"></div>
     <div class="metal-swatches">
       <button class="active" data-metal="white" style="background:#E7E4DD" aria-label="White Gold" title="White Gold"></button>
       <button data-metal="yellow" style="background:#D8B13A" aria-label="Yellow Gold" title="Yellow Gold"></button>
@@ -524,6 +524,7 @@
   menuToggle.addEventListener('click', () => primaryNav.classList.toggle('open'));
 
   document.querySelectorAll('.style-card, .design-card').forEach(card => {
+    const styleMedia = card.querySelector('.style-card-media');
     const img = card.querySelector('.style-card-media img, .design-card-media img');
     const label = card.querySelector('.metal-label');
     const names = {white:'White Gold', yellow:'Yellow Gold', rose:'Rose Gold'};
@@ -532,8 +533,17 @@
         const metal = sw.dataset.metal;
         const url = card.dataset[metal];
         if (!url) return;
-        img.style.opacity = '0';
-        setTimeout(() => { img.src = url; img.style.opacity = '1'; }, 120);
+        if (styleMedia) {
+          styleMedia.style.opacity = '0';
+          setTimeout(() => {
+            styleMedia.style.backgroundImage = `url('${url}')`;
+            img.src = url;
+            styleMedia.style.opacity = '1';
+          }, 120);
+        } else {
+          img.style.opacity = '0';
+          setTimeout(() => { img.src = url; img.style.opacity = '1'; }, 120);
+        }
         if (label) label.textContent = names[metal];
         card.querySelectorAll('.metal-swatches button').forEach(b => b.classList.remove('active'));
         sw.classList.add('active');
