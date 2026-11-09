@@ -1,0 +1,16 @@
+# Cloudflare Worker for the Hidden Gem forms, team page and Instagram feed.
+# Deployed automatically by .github/workflows/deploy-worker.yml whenever
+# worker.js or this file changes on main. Secrets (RESEND_API_KEY, ADMIN_KEY,
+# Instagram keys) stay in the Cloudflare dashboard and are not touched.
+name = "long-bar-d49d"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+workers_dev = true
+keep_vars = true
+
+[[kv_namespaces]]
+binding = "IG_KV"
+id = "1da47ceb018747cfacd6a48ff64eaea1" # hidden-gem-instagram
+
+[triggers]
+crons = ["0 6 * * *"]
