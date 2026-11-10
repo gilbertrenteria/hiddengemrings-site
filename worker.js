@@ -556,6 +556,7 @@ async function handleLead(fields, request, env, origin) {
     ['Credit (self reported)', lead.credit || 'not answered'],
     ['Sent to', `${(lead.routedNames || []).join(', ')} (${lead.routeReason})`],
     ['Received', chicagoTime(lead.receivedAt)],
+    ['Location', (() => { const c = request.cf || {}; const t = [c.city, c.regionCode || c.region].filter(Boolean).join(', '); return t ? t + (c.postalCode ? ' ' + c.postalCode : '') : 'Unknown'; })()],
   ];
   const color = { 'READY': '#1f7a3a', 'WARM': '#b07a12', 'PLANNING': '#5b6b8a', 'JUST LOOKING': '#777' }[lead.label] || '#54453A';
   const html =
