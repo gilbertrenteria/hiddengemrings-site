@@ -43,6 +43,13 @@
   .slot .hint{font-size:.8rem;color:#8a6d34;margin-top:4px;min-height:18px}
   .lovepill{display:inline-block;background:var(--deep);color:var(--gold);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px;margin-left:6px}
   .outs{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;margin:8px 0 4px}
+  .tile{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:0;overflow:hidden;cursor:pointer;text-align:center;font:600 .86rem 'Work Sans',sans-serif;color:var(--deep);transition:border-color .2s,box-shadow .2s}
+  .tile img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;background:#1a1410}
+  .tile span{display:block;padding:7px 4px 8px}
+  .tile[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,97,.35)}
+  .tile .lv{color:#b0413e}
+  .qn{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--deep);color:#f4ede2;font-size:.78rem;margin-right:8px}
   .outs .opt{justify-content:flex-start;text-align:left;min-height:56px}
   .live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--ok)}
   .live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(31,122,58,.15)}
@@ -129,12 +136,16 @@
     <h2>Build <span class="script">Her Ring</span></h2>
     <div class="tip" id="loveTip">Rings they loved on the intro page show up here live.</div>
     <div id="createScript"></div>
-    <div class="q">Ring style</div><div class="opts" data-k="style"></div>
-    <div class="q">Stone shape</div><div class="opts" data-k="shape"></div>
-    <div class="q">Stone size</div><div class="opts" data-k="carat"></div>
-    <div class="q">Stone type</div><div class="opts" data-k="stoneType"></div>
-    <div class="q">Metal</div><div class="opts" data-k="metal"></div>
-    <div class="q">Band</div><div class="opts" data-k="band"></div>
+    <div class="q"><span class="qn">1</span>What shape is the center stone?<small>Ask: "Picture her ring. Is the stone round, oval, or more like a teardrop?"</small></div><div class="tiles" id="shapeTiles"></div>
+    <div class="q"><span class="qn">2</span>What setting style?<small>Ask: "Just the one stone, or a little extra sparkle around it or down the band?"</small></div><div class="tiles" id="settingTiles"></div>
+    <div class="q"><span class="qn">3</span>How big is the stone?<small>Ask: "Delicate, noticeable, or show stopper?"</small></div><div class="opts" data-k="carat"></div>
+    <div class="q"><span class="qn">4</span>Stone type</div><div class="opts" data-k="stoneType"></div>
+    <div class="q"><span class="qn">5</span>Metal color<small>Ask: "Does she wear more gold or more silver jewelry?"</small></div><div class="opts" data-k="metal"></div>
+    <div class="q"><span class="qn">6</span>Band look</div><div class="opts" data-k="bandLook"></div>
+    <div class="q"><span class="qn">7</span>Band width<small>Ask: "Are her hands more petite or does she like bold pieces?"</small></div><div class="opts" data-k="bandWidth"></div>
+    <div class="q"><span class="qn">8</span>How high does the stone sit?<small>Ask: "Does she work with her hands a lot? Low sits flush and won't snag. High catches more light."</small></div><div class="opts" data-k="profile"></div>
+    <div class="q">Signature design they loved (optional)</div><div class="opts" data-k="style"></div>
+    <div class="tip"><b>Only at Hidden Gem:</b> every ring can carry a hidden engraving inside the band. Ask what they want hidden in there.</div>
     <label class="f"><span>Engraving (optional)</span><input type="text" data-k="engraving" maxlength="60"></label>
     <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Her size</button></div>
   </section>
@@ -203,6 +214,7 @@
   </div>
 </main>
 
+<script src="ring-library.js"></script>
 <script src="hg-links.js"></script>
 <script>
 (function () {
@@ -221,7 +233,11 @@
     wears: ['Yellow gold', 'White gold or silver', 'Rose gold', 'Mixes metals', 'Barely wears jewelry'],
     vibe: ['Classic', 'Modern', 'Vintage', 'Minimal', 'Glam'],
     style: ['The Penelope', 'The Selah', 'The Nova', 'The Allison', 'The Souline', 'The Aurora', 'The Setlla', 'Something custom'],
-    shape: ['Oval', 'Round', 'Pear', 'Emerald', 'Cushion', 'Radiant', 'Princess', 'Marquise', 'Not sure yet'],
+    shape: HGLIB.SHAPES.map(function (x) { return x.label; }),
+    setting: HGLIB.STYLES.map(function (x) { return x.label; }),
+    bandLook: ['Plain polished', 'Pavé diamonds', 'Split shank', 'Not sure yet'],
+    bandWidth: ['Thin and delicate', 'Classic', 'Bold', 'Not sure yet'],
+    profile: ['Sits low', 'Sits high', 'Not sure yet'],
     carat: ['Under 1 carat', '1 to 1.5 carats', '1.5 to 2 carats', '2 to 3 carats', '3 carats+', 'Not sure yet'],
     stoneType: ['Lab grown diamond', 'Natural diamond', 'Moissanite', 'Not sure yet'],
     metal: ['14k Yellow Gold', '14k White Gold', '14k Rose Gold', '18k Yellow Gold', '18k White Gold', 'Platinum'],
@@ -252,7 +268,7 @@
              ['Set the frame', "Perfect. Here's how this works: I'll ask you a few questions, we'll build her ring together, and before we hang up I'll text you 6 options made for what you told me. No pressure, and nothing gets made unless you approve it. Sound good?"],
              ['Send the intro', "I just texted you a link. Put me on speaker and open it, it shows you who we are while we talk."]],
       story: [['Ask', "Congrats man, that's huge. Tell me about her. How long have you two been together?"], ['Ask', 'How are you planning to pop the question? Anything special?'], ['Why it matters', "Every detail you give me goes into her ring. Most guys stress about this part. My job is to take that weight off you."]],
-      create: [['Guide', "Let's look at the rings on that page. Which ones did you heart? Good taste. Is she more of an oval or a pear type of woman?"], ['Lead him', "Guys usually come in thinking smaller to stay safe. Here's what I tell everyone: lab grown gets you a lot more diamond for the money, so you can go bigger without going over budget."]],
+      create: [['Guide', "Let's look at the rings on that page. Which ones did you heart? Good taste. First thing we lock in is the shape. Is she more of an oval or a pear type of woman? Then we pick how much sparkle goes around it."], ['Lead him', "Guys usually come in thinking smaller to stay safe. Here's what I tell everyone: lab grown gets you a lot more diamond for the money, so you can go bigger without going over budget."]],
       size: [['Say', "Real talk, most guys don't know her size. Here's how we get it without ruining the surprise."], ['Methods', '1) Borrow a ring she wears on her right hand and measure it on the link. 2) Ask her best friend, sister or mom. 3) Slide one of her rings on your pinky and mark where it stops. 4) If all else fails, most women are a 6. Your first resize is free, up to 2 sizes.']],
       budget: [['Ask', "What number are you comfortable with? Monthly or total, either works."], ['Financing pitch', "Most of our clients do monthly payments through our lending partners. You apply on your phone in a couple minutes, and you know right away. That way you get the ring she deserves without draining your savings."]],
       pitch: [['Value', "No showroom, no markup. At a mall jeweler you're paying for the lease and the name on the box. With us it goes into the diamond."], ['Protection', "You see the exact ring and approve it before we make anything. We send you a video before it ships. It's insured, tracked and signed for. And if we ever can't deliver, you get every dollar back."], ['Ownership', "I own this company with my wife. When you buy from us, you're dealing with the owner, not a commissioned salesman."]],
@@ -266,7 +282,7 @@
              ['Set the frame', "I'm so excited for you. I'll ask a few questions, we'll design her ring together, and before we hang up I'll text you 6 rings picked just for her. Nothing is made until you approve it."],
              ['Send the intro', 'I just texted you a link, open it on speaker and follow along with me, it shows you who we are.']],
       story: [['Ask', "Okay, tell me everything! How did you two meet?"], ['Ask', "How are you planning to propose? I love hearing these."], ['Why it matters', "Her ring should feel like her. The more you tell me, the more perfect it'll be."]],
-      create: [['Guide', "Which rings did you heart? Oh she'll love that. As a woman, I can tell you the shape is what she'll notice first. Ovals look bigger and make her finger look longer."], ['Her perspective', "She'll be looking at this ring every single day. Trust me, a little more sparkle is never a mistake. Lab grown lets you get that without spending more."]],
+      create: [['Guide', "Which rings did you heart? Oh she'll love that. As a woman, I can tell you the shape is what she'll notice first. Ovals look bigger and make her finger look longer. Once we pick the shape, we'll choose the setting and the band together."], ['Her perspective', "She'll be looking at this ring every single day. Trust me, a little more sparkle is never a mistake. Lab grown lets you get that without spending more."]],
       size: [['Say', "Don't worry, almost nobody knows her size. Here are my secret tricks."], ['Methods', "1) Borrow a ring from her jewelry box and measure it on the link. 2) Ask her best friend, sister or mom. They'll keep the secret. 3) Most women wear a 6 to 7. 4) Your first resize is free, up to 2 sizes, so you can't really get it wrong."]],
       budget: [['Ask', "What feels comfortable for you? Monthly or total is totally fine."], ['Financing pitch', "Most of our couples do monthly payments. It takes a couple minutes on your phone, and she gets the ring she's dreaming about without you stressing."]],
       pitch: [['Her reaction', "When she opens this box, she's going to cry. The custom box, the Polaroid, the handwritten note, every detail is made for that moment."], ['Value', "No showroom markup, so your money goes into a bigger, better diamond. That's what she'll show her friends."], ['Protection', "You approve everything first, we send you a video before it ships, it's fully insured, and her first resize is free. You're completely covered."]],
@@ -322,14 +338,30 @@
   function opts() {
     document.querySelectorAll('.opts[data-k]').forEach(function (g) {
       var k = g.dataset.k;
+      if (!C[k]) return;
       g.innerHTML = C[k].map(function (v) { return '<button type="button" class="opt" aria-pressed="' + (ans[k] === v) + '">' + E(v) + '</button>'; }).join('');
       g.onclick = function (e) {
         var b = e.target.closest('.opt'); if (!b) return;
         ans[k] = b.textContent; g.querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
-        saveSoon(); priceHint(); if (k === 'style' || k === 'shape' || k === 'metal' || k === 'carat' || k === 'band' || k === 'stoneType') suggest(false);
+        saveSoon(); priceHint(); if (k === 'metal') tiles(); suggest(false);
       };
     });
+    tiles();
     document.querySelectorAll('textarea[data-k],input[data-k]').forEach(function (el) { el.value = ans[el.dataset.k] || ''; el.oninput = function () { ans[el.dataset.k] = el.value; saveSoon(); }; });
+  }
+  function tiles() {
+    var mk = metalKey(ans.metal), hearts = (lead && lead.hearts) || [], sh = HGLIB.shapeId(ans.shape);
+    $('shapeTiles').innerHTML = HGLIB.SHAPES.map(function (x) {
+      var lv = hearts.some(function (h) { return h.indexOf(x.id + '-') === 0; });
+      return '<button type="button" class="tile" data-v="' + x.label + '" aria-pressed="' + (ans.shape === x.label) + '"><img src="' + HGLIB.url(x.id, 'solitaire', mk) + '" alt="" loading="lazy"><span>' + x.label + (lv ? ' <b class="lv">&#9829;</b>' : '') + '</span></button>';
+    }).join('');
+    var list = sh ? HGLIB.HAS[sh] : HGLIB.STYLES.map(function (x) { return x.id; });
+    $('settingTiles').innerHTML = list.map(function (st) {
+      var x = HGLIB.style(st), lv = sh && hearts.indexOf(sh + '-' + st) > -1;
+      return '<button type="button" class="tile" data-v="' + x.label + '" aria-pressed="' + (ans.setting === x.label) + '"><img src="' + HGLIB.url(sh || 'oval', st, mk) + '" alt="" loading="lazy"><span>' + x.label + (lv ? ' <b class="lv">&#9829;</b>' : '') + '</span></button>';
+    }).join('');
+    $('shapeTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.shape = b.dataset.v; var ok = HGLIB.HAS[HGLIB.shapeId(ans.shape)]; if (ans.setting && ok.indexOf(HGLIB.styleId(ans.setting)) < 0) ans.setting = ''; tiles(); saveSoon(); priceHint(); suggest(false); };
+    $('settingTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.setting = b.dataset.v; tiles(); saveSoon(); priceHint(); suggest(false); };
   }
   function scripts() {
     var s = S[rep];
@@ -378,7 +410,7 @@
     }).join('');
     $('introState').innerHTML = lead.introSeenAt ? '<span class="live">Intro opened ' + E(when(lead.introLastAt || lead.introSeenAt)) + '</span>' : 'Not opened yet';
     var h = lead.hearts || [];
-    $('loveTip').innerHTML = h.length ? '<b>They loved:</b> ' + h.map(function (x) { var r = LIB.filter(function (l) { return l.id === x; })[0]; return E(r ? r.name : x); }).join(', ') + ' <span class="live">live</span>' : 'Rings they love on the intro page show up here live.';
+    $('loveTip').innerHTML = h.length ? '<b>They loved:</b> ' + h.map(function (x) { var r = LIB.filter(function (l) { return l.id === x; })[0]; return E(r ? r.name : /-/.test(x) ? HGLIB.name(x.split('-')[0], x.split('-')[1]) : x); }).join(', ') + ' <span class="live">live</span>' : 'Rings they love on the intro page show up here live.';
   }
   function seedAnswers() {
     var d = lead.design || {}, c = lead.call || {};
@@ -393,6 +425,9 @@
       if (k === 'carat') hit = (C.carat).filter(function (x) { return x.indexOf(v) === 0; })[0] || hit;
       if (hit) ans[k] = hit; else if (k === 'engraving') ans[k] = v === 'No' ? '' : '';
     });
+    if (!ans.setting && /hidden halo/i.test(d.band || '')) ans.setting = 'Hidden Halo';
+    if (!ans.bandLook && /diamond band/i.test(d.band || '')) ans.bandLook = 'Pavé diamonds';
+    if (!ans.bandLook && /plain/i.test(d.band || '')) ans.bandLook = 'Plain polished';
     Object.keys(c).forEach(function (k) { if (['savedAt', 'rep'].indexOf(k) < 0 && c[k]) ans[k] = c[k]; });
   }
 
@@ -404,7 +439,10 @@
     if (/Natural/.test(st)) mid *= 4; else if (/Moissanite/.test(st)) mid *= 0.55;
     var m = ans.metal || '';
     if (/18k/.test(m)) mid += 250; if (/Platinum/.test(m)) mid += 650;
-    if (ans.band === 'Diamond band') mid += 350; if (ans.band === 'Hidden halo') mid += 300;
+    var SET = { 'Hidden Halo': 300, 'Halo': 350, 'Pavé Band': 350, 'Three Stone': 600, 'Five Stone': 750, 'Bezel': 100, 'Toi et Moi': 500 };
+    mid += SET[ans.setting] || 0;
+    if (ans.bandLook === 'Pavé diamonds' && ans.setting !== 'Pavé Band') mid += 350; if (ans.bandLook === 'Split shank') mid += 150; if (ans.bandWidth === 'Bold') mid += 100;
+    if (ans.band === 'Diamond band' && !ans.bandLook) mid += 350;
     mid += extra || 0;
     return Math.round(mid / 50) * 50 - 1;
   }
@@ -418,27 +456,45 @@
     var sh = shape && shape !== 'Band' ? shape.toLowerCase() + ' ' : '';
     return c + ' ' + sh + st + (/lab|natural/.test(st) ? ', IGI certified' : '');
   }
+  function libPrice(st, extra) { var SET = { solitaire: 0, hidden: 300, halo: 350, side: 350, three: 600, five: 750, bezel: 100, toi: 500 }; var keep = ans.setting; ans.setting = ''; var p = priceFor(ans.carat, (SET[st] || 0) + (extra || 0)); ans.setting = keep; return p; }
   function suggest(force) {
     if (slots.some(function (s) { return s.touched; }) && !force) { drawSlots(); return; }
-    var hearts = lead.hearts || [], shape = ans.shape, styleName = ans.style;
-    var ranked = LIB.slice().sort(function (a, b) {
-      function sc(x) { return (hearts.indexOf(x.id) > -1 ? 10 : 0) + (x.name === styleName ? 8 : 0) + (shape && x.shape === shape ? 5 : 0) + (x.kind === 'solitaire' ? 1 : 0); }
-      return sc(b) - sc(a);
-    });
+    var hearts = (lead && lead.hearts) || [], sh = HGLIB.shapeId(ans.shape), st = HGLIB.styleId(ans.setting), sig = ans.style;
     var mk = metalKey(ans.metal), metal = ans.metal || '14k Yellow Gold';
-    slots = ranked.slice(0, 6).map(function (x, i) {
-      return { lib: x.id, name: x.name, metal: metal, metalKey: mk, stone: x.kind === 'band' ? 'Diamond band, lab grown diamonds' : stoneText(x.shape), price: '$' + priceFor(ans.carat, x.kind === 'band' ? -300 : (i % 2 ? 150 : 0)).toLocaleString(), ready: false, noResize: false, upload: '' };
+    var cands = [];
+    HGLIB.SHAPES.forEach(function (x) { (HGLIB.HAS[x.id] || []).forEach(function (t) {
+      var id = x.id + '-' + t, sc = 0;
+      if (hearts.indexOf(id) > -1) sc += 10;
+      if (sh && x.id === sh) sc += 6; if (st && t === st) sc += 4; if (sh && st && x.id === sh && t === st) sc += 6;
+      if (!sh && !st && t === 'solitaire') sc += 1;
+      cands.push({ key: id, combo: id, sh: x.id, st: t, sc: sc });
+    }); });
+    LIB.forEach(function (l) { cands.push({ key: l.id, lib: l.id, sc: (hearts.indexOf(l.id) > -1 ? 10 : 0) + (l.name === sig ? 12 : 0) + (sh && HGLIB.shapeId(l.shape) === sh ? 3 : 0) }); });
+    cands.sort(function (a, b) { return b.sc - a.sc; });
+    var pick = [], perStyle = {};
+    cands.forEach(function (c) { if (pick.length >= 6) return; var g = c.st || c.lib; if (c.sc < 10 && perStyle[g] >= 1 && pick.length < 5) return; perStyle[g] = (perStyle[g] || 0) + 1; pick.push(c); });
+    cands.forEach(function (c) { if (pick.length < 6 && pick.indexOf(c) < 0) pick.push(c); });
+    slots = pick.map(function (c, i) {
+      if (c.lib) { var l = LIB.filter(function (x) { return x.id === c.lib; })[0]; return { lib: l.id, combo: '', name: l.name, metal: metal, metalKey: mk, stone: l.kind === 'band' ? 'Diamond band, lab grown diamonds' : stoneText(l.shape), price: '$' + priceFor(ans.carat, l.kind === 'band' ? -300 : 0).toLocaleString(), ready: false, noResize: false, upload: '' }; }
+      return { lib: '', combo: c.combo, name: 'The ' + HGLIB.name(c.sh, c.st), metal: metal, metalKey: mk, stone: stoneText(HGLIB.shape(c.sh).label), price: '$' + libPrice(c.st, i % 2 ? 150 : 0).toLocaleString(), ready: false, noResize: false, upload: '' };
     });
     drawSlots();
+  }
+  function slotSrc(s) { return s.upload || (s.combo ? HGLIB.url(s.combo.split('-')[0], s.combo.split('-')[1], s.metalKey) : s.lib ? 'design-' + s.lib + '-' + s.metalKey + '.jpg' : ''); }
+  function slotOptions(s) {
+    var cur = s.combo ? 'c:' + s.combo : s.lib ? 'l:' + s.lib : '';
+    var h = '<option value="">Upload my own</option><optgroup label="Signature collection">' + LIB.map(function (l) { return '<option value="l:' + l.id + '"' + (cur === 'l:' + l.id ? ' selected' : '') + '>' + l.name + '</option>'; }).join('') + '</optgroup>';
+    HGLIB.SHAPES.forEach(function (x) { h += '<optgroup label="' + x.label + '">' + HGLIB.HAS[x.id].map(function (t) { var v = 'c:' + x.id + '-' + t; return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + HGLIB.name(x.id, t) + '</option>'; }).join('') + '</optgroup>'; });
+    return h;
   }
   function drawSlots() {
     var hearts = lead.hearts || [];
     $('slots').innerHTML = slots.map(function (s, i) {
-      var src = s.upload || (s.lib ? 'design-' + s.lib + '-' + s.metalKey + '.jpg' : '');
+      var src = slotSrc(s), lovedKey = s.combo || s.lib;
       return '<div class="slot filled" data-i="' + i + '"><img class="pv" src="' + (src || 'design-penelope-yellow.jpg') + '" alt="">' +
-        '<b style="font-family:Newsreader,serif;font-size:1.1rem;color:var(--deep)">Ring ' + (i + 1) + (s.lib && hearts.indexOf(s.lib) > -1 ? '<span class="lovepill">Loved</span>' : '') + '</b>' +
-        '<select data-f="lib"><option value="">Upload my own</option>' + LIB.map(function (l) { return '<option value="' + l.id + '"' + (s.lib === l.id ? ' selected' : '') + '>' + l.name + '</option>'; }).join('') + '</select>' +
-        '<input type="file" accept="image/*" data-f="upload" style="margin-top:8px' + (s.lib ? ';display:none' : '') + '">' +
+        '<b style="font-family:Newsreader,serif;font-size:1.1rem;color:var(--deep)">Ring ' + (i + 1) + (lovedKey && hearts.indexOf(lovedKey) > -1 ? '<span class="lovepill">Loved</span>' : '') + '</b>' +
+        '<select data-f="lib">' + slotOptions(s) + '</select>' +
+        '<input type="file" accept="image/*" data-f="upload" style="margin-top:8px' + (s.lib || s.combo ? ';display:none' : '') + '">' +
         '<input type="text" data-f="name" value="' + E(s.name) + '" placeholder="Ring name" style="margin-top:8px">' +
         '<div class="row2"><select data-f="metal">' + C.metal.map(function (m) { return '<option' + (s.metal === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select><input type="text" data-f="price" value="' + E(s.price) + '" placeholder="$2,499"></div>' +
         '<input type="text" data-f="stone" value="' + E(s.stone) + '" placeholder="1.5 ct lab grown oval, IGI certified" style="margin-top:8px">' +
@@ -452,9 +508,9 @@
         f.addEventListener(f.type === 'file' ? 'change' : 'input', function () {
           s.touched = true;
           var k = f.dataset.f;
-          if (k === 'lib') { s.lib = f.value; var l = LIB.filter(function (x) { return x.id === f.value; })[0]; if (l) { s.name = l.name; s.upload = ''; } drawSlots(); return; }
+          if (k === 'lib') { var v = f.value; s.lib = ''; s.combo = ''; if (v.indexOf('l:') === 0) { s.lib = v.slice(2); var l = LIB.filter(function (x) { return x.id === s.lib; })[0]; if (l) s.name = l.name; s.upload = ''; } else if (v.indexOf('c:') === 0) { s.combo = v.slice(2); var p2 = s.combo.split('-'); s.name = 'The ' + HGLIB.name(p2[0], p2[1]); s.stone = stoneText(HGLIB.shape(p2[0]).label); s.upload = ''; } drawSlots(); return; }
           if (k === 'metal') { s.metal = f.value; s.metalKey = metalKey(f.value); drawSlots(); return; }
-          if (k === 'upload') { var file = f.files[0]; if (!file) return; resize(URL.createObjectURL(file), function (d) { s.upload = d; s.lib = ''; drawSlots(); }); return; }
+          if (k === 'upload') { var file = f.files[0]; if (!file) return; resize(URL.createObjectURL(file), function (d) { s.upload = d; s.lib = ''; s.combo = ''; drawSlots(); }); return; }
           if (f.type === 'checkbox') s[k] = f.checked; else s[k] = f.value;
         });
         if (f.tagName === 'SELECT') f.addEventListener('change', function () { f.dispatchEvent(new Event('input')); });
@@ -467,7 +523,7 @@
     im.onerror = function () { cb(''); };
     im.src = url;
   }
-  function imgData(s) { return new Promise(function (res) { if (s.upload) return res(s.upload); if (!s.lib) return res(''); resize('design-' + s.lib + '-' + s.metalKey + '.jpg', res); }); }
+  function imgData(s) { return new Promise(function (res) { if (s.upload) return res(s.upload); if (s.combo || !s.lib) return res(''); resize('design-' + s.lib + '-' + s.metalKey + '.jpg', res); }); }
 
   function createLink() {
     var btn = $('createLink'), msg = $('createMsg');
@@ -475,9 +531,9 @@
     if (!good.length) { msg.className = 'status err'; msg.textContent = 'Add at least one ring with a name and price.'; return; }
     btn.disabled = true; msg.className = 'status'; msg.textContent = 'Preparing ring photos...';
     Promise.all(good.map(imgData)).then(function (imgs) {
-      var brief = { 'Ring style': ans.style, 'Shape': ans.shape, 'Stone size': ans.carat, 'Stone': ans.stoneType, 'Metal': ans.metal, 'Band': ans.band, 'Her size': ans.size ? ans.size + (ans.sizeKnown === 'Knows her size' ? '' : ' (estimate)') : '', 'Budget': ans.budget, 'Pay': ans.pay, 'Proposing': ans.when };
+      var brief = { 'Shape': ans.shape, 'Setting': ans.setting, 'Signature design': ans.style, 'Stone size': ans.carat, 'Stone': ans.stoneType, 'Metal': ans.metal, 'Band': ans.bandLook || ans.band, 'Band width': ans.bandWidth, 'Stone height': ans.profile, 'Her size': ans.size ? ans.size + (ans.sizeKnown === 'Knows her size' ? '' : ' (estimate)') : '', 'Budget': ans.budget, 'Pay': ans.pay, 'Proposing': ans.when };
       var body = { key: key, leadId: leadId, customerName: lead.name, customerPhone: lead.phone, customerEmail: lead.email || '', payPref: ans.pay || lead.pay || '', engraving: ans.engraving || '', notes: ans.notes || '', brief: brief,
-        options: good.map(function (s, i) { return { name: s.name, metal: s.metal, stone: s.stone, price: s.price, ready: !!s.ready, noResize: !!s.noResize, image: imgs[i] }; }) };
+        options: good.map(function (s, i) { return { name: s.name, metal: s.metal, stone: s.stone, price: s.price, ready: !!s.ready, noResize: !!s.noResize, image: imgs[i], imageUrl: s.combo && !s.upload ? slotSrc(s) : '' }; }) };
       msg.textContent = 'Creating their link...';
       return fetch(API + '/order/create-options', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
     }).then(function (j) {
@@ -497,7 +553,7 @@
       if (!j.ok) throw j;
       var fresh = !lead; lead = j.lead;
       if (fresh) { seedAnswers(); scripts(); opts(); priceHint(); suggest(true); }
-      else if (!slots.some(function (s) { return s.touched; })) suggest(true);
+      else { tiles(); if (!slots.some(function (s) { return s.touched; })) suggest(true); }
       lead2view();
     });
   }
