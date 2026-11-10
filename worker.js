@@ -780,7 +780,8 @@ function publicOrder(o) {
     approval: o.approval ? { name: o.approval.name, at: o.approval.at } : null,
     paid: !!o.paid, paidInFull: !!o.paidInFull, plan: o.plan || '', amountPaidCents: o.amountPaidCents || 0,
     payPref: o.payPref || '', ready: !!o.ready,
-    options: o.options ? o.options.map((x, i) => ({ i, name: x.name, metal: x.metal, stone: x.stone, price: x.price, ready: !!x.ready, noResize: !!x.noResize, hasImage: !!x.hasImage })) : null,
+    options: o.options ? o.options.map((x, i) => ({ i, name: x.name, metal: x.metal, stone: x.stone, price: x.price, ready: !!x.ready, noResize: !!x.noResize, hasImage: !!x.hasImage, imageUrl: x.imageUrl || '' })) : null,
+    imageUrl: o.imageUrl || '',
     brief: o.brief || [], chosen: o.chosen == null ? null : o.chosen, sizeMethod: o.sizeMethod || '', sizeEstimated: !!o.sizeEstimated,
   };
 }
@@ -793,7 +794,8 @@ async function handleOptionsCreate(fields, env, origin, url) {
   if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
   const s = (v, n = 200) => String(v || '').trim().slice(0, n);
   const raw = Array.isArray(fields.options) ? fields.options.slice(0, 6) : [];
-  const options = raw.map((x) => ({ name: s(x.name, 120), metal: s(x.metal, 60), stone: s(x.stone, 300), price: s(x.price, 40), ready: !!x.ready, noResize: !!x.noResize, image: String(x.image || '') }))
+  const okUrl = (u) => /^https:\/\/(ring\.gilbertrenteria\.dev|hiddengemrings\.com)\/[\w\-./]+\.(webp|jpg|jpeg|png)$/i.test(u) ? u : '';
+  const options = raw.map((x) => ({ name: s(x.name, 120), metal: s(x.metal, 60), stone: s(x.stone, 300), price: s(x.price, 40), ready: !!x.ready, noResize: !!x.noResize, image: String(x.image || ''), imageUrl: okUrl(String(x.imageUrl || '')) }))
     .filter((x) => x.name && parseMoneyCents(x.price));
   const order = {
     id: newId(), type: 'options',
@@ -854,6 +856,7 @@ async function handleOptionsChoose(id, fields, env, origin) {
   const detail = String(fields.sizeDetail || '').trim().slice(0, 160);
   const how = method === 'known' ? 'known size' : method === 'measured' ? `measured from her ring${detail ? ', ' + detail : ''}` : `estimated${detail ? ', ' + detail : ''}`;
   o.size = `${size} (${how})${o.sizeEstimated && !opt.noResize ? ' · free resize within 1 year, up to 2 sizes' : ''}`;
+  o.imageUrl = opt.imageUrl || '';
   if (opt.hasImage) {
     const img = await env.IG_KV.get(`img:${id}:${i}`);
     if (img) { await env.IG_KV.put(`img:${id}`, img); o.hasImage = true; }
@@ -953,7 +956,8 @@ async function handleOrderApprove(id, fields, request, env, origin) {
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') + `</table>`;
   if (o.hasSizePhoto) rows.splice(4, 0, ['Size photo', `https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image/size`]);
   if (o.payPref) rows.push(['Payment preference (form)', o.payPref]);
-  const imgTag = o.hasImage ? `<p><img src="https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image" alt="Approved design" style="max-width:100%;border-radius:12px"></p>` : '';
+  const imgSrc = o.hasImage ? `https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image` : o.imageUrl;
+  const imgTag = imgSrc ? `<p><img src="${imgSrc}" alt="Approved design" style="max-width:100%;border-radius:12px"></p>` : '';
 
   const ownerSent = await sendEmail(env, {
     to: [OWNER_ADDRESS, TO_ADDRESS],
@@ -1005,7 +1009,7 @@ const INTRO_RINGS = ['penelope', 'selah', 'nova', 'allison', 'souline', 'aurora'
 async function handleIntroHeart(fields, env, origin) {
   const id = String(fields.lead || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
   const d = String(fields.design || '');
-  if (!INTRO_RINGS.includes(d)) return json({ ok: false }, 400, origin);
+  if (!INTRO_RINGS.includes(d) && !/^(round|oval|pear|emerald|cushion|elcushion|marquise|radiant|princess|asscher)-(solitaire|hidden|halo|side|three|five|bezel|toi)$/.test(d)) return json({ ok: false }, 400, origin);
   const lead = await env.IG_KV.get(`lead:${id}`, 'json');
   if (!lead) return json({ ok: false }, 404, origin);
   const set = new Set(lead.hearts || []);

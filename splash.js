@@ -4,6 +4,7 @@
 (function () {
   var me = document.currentScript;
   var tagline = (me && me.getAttribute('data-tagline')) || 'Engagement Rings, Built Around Your Story';
+  var dark = me && me.getAttribute('data-theme') === 'dark';
   var storeKey = 'hgSplash:' + location.pathname;
   try { if (sessionStorage.getItem(storeKey)) return; } catch (e) {}
 
@@ -19,12 +20,13 @@
     '.hg-splash-tag.go{animation:hgWIn .7s ease forwards;}' +
     '@keyframes hgWIn{0%{opacity:0;filter:blur(6px);transform:translateY(6px);}55%{opacity:1;filter:blur(0);transform:translateY(0);text-shadow:0 0 14px rgba(185,156,95,.75);}100%{opacity:1;filter:blur(0);transform:translateY(0);text-shadow:0 0 0 rgba(185,156,95,0);}}' +
     '@media(prefers-reduced-motion: reduce){.hg-splash-logo,.hg-splash-tag{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;}}';
+  if (dark) css += '.hg-splash{background:radial-gradient(60% 50% at 50% 45%,rgba(185,156,95,.22),transparent 70%),#120E0B}.hg-splash-tag{color:#E9DCC2}.hg-splash-skip{color:#B9A27A}.hg-splash-logo{filter:drop-shadow(0 0 24px rgba(185,156,95,.35))}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   var el = document.createElement('div');
   el.className = 'hg-splash';
   el.innerHTML = '<button class="hg-splash-skip" type="button">Skip</button><div class="hg-splash-inner">' +
-    '<img class="hg-splash-logo" src="logo-brown.png" alt="Hidden Gem"><p class="hg-splash-tag"></p></div>';
+    '<img class="hg-splash-logo" src="' + (dark ? 'logo-white.png' : 'logo-brown.png') + '" alt="Hidden Gem"><p class="hg-splash-tag"></p></div>';
   el.querySelector('.hg-splash-tag').textContent = tagline;
   window.__hgSplashOn = true;
 

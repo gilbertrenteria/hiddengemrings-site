@@ -86,7 +86,7 @@
   }
 
   function render(o) {
-    var img = o.hasImage ? '<img class="render" src="' + API + '/order/' + o.id + '/image" alt="Your ring design">' : '';
+    var img = o.hasImage ? '<img class="render" src="' + API + '/order/' + o.id + '/image" alt="Your ring design">' : (o.imageUrl ? '<img class="render" src="' + o.imageUrl + '" alt="Your ring design">' : '');
     if (o.approved) { renderApproved(o, img); return; }
     card.innerHTML = img + specs(o) +
       '<label class="agree"><input type="checkbox" id="agree"><span>I approve this design, metal, stone, size and price. I understand this is a custom order made just for me and is <strong>final sale once approved</strong>, as described in the <a href="policies.html" target="_blank">Hidden Gem Policies</a>.</span></label>' +
