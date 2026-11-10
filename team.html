@@ -112,13 +112,13 @@
 
     <div class="card">
       <h2><img src="icon-clock.png" alt="">Booked calls</h2>
-      <p class="hint">15 minute calls customers booked while you were both offline.</p>
+      <p class="hint">30 minute calls customers booked while you were both offline.</p>
       <div class="list" id="bookings"></div>
     </div>
 
     <div class="card">
       <h2><img src="icon-consult.png" alt="">Call hours customers can book</h2>
-      <p class="hint">Customers only see open 15 minute times inside these hours. Booked times disappear automatically.</p>
+      <p class="hint">Customers only see open 30 minute times inside these hours. Booked times disappear automatically.</p>
       <div class="days" id="days"></div>
       <div class="inline">
         <div class="field"><span>Block a full day off</span><input type="date" id="blockDate"></div>
@@ -185,7 +185,7 @@
   function render(first) {
     var cfg = data.config;
     var on = cfg.reps.filter(function (r) { return r.online; });
-    $('onlineHint').textContent = on.length ? 'Customers can ask for a call right now.' : 'You are both offline. Customers can book a 15 minute call.';
+    $('onlineHint').textContent = on.length ? 'Customers can ask for a call right now.' : 'You are both offline. Customers can book a 30 minute call.';
     $('reps').innerHTML = cfg.reps.map(function (r) {
       return '<div class="rep' + (r.online ? ' on' : '') + '"><div class="nm">' + esc(r.name) + '</div>' +
         '<div class="st"><span class="dot"></span>' + (r.online ? 'Online' : 'Offline') + '</div>' +

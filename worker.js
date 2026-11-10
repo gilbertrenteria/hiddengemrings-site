@@ -210,7 +210,7 @@ async function handleEmailCheck(url, env, origin) {
 //   index:bookdates    list of dates that have bookings
 
 const TZ = 'America/Chicago';
-const SLOT_MIN = 15;
+const SLOT_MIN = 30;
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DEFAULT_CONFIG = {
@@ -267,7 +267,7 @@ function labelDate(dateStr) {
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-// Open 15 minute slots for one date (Chicago time), minus booked ones.
+// Open 30 minute slots for one date (Chicago time), minus booked ones.
 async function openSlotsFor(env, dateStr, wd, avail, now) {
   const day = avail.days[wd];
   if (!day || !day.on || (avail.blocked || []).includes(dateStr)) return [];
@@ -278,7 +278,8 @@ async function openSlotsFor(env, dateStr, wd, avail, now) {
   for (let t = from; t + SLOT_MIN <= to; t += SLOT_MIN) {
     if (t < earliest) continue;
     const hm = toHM(t);
-    if (!booked[hm]) out.push(hm);
+    // skip if any booked call (including older 15 minute bookings) overlaps this slot
+    if (!Object.keys(booked).some((b) => { const bm = toMins(b); return bm > t - SLOT_MIN && bm < t + SLOT_MIN; })) out.push(hm);
   }
   return out;
 }
@@ -467,7 +468,7 @@ async function handleLeadEmail(fields, env, origin) {
 
   const first = escapeHtml(lead.name.split(' ')[0]);
   let howNext;
-  if (lead.contact === 'Book a call') howNext = `Your 15 minute call is booked for <strong>${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}</strong> (Central). One of our ring specialists will call you then.`;
+  if (lead.contact === 'Book a call') howNext = `Your 30 minute call is booked for <strong>${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}</strong> (Central). One of our ring specialists will call you then.`;
   else if (lead.routeMode === 'offline') howNext = `Our ring specialists are away right now. We will ${lead.contact === 'Text me' ? 'text' : 'call'} you during business hours (Mon to Sat, 9 AM to 9 PM).`;
   else if (lead.contact === 'Call me') howNext = 'One of our ring specialists will be calling you shortly.';
   else howNext = 'One of our ring specialists will be texting you shortly.';

@@ -370,7 +370,7 @@
         <button type="button" data-v="Text me">Text me</button>
       </div>
       <div class="po-chips po-chips-1" id="poPrefOffline" hidden>
-        <button type="button" data-v="Book a call">Book a 15 minute call</button>
+        <button type="button" data-v="Book a call">Book a 30 minute call</button>
         <button type="button" data-v="Text me">Text me during business hours</button>
       </div>
     </div>
@@ -378,7 +378,7 @@
     <div class="po-step" data-key="slot">
       <img class="po-icon" src="icon-clock.png" alt="">
       <h2>Pick a time for your call</h2>
-      <p class="po-sub" id="poSlotSub">15 minutes with one of our ring specialists. Times are Central.</p>
+      <p class="po-sub" id="poSlotSub">30 minutes with one of our ring specialists. Times are Central.</p>
       <p class="po-status err" id="poSlotMsg"></p>
       <div class="po-slot-sec">
         <p class="po-slot-label"><span class="po-slot-n">1</span>Choose a day</p>
@@ -635,8 +635,8 @@
       document.getElementById('poPrefOnline').hidden = off;
       document.getElementById('poPrefOffline').hidden = !off;
       document.getElementById('poSlotSub').textContent = off
-        ? 'Our ring specialists are away right now. Pick a 15 minute time and we\'ll call you then. Times are Central.'
-        : '15 minutes with one of our ring specialists. Times are Central.';
+        ? 'Our ring specialists are away right now. Pick a 30 minute time and we\'ll call you then. Times are Central.'
+        : '30 minutes with one of our ring specialists. Times are Central.';
       if (!TEXT_ENABLED && !state.sent && !state.pending) {
         state.a.contactPref = off && !slotsFailed ? 'Book a call' : 'Call me';
         save();
@@ -971,7 +971,7 @@
       var first = (state.a.name || '').trim().split(/\s+/)[0];
       document.getElementById('poFirst').textContent = first ? ', ' + first : '';
       var msg;
-      if (state.a.contactPref === 'Book a call' && state.a.slotLabel) msg = 'Your 15 minute call is booked for <strong>' + state.a.slotLabel + '</strong> (Central). One of our ring specialists will call you then.';
+      if (state.a.contactPref === 'Book a call' && state.a.slotLabel) msg = 'Your 30 minute call is booked for <strong>' + state.a.slotLabel + '</strong> (Central). One of our ring specialists will call you then.';
       else if (state.mode === 'offline') msg = 'Our ring specialists are away right now. We\'ll ' + (state.a.contactPref === 'Text me' ? 'text' : 'call') + ' you during business hours (Mon to Sat, 9 AM to 9 PM).';
       else if (state.a.contactPref === 'Text me') msg = 'One of our ring specialists will be texting you shortly.';
       else msg = 'One of our ring specialists will be calling you shortly.';
