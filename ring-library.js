@@ -1,6 +1,6 @@
 /* Hidden Gem ring library: every shape in every setting style, in yellow,
    white and rose gold. Renders hosted at ring.gilbertrenteria.dev. Used by
-   /welcome (style explorer + hearts) and /call (ring creator + 6 ring builder). */
+   /call (ring creator + 6 ring builder). */
 (function () {
   var BASE = 'https://ring.gilbertrenteria.dev/img/ring/';
   var SHAPES = [
