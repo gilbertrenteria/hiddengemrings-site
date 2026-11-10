@@ -13,6 +13,10 @@
   .say{background:var(--deep);color:#f4ede2;border-radius:18px;padding:16px 18px;margin:12px 0;font-size:1.04rem;line-height:1.55}
   .say small{display:block;color:#d9c290;font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;margin-bottom:6px}
   .say + .say{margin-top:8px}
+.pace{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 14px;font-size:.9rem;color:var(--muted)}
+  .pace b{color:var(--deep)}.pace .st{font-weight:700;border-radius:999px;padding:3px 10px;font-size:.78rem;letter-spacing:.04em}
+  .pace .st.ok{background:#e3f1e6;color:#1f7a3a}.pace .st.warn{background:#fbecd2;color:#8a5a12}.pace .st.late{background:#f8dcdc;color:#a33}
+  .pace button{margin-left:auto;border:1px solid var(--line);background:var(--cream2);border-radius:999px;padding:6px 12px;font:600 .8rem 'Work Sans',sans-serif;cursor:pointer;color:var(--deep)}
   .tip{background:var(--goldsoft);border-radius:14px;padding:12px 14px;font-size:.95rem;color:#5c4a2a;margin:10px 0}
   .tip b{color:#6f5524}
   .q{margin:18px 0 6px;font-weight:600;color:var(--deep)}
@@ -367,6 +371,35 @@
     $('shapeTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.shape = b.dataset.v; var ok = HGLIB.HAS[HGLIB.shapeId(ans.shape)]; if (ans.setting && ok.indexOf(HGLIB.styleId(ans.setting)) < 0) ans.setting = ''; tiles(); saveSoon(); priceHint(); suggest(false); };
     $('settingTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.setting = b.dataset.v; tiles(); saveSoon(); priceHint(); suggest(false); };
   }
+  /* call pace: minutes per page, 30 minutes total */
+  var PACE = [0, 2, 4, 8, 2, 2, 4, 3, 5], callStart = 0;
+  function paceInit() {
+    try { var v = JSON.parse(sessionStorage.getItem('hg_pace_' + leadId) || '0'); if (v) callStart = v; } catch (e) {}
+    document.querySelectorAll('section.pg').forEach(function (pg, i) {
+      var d = document.createElement('div'); d.className = 'pace'; d.dataset.i = i;
+      var h = pg.querySelector('h2,h1'); (h ? h.nextSibling : pg.firstChild) ? pg.insertBefore(d, h ? h.nextSibling : pg.firstChild) : pg.appendChild(d);
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-pace-start]')) { callStart = Date.now(); savePace(); }
+      else if (e.target.closest('[data-pace-reset]')) { callStart = 0; savePace(); }
+      else if (!callStart && e.target.closest('#timeOpts [data-t=yes]')) { callStart = Date.now(); savePace(); }
+      paceTick();
+    });
+    setInterval(paceTick, 1000); paceTick();
+  }
+  function savePace() { try { sessionStorage.setItem('hg_pace_' + leadId, JSON.stringify(callStart)); } catch (e) {} }
+  function mmss(ms) { var t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 60) + ':' + ('0' + t % 60).slice(-2); }
+  function paceTick() {
+    var pg = document.querySelector('section.pg.on'); if (!pg) return;
+    var all = [].slice.call(document.querySelectorAll('section.pg')), i = all.indexOf(pg), box = pg.querySelector('.pace'); if (!box) return;
+    var doneBy = 0; for (var k = 0; k <= i; k++) doneBy += PACE[k];
+    if (i === 0) { box.innerHTML = '<span>Call plan: <b>30 minutes</b>. Open 2, story 4, ring creator 8, size 2, budget 2, pitch 4, build 3, close 5.</span>' + (callStart ? '<span>Call time <b>' + mmss(Date.now() - callStart) + '</b></span><button type="button" data-pace-reset>Reset timer</button>' : ''); return; }
+    var aim = '<span>Aim: <b>' + PACE[i] + ' min</b> on this page</span><span>Finish this page by <b>' + doneBy + ':00</b></span>';
+    if (!callStart) { box.innerHTML = aim + '<button type="button" data-pace-start>Start call timer</button>'; return; }
+    var el = (Date.now() - callStart) / 60000, st = el <= doneBy ? 'ok' : el <= doneBy + 3 ? 'warn' : 'late';
+    var lbl = st === 'ok' ? 'On pace' : st === 'warn' ? 'A little behind, keep moving' : 'Behind, tighten up';
+    box.innerHTML = aim + '<span>Call time <b>' + mmss(Date.now() - callStart) + '</b></span><span class="st ' + st + '">' + lbl + '</span>';
+  }
   function scripts() {
     var s = S[rep];
     $('repName').textContent = s.title;
@@ -570,6 +603,7 @@
     refresh().then(function () {
       $('login').hidden = true; $('pages').hidden = false;
       HG.pages({});
+      paceInit();
       HG.headline($('h1'), $('lead'));
       setInterval(function () { refresh().catch(function () {}); }, 6000);
     }).catch(function (e) {
