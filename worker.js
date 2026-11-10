@@ -1272,7 +1272,16 @@ async function handleTrack(request, env, origin) {
   const cf = request.cf || {};
   // drop crawlers, verified bots and traffic from cloud/data center networks
   if (cf.botManagement && (cf.botManagement.verifiedBot || (cf.botManagement.score && cf.botManagement.score < 30))) return ok();
-  if (/amazon|aws|google cloud|googlebot|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|oracle|alibaba|tencent|cloudflare|fastly|vultr|scaleway|leaseweb|choopa|m247|datacamp|hostinger|contabo/i.test(String(cf.asOrganization || ''))) return ok();
+  if (/facebook|meta platforms|instagram|amazon|aws|google cloud|googlebot|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|oracle|alibaba|tencent|cloudflare|fastly|vultr|scaleway|leaseweb|choopa|m247|datacamp|hostinger|contabo/i.test(String(cf.asOrganization || ''))) return ok();
+  if (cf.asn === 32934 || cf.asn === 63293 || cf.asn === 54115) return ok(); // Meta crawler and ad review networks (Prineville, Oregon)
+  // one alert per network address every 6 hours, so repeat hits never flood the inbox
+  const ip = request.headers.get('CF-Connecting-IP') || '';
+  if (ip) {
+    const ik = `ipseen:${ip}`;
+    const n = Number(await env.IG_KV.get(ik) || 0);
+    if (n >= 3) return ok();
+    await env.IG_KV.put(ik, String(n + 1), { expirationTtl: 21600 });
+  }
   const city = [cf.city, cf.regionCode || cf.region].filter(Boolean).join(', ');
   const place = city ? `${city}${cf.postalCode ? ' ' + cf.postalCode : ''}${cf.country && cf.country !== 'US' ? ' (' + cf.country + ')' : ''}` : 'Unknown';
   let t;

@@ -34,7 +34,7 @@
     if (human) return; human = true;
     var list = queue; queue = []; list.forEach(function (b) { send(b); });
   }
-  ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel', 'mousemove'].forEach(function (t) {
+  ['pointerdown', 'touchstart', 'keydown', 'wheel'].forEach(function (t) {
     addEventListener(t, onHuman, { passive: true, once: true });
   });
 
