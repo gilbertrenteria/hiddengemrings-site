@@ -556,7 +556,7 @@ async function handleLead(fields, request, env, origin) {
     ['Credit (self reported)', lead.credit || 'not answered'],
     ['Sent to', `${(lead.routedNames || []).join(', ')} (${lead.routeReason})`],
     ['Received', chicagoTime(lead.receivedAt)],
-    ['Location', (() => { const c = request.cf || {}; const t = [c.city, c.regionCode || c.region].filter(Boolean).join(', '); return t ? t + (c.postalCode ? ' ' + c.postalCode : '') : 'Unknown'; })()],
+    ['Approximate location', (() => { const c = request.cf || {}; const t = [c.city, c.regionCode || c.region].filter(Boolean).join(', '); return t ? t + (c.postalCode ? ' (near ' + c.postalCode + ')' : '') : 'Unknown'; })()],
   ];
   const color = { 'READY': '#1f7a3a', 'WARM': '#b07a12', 'PLANNING': '#5b6b8a', 'JUST LOOKING': '#777' }[lead.label] || '#54453A';
   const html =
@@ -1284,7 +1284,7 @@ async function handleTrack(request, env, origin) {
     await env.IG_KV.put(ik, String(n + 1), { expirationTtl: 21600 });
   }
   const city = [cf.city, cf.regionCode || cf.region].filter(Boolean).join(', ');
-  const place = city ? `${city}${cf.postalCode ? ' ' + cf.postalCode : ''}${cf.country && cf.country !== 'US' ? ' (' + cf.country + ')' : ''}` : 'Unknown';
+  const place = city ? `${city}${cf.postalCode ? ' (near ' + cf.postalCode + ')' : ''}${cf.country && cf.country !== 'US' ? ' ' + cf.country : ''}` : 'Unknown';
   let t;
   try { t = JSON.parse(await request.text()); } catch (e) { return ok(); }
   const ev = String(t.ev || '');
@@ -1324,7 +1324,7 @@ async function handleTrack(request, env, origin) {
     if (o) { who = o.customerName || ''; ring = o.ring || ''; }
   }
   const title = who ? `${who} ${label}` : (label.charAt(0).toUpperCase() + label.slice(1));
-  const rows = [['When', centralTime()], ['Location', place], ['Page', 'hiddengemrings.com' + page], ['Came from', src]];
+  const rows = [['When', centralTime()], ['Approximate location', place], ['Page', 'hiddengemrings.com' + page], ['Came from', src]];
   if (ring) rows.push(['Ring', ring]);
   Object.entries(data).slice(0, 14).forEach(([k, v]) => { if (v) rows.push([k, String(v).slice(0, 200)]); });
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 10px">${escapeHtml(title)}</h2><table cellpadding="6" style="border-collapse:collapse">` +
@@ -1344,7 +1344,7 @@ async function sendDailySummary(env) {
     `<li>Quiz started: ${e.quiz_start || 0}</li><li>Quiz left unfinished: ${e.quiz_abandon || 0}</li>` +
     `<li>Pick Your Ring links opened: ${e.rings_open || 0}</li><li>Design approval links opened: ${e.approve_open || 0}</li>` +
     `<li>Ring browsers (3+ rings): ${e.collection_hot || 0}</li></ul>` +
-    `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Visitor locations</h3><ul>${list(st && st.places)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
+    `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Approximate visitor locations</h3><ul>${list(st && st.places)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
     `<p style="color:#777;font-size:12px">Finished quizzes are emailed the moment they come in.</p></div>`;
   await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem daily summary: ${visitors} visitors on ${day}`, html });
 }
