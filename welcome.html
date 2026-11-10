@@ -11,6 +11,15 @@
 <link rel="stylesheet" href="hg-links.css">
 <script src="splash.js" data-tagline="Welcome to Hidden Gem"></script>
 <style>
+  .story{display:grid;gap:14px;margin-top:20px;position:relative}
+  .chap{display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 20px}
+  .chap .cn{flex:none;font-family:'Newsreader',serif;font-size:2.2rem;line-height:1;color:var(--gold);font-style:italic;min-width:48px}
+  .chap b{font-family:'Newsreader',serif;font-size:1.35rem;color:var(--deep);display:block;margin-bottom:4px;font-weight:500}
+  .chap p{margin:0;color:#3f3832}
+  .quote{margin:22px 0 0;background:var(--deep);border-radius:22px;padding:28px 24px;text-align:center}
+  .quote span{display:block;color:#d9c290;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+  .quote b{font-family:'Newsreader',serif;font-weight:500;color:#fff;font-size:clamp(2rem,6vw,3rem)}
+  .quote i{color:var(--gold)}
   .heart-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
   .ring{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
   .ring:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(66,53,41,.12)}
@@ -43,7 +52,7 @@
       <img src="logo-brown.png" alt="Hidden Gem">
       <div class="who"><b>Hidden Gem</b>Engagement Rings · Houston</div>
       <nav class="seg" aria-label="Sections">
-        <button type="button" data-go="0-3">Meet Us</button>
+        <button type="button" data-go="0-3">Our Story</button>
         <button type="button" data-go="4-4">Your Style</button>
         <button type="button" data-go="5-8">Our Promise</button>
       </nav>
@@ -68,16 +77,22 @@
     <div class="pgnav"><span></span><button class="btn" type="button" data-next>Meet Hidden Gem</button></div>
   </section>
 
-  <!-- 1. Who we are -->
-  <section class="pg" data-label="Who we are">
-    <span class="eyebrow">Who We Are</span>
-    <h2>A Family Run <span class="script">Houston</span> Jeweler</h2>
-    <p class="lead">Hidden Gem is a small family business based in Houston. We started it because buying a ring the traditional way meant showroom pressure and paying for a name on the box. We wanted something more honest.</p>
-    <div class="split" style="margin-top:20px">
+  <!-- 1. Our story -->
+  <section class="pg" data-label="Our story">
+    <span class="eyebrow">Our Story</span>
+    <h2>Built by a Husband and Wife Who <span class="script">Believe in Forever</span></h2>
+    <p class="lead">Hidden Gem is Gilbert and Kim, a husband and wife from Houston raising two girls, Olivia and Ellie. We don't sell rings from behind a glass case. We help people start forever, and we take that personally.</p>
+    <div class="story stag">
+      <div class="chap"><span class="cn">01</span><div><b>We build things from the ground up</b><p>Gilbert ran a Houston restaurant for six years, then built a company that rebuilt homes for families after disasters. Kim has been right there through every one of them. We know what it takes to earn people's trust, one handshake at a time.</p></div></div>
+      <div class="chap"><span class="cn">02</span><div><b>Then we saw what couples were really paying for</b><p>Mall jewelers with sales floors, commissions and a name on the box. Couples were spending their savings on markup instead of on the diamond, and leaving more stressed than excited.</p></div></div>
+      <div class="chap"><span class="cn">03</span><div><b>So we flipped the whole thing</b><p>No showroom. No pushy salespeople. Certified lab grown diamonds that put a bigger, brighter stone in your budget. Every ring made to order, and a real person with you on the phone from hello to yes.</p></div></div>
+      <div class="chap"><span class="cn">04</span><div><b>Why we're called Hidden Gem</b><p>The best things in life aren't sitting in a mall window. They're found by the few who look a little harder. If you're here, that's you.</p></div></div>
+    </div>
+    <div class="quote stag"><span>Not found in stores.</span><b>Found by the <i>few</i>.</b></div>
+    <div class="split" style="margin-top:22px">
       <div class="grid stag" style="grid-template-columns:1fr">
-        <div class="card icard"><div class="ic"><img src="icon-family.png" alt=""></div><div><h3>Family owned</h3><p>When you call Hidden Gem, you talk to the people who own it. Your ring is our name on the line.</p></div></div>
-        <div class="card icard"><div class="ic"><img src="icon-design.png" alt=""></div><div><h3>Made for you</h3><p>Every ring is made to order around your design, your stone and her size. Nothing is pulled off a shelf.</p></div></div>
-        <div class="card icard"><div class="ic"><img src="icon-personal.png" alt=""></div><div><h3>One person, start to finish</h3><p>The same ring specialist you're talking to now stays with you until the ring is on her hand.</p></div></div>
+        <div class="card icard"><div class="ic"><img src="icon-family.png" alt=""></div><div><h3>You're talking to the owners</h3><p>No call center and no commission. When you call Hidden Gem, you get Gilbert or Kim, and our name is on every ring.</p></div></div>
+        <div class="card icard"><div class="ic"><img src="icon-personal.png" alt=""></div><div><h3>We treat your proposal like our own</h3><p>Your story goes into your ring. We'll sweat the details so you can enjoy the moment.</p></div></div>
       </div>
       <img src="story-veil.jpg" alt="A Hidden Gem ring moment">
     </div>
