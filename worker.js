@@ -25,7 +25,7 @@ const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.d
 const SITE = 'https://hiddengemrings.com';
 
 // Stripe — deposit is charged at checkout once the customer approves their
-// design on approve.html. Needs two secrets added in the Cloudflare
+// design on /approve. Needs two secrets added in the Cloudflare
 // dashboard (Workers > long-bar-d49d > Settings > Variables and Secrets):
 //   STRIPE_SECRET_KEY      the Secret key from the Stripe Dashboard
 //   STRIPE_WEBHOOK_SECRET  the signing secret for the /stripe/webhook endpoint
@@ -201,7 +201,7 @@ async function handleEmailCheck(url, env, origin) {
 }
 
 // === Team status, lead routing and call booking ===
-// The team page (team.html, password = ADMIN_KEY) sets who is Online, who
+// The team page (/team, password = ADMIN_KEY) sets who is Online, who
 // gets leads first, the weekly call hours and the rep names and emails.
 // Everything lives in IG_KV:
 //   team:config        reps, lead order, round-robin pointer
@@ -483,8 +483,8 @@ async function handleLeadEmail(fields, env, origin) {
     picks.map(([k, v]) => `<tr><td style="color:#776C5C;padding-right:14px">${escapeHtml(k)}</td><td style="color:#423529;font-weight:600">${escapeHtml(v)}</td></tr>`).join('') + `</table>` +
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">What happens next</h3>` +
     `<ol style="font-size:16px;line-height:1.55;padding-left:20px"><li>We send ring designs that match your style and budget.</li><li>You get a secure link to check your payment options with our lending partner, right on your phone.</li><li>You approve your final design and we start making your ring. Delivered within 6 weeks.</li></ol>` +
-    `<p style="margin:24px 0"><a href="${SITE}/collection.html" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
-    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Call or text <a href="tel:${PUBLIC_TEL}" style="color:#776C5C">${PUBLIC_PHONE}</a> or just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies.html" style="color:#776C5C">Our policies</a></p></div>`;
+    `<p style="margin:24px 0"><a href="${SITE}/collection" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
+    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Call or text <a href="tel:${PUBLIC_TEL}" style="color:#776C5C">${PUBLIC_PHONE}</a> or just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies" style="color:#776C5C">Our policies</a></p></div>`;
   const sent = await sendEmail(env, { to: [email], subject: `Your Hidden Gem ring picks, ${lead.name.split(' ')[0]}`, html, replyTo: PUBLIC_EMAIL, from: CUSTOMER_FROM });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.recapSent = true;
@@ -566,7 +566,7 @@ async function handleLead(fields, request, env, origin) {
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${k === 'Phone' ? v : escapeHtml(v)}</td></tr>`).join('') +
     `</table>` +
     `<p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700;margin-right:8px">Text ${escapeHtml(lead.name.split(' ')[0])}</a> <a href="tel:+1${tel}" style="background:#fff;color:#54453A;border:2px solid #54453A;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700">Call</a></p>` +
-    `<p style="color:#777;font-size:13px">Team page: <a href="${SITE}/team.html">${SITE}/team.html</a></p>` +
+    `<p style="color:#777;font-size:13px">Team page: <a href="${SITE}/team">${SITE}/team</a></p>` +
     `</div>`;
 
   const who = (lead.routedNames || []).length === 1 ? ` for ${lead.routedNames[0]}` : '';
@@ -682,7 +682,7 @@ async function handleOrderCheckout(id, fields, env, origin) {
   const amount = plan === 'full' || plan === 'finance' ? totalCents : plan === 'deposit' ? depositCents : totalCents - (o.amountPaidCents || depositCents);
   if (amount < 50) return json({ ok: false, error: 'Nothing left to pay on this order.' }, 400, origin);
   const label = plan === 'finance' ? 'Monthly payments' : plan === 'full' ? 'Paid in full' : plan === 'deposit' ? '50% deposit' : 'Remaining balance';
-  const page = o.options ? 'pick.html' : 'approve.html';
+  const page = o.options ? 'rings' : 'approve';
 
   const base = {
     mode: 'payment',
@@ -761,8 +761,8 @@ async function handleStripeWebhook(request, env) {
 }
 
 // === Design approvals ===
-// Gilbert creates an order from approve-admin.html (needs ADMIN_KEY). The
-// customer opens approve.html?id=..., checks the final-sale box, types
+// Gilbert creates an order from /admin (needs ADMIN_KEY). The
+// customer opens /approve?id=..., checks the final-sale box, types
 // their full name and approves. The approval is saved with the date, time,
 // IP and device, and a copy is emailed to Gilbert and to the customer.
 
@@ -788,7 +788,7 @@ function publicOrder(o) {
 const READY_DELIVERY = 'Ships within 3 to 5 business days after payment';
 const CUSTOM_DELIVERY = 'Within 6 weeks of approval and completed payment or financing';
 
-// Ring options: up to 6 rings for one customer on one link (pick.html).
+// Ring options: up to 6 rings for one customer on one link (/rings).
 async function handleOptionsCreate(fields, env, origin, url) {
   if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
   const s = (v, n = 200) => String(v || '').trim().slice(0, n);
@@ -830,7 +830,7 @@ async function handleOptionsCreate(fields, env, origin, url) {
   order.options = options;
   await env.IG_KV.put(`order:${order.id}`, JSON.stringify(order));
   await addToIndex(env, 'index:orders', order.id);
-  return json({ ok: true, id: order.id, link: `${SITE}/pick.html?id=${order.id}` }, 200, origin);
+  return json({ ok: true, id: order.id, link: `${SITE}/rings?id=${order.id}` }, 200, origin);
 }
 
 // The customer picks a ring and a size. Allowed until the design is signed.
@@ -902,7 +902,7 @@ async function handleOrderCreate(fields, env, origin, url) {
   }
   await env.IG_KV.put(`order:${order.id}`, JSON.stringify(order));
   await addToIndex(env, 'index:orders', order.id);
-  return json({ ok: true, id: order.id, link: `${SITE}/approve.html?id=${order.id}` }, 200, origin);
+  return json({ ok: true, id: order.id, link: `${SITE}/approve?id=${order.id}` }, 200, origin);
 }
 
 async function handleOrderGet(id, env, origin) {
@@ -1056,7 +1056,7 @@ async function handleAdminList(url, env, origin) {
   const orderIds = ((await env.IG_KV.get('index:orders', 'json')) || []).slice(0, 50);
   const leads = (await Promise.all(leadIds.map((id) => env.IG_KV.get(`lead:${id}`, 'json')))).filter(Boolean);
   const orders = (await Promise.all(orderIds.map((id) => env.IG_KV.get(`order:${id}`, 'json')))).filter(Boolean)
-    .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/${o.options ? 'pick' : 'approve'}.html?id=${o.id}` }));
+    .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/${o.options ? 'rings' : 'approve'}?id=${o.id}` }));
   return json({ ok: true, leads, orders }, 200, origin);
 }
 

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Welcome to Hidden Gem | Engagement Rings</title>
+<meta name="description" content="Meet Hidden Gem: a family run Houston jeweler making certified engagement rings to order, with honest pricing and a real person with you start to finish.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="hg-links.css">
+<script src="splash.js" data-tagline="Welcome to Hidden Gem"></script>
+<style>
+  .heart-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .ring{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+  .ring:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(66,53,41,.12)}
+  .ring img{width:100%;aspect-ratio:.9;object-fit:cover;display:block}
+  .ring .rt{padding:12px 14px 14px}
+  .ring .rt b{font-family:'Newsreader',serif;font-size:1.15rem;color:var(--deep);display:block}
+  .ring .rt small{color:var(--muted);font-size:.85rem;line-height:1.4;display:block}
+  .heart{position:absolute;top:10px;right:10px;width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .2s ease}
+  .heart svg{width:24px;height:24px;fill:none;stroke:var(--deep);stroke-width:2}
+  .ring.loved .heart{transform:scale(1.08);background:var(--deep)}
+  .ring.loved .heart svg{fill:var(--gold);stroke:var(--gold)}
+  .ring.loved{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+  .loved-count{font-weight:600;color:#8a6d34;margin:14px 0 0;min-height:24px}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .compare div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+  .compare small{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .compare b{font-family:'Newsreader',serif;font-size:1.25rem;color:var(--deep)}
+  .pay3{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:16px}
+  .pay3 .card.feat{border:2px solid var(--gold);position:relative}
+  .pay3 .card.feat::before{content:'Most popular';position:absolute;top:-12px;left:18px;background:var(--gold);color:#2b2119;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+  .split{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:center}
+  .split img{width:100%;border-radius:22px;display:block;box-shadow:0 18px 50px rgba(66,53,41,.14)}
+  @media(max-width:760px){.split{grid-template-columns:1fr}.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <img src="logo-brown.png" alt="Hidden Gem">
+      <div class="who"><b>Hidden Gem</b>Engagement Rings · Houston</div>
+      <nav class="seg" aria-label="Sections">
+        <button type="button" data-go="0-3">Meet Us</button>
+        <button type="button" data-go="4-4">Your Style</button>
+        <button type="button" data-go="5-8">Our Promise</button>
+      </nav>
+    </div>
+    <div class="meta"><span id="plab"></span><span id="pcnt"></span></div>
+    <div class="prog"><i></i></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 0. Cover -->
+  <section class="pg" data-label="Welcome">
+    <span class="eyebrow">Your Hidden Gem Introduction</span>
+    <h1 class="fx" id="h1">Welcome<span id="nm"></span>. Let's Find <span class="script">Her Ring</span></h1>
+    <p class="lead fxlead" id="lead">We made this page so you can see exactly who you're working with while we talk. It takes about two minutes, and there's nothing to fill out. Just follow along with your ring specialist.</p>
+    <img class="hero" src="lifestyle-bride.jpg" alt="A bride wearing a Hidden Gem engagement ring">
+    <div class="grid stag" style="margin-top:18px">
+      <div class="card icard"><div class="ic"><img src="icon-conversation.png" alt=""></div><div><h3>Why we made this</h3><p>Buying an engagement ring online should feel as personal and safe as sitting across the table from a jeweler you trust. This is that table.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-checkmark.png" alt=""></div><div><h3>What we'll cover</h3><p>Who we are, the diamond, the rings you love, our promise to you, and exactly what happens next.</p></div></div>
+    </div>
+    <div class="pgnav"><span></span><button class="btn" type="button" data-next>Meet Hidden Gem</button></div>
+  </section>
+
+  <!-- 1. Who we are -->
+  <section class="pg" data-label="Who we are">
+    <span class="eyebrow">Who We Are</span>
+    <h2>A Family Run <span class="script">Houston</span> Jeweler</h2>
+    <p class="lead">Hidden Gem is a small family business based in Houston. We started it because buying a ring the traditional way meant showroom pressure and paying for a name on the box. We wanted something more honest.</p>
+    <div class="split" style="margin-top:20px">
+      <div class="grid stag" style="grid-template-columns:1fr">
+        <div class="card icard"><div class="ic"><img src="icon-family.png" alt=""></div><div><h3>Family owned</h3><p>When you call Hidden Gem, you talk to the people who own it. Your ring is our name on the line.</p></div></div>
+        <div class="card icard"><div class="ic"><img src="icon-design.png" alt=""></div><div><h3>Made for you</h3><p>Every ring is made to order around your design, your stone and her size. Nothing is pulled off a shelf.</p></div></div>
+        <div class="card icard"><div class="ic"><img src="icon-personal.png" alt=""></div><div><h3>One person, start to finish</h3><p>The same ring specialist you're talking to now stays with you until the ring is on her hand.</p></div></div>
+      </div>
+      <img src="story-veil.jpg" alt="A Hidden Gem ring moment">
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Why Hidden Gem</button></div>
+  </section>
+
+  <!-- 2. Why different -->
+  <section class="pg" data-label="Why Hidden Gem">
+    <span class="eyebrow">Why We're Different</span>
+    <h2>More Ring, <span class="script">Less Markup</span></h2>
+    <p class="lead">Most jewelry stores are built to move inventory. We built Hidden Gem to work the opposite way.</p>
+    <div class="grid stag" style="margin-top:18px">
+      <div class="card icard"><div class="ic"><img src="icon-pricing.png" alt=""></div><div><h3>No showroom markup</h3><p>No storefront lease and no sales floor. What you pay goes into the stone and the craftsmanship.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-quote.png" alt=""></div><div><h3>Honest pricing</h3><p>You'll see exactly what you're paying for and why, before you commit to anything.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-conversation.png" alt=""></div><div><h3>A real conversation</h3><p>No commissioned upsells and no pressure. We design around your story and your budget.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-warranty.png" alt=""></div><div><h3>We stand behind it</h3><p>A one year warranty, free lifetime cleaning and inspection, and fully insured delivery.</p></div></div>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>About the diamond</button></div>
+  </section>
+
+  <!-- 3. Diamond -->
+  <section class="pg" data-label="The diamond">
+    <span class="eyebrow">The Diamond</span>
+    <h2>Real Diamonds, <span class="script">Certified</span></h2>
+    <p class="lead">Lab grown diamonds are our specialty. They are real diamonds, with the same chemistry, hardness and fire as a mined diamond. They're just grown in a lab instead of dug from the ground, which puts more diamond in your budget.</p>
+    <div class="compare stag">
+      <div><small>Same as a mined diamond</small><b>Chemistry, hardness, sparkle</b></div>
+      <div><small>The difference</small><b>A bigger, better stone for the same budget</b></div>
+    </div>
+    <div class="grid stag" style="margin-top:14px">
+      <div class="card icard"><div class="ic"><img src="icon-diamond.png" alt=""></div><div><h3>Graded and certified</h3><p>Diamonds come with a grading certificate, such as IGI, so you know exactly what you're getting.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-checkmark.png" alt=""></div><div><h3>Always labeled honestly</h3><p>Natural diamonds and moissanite are available too. Every stone is clearly labeled as lab grown, natural or moissanite.</p></div></div>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>See our rings</button></div>
+  </section>
+
+  <!-- 4. Hearts -->
+  <section class="pg" data-label="Rings you love">
+    <span class="eyebrow">Your Style</span>
+    <h2>Tap the Rings <span class="script">You Love</span></h2>
+    <p class="lead">Tap the heart on every ring that catches your eye. Your ring specialist sees your picks right away and uses them to build your ring options.</p>
+    <div class="heart-grid stag" id="rings"></div>
+    <p class="loved-count" id="lovedCount"></p>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Our promise to you</button></div>
+  </section>
+
+  <!-- 5. Promise -->
+  <section class="pg" data-label="Our promise">
+    <span class="eyebrow">Our Promise</span>
+    <h2>Protected From <span class="script">Start to Finish</span></h2>
+    <p class="lead">A ring is a big decision. Here's how we protect you at every step.</p>
+    <div class="grid stag" style="margin-top:18px">
+      <div class="card icard"><div class="ic"><img src="icon-checkmark.png" alt=""></div><div><h3>You approve everything first</h3><p>You see your exact ring, metal, stone, size and price, and sign off before anything is made.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-camera.png" alt=""></div><div><h3>A video before it ships</h3><p>We send a video of your finished ring so you see it before it leaves our hands.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-shipping.png" alt=""></div><div><h3>Fully insured delivery</h3><p>Tracked, insured and signed for by an adult, or pick it up by appointment in Houston.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-resize.png" alt=""></div><div><h3>First resize free</h3><p>Not sure of her size? Your first resize is free within one year, up to two sizes.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-warranty.png" alt=""></div><div><h3>One year warranty</h3><p>Covered against manufacturing defects, plus free cleaning and inspection for life.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-quote.png" alt=""></div><div><h3>Full refund if we can't deliver</h3><p>If we ever can't complete your ring, you get every dollar back. Our full policies are always public.</p></div></div>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>The unboxing</button></div>
+  </section>
+
+  <!-- 6. Unboxing -->
+  <section class="pg" data-label="The unboxing">
+    <span class="eyebrow">The Moment</span>
+    <h2>It Arrives Ready to <span class="script">Propose</span></h2>
+    <div class="split" style="margin-top:16px">
+      <img src="ringbox.jpg" alt="The Hidden Gem ring box">
+      <div class="stag">
+        <p class="lead">Every ring arrives in a custom Hidden Gem box, made for the moment you open it.</p>
+        <ul class="steps">
+          <li><span class="n">1</span><div><b>Custom Hidden Gem ring box</b><p>Designed to be opened on one knee.</p></div></li>
+          <li><span class="n">2</span><div><b>Grading certificate</b><p>The paperwork for your diamond, when one applies.</p></div></li>
+          <li><span class="n">3</span><div><b>A Polaroid and ring holder</b><p>A keepsake of your ring and a place to set it at night.</p></div></li>
+          <li><span class="n">4</span><div><b>A handwritten note</b><p>Every box includes a handwritten commitment note from us.</p></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>How it works</button></div>
+  </section>
+
+  <!-- 7. How it works + pay -->
+  <section class="pg" data-label="How it works">
+    <span class="eyebrow">How It Works</span>
+    <h2>Simple, From <span class="script">Hello to Yes</span></h2>
+    <ul class="steps stag">
+      <li><span class="n">1</span><div><b>We talk it through</b><p>Style, stone, metal, budget and her size, right here on this call.</p></div></li>
+      <li><span class="n">2</span><div><b>You get 6 ring options</b><p>We text you a private link with 6 rings made for what you told us.</p></div></li>
+      <li><span class="n">3</span><div><b>Pick, approve and pay</b><p>Choose your ring, confirm her size, sign your approval and check out securely.</p></div></li>
+      <li><span class="n">4</span><div><b>We make it and deliver it</b><p>Custom rings within 6 weeks with progress updates. Ready to ship rings go out in 3 to 5 business days.</p></div></li>
+    </ul>
+    <h3 style="margin-top:28px">Ways to pay</h3>
+    <div class="pay3 stag">
+      <div class="card feat icard"><div class="ic"><img src="icon-financing.png" alt=""></div><div><h3>Monthly payments</h3><p>Split it into monthly payments with our approved lending partners, right on your phone. Subject to approval.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-payment.png" alt=""></div><div><h3>Pay in full</h3><p>Card, Apple Pay or Cash App through secure checkout.</p></div></div>
+      <div class="card icard"><div class="ic"><img src="icon-pricing.png" alt=""></div><div><h3>50% deposit</h3><p>Start production with half, and pay the rest before your ring ships.</p></div></div>
+    </div>
+    <p class="fine" style="margin-top:12px">Checkout is handled by Stripe. Hidden Gem never asks for your Social Security number, income or bank details. Any credit application happens on the lender's own secure site.</p>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>What's next</button></div>
+  </section>
+
+  <!-- 8. Next -->
+  <section class="pg" data-label="What's next">
+    <div class="dark stag">
+      <small>What happens next</small>
+      <h2>Your 6 Ring Options Are <span class="script" style="color:#d9c290">On the Way</span></h2>
+      <p>Stay on the line with your ring specialist. We'll build your options from everything we talked about and the rings you loved, then text you your private Pick Your Ring link.</p>
+      <div class="btns"><a class="btn gold" href="tel:+18327437657">Call (832) 743-7657</a><a class="btn ghost" style="background:transparent;color:#fff;border-color:#fff" href="collection.html">Browse the collection</a></div>
+    </div>
+    <div class="trust stag">
+      <span><img src="icon-diamond.png" alt="">Certified diamonds</span>
+      <span><img src="icon-warranty.png" alt="">One year warranty</span>
+      <span><img src="icon-resize.png" alt="">Free first resize</span>
+      <span><img src="icon-shipping.png" alt="">Insured delivery</span>
+      <span><img src="icon-payment.png" alt="">Secure checkout</span>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><a class="btn ghost" href="policies.html">Our policies</a></div>
+  </section>
+
+  <footer class="foot"><span>Hidden Gem Engagement Rings LLC · Houston, TX</span><span><a href="tel:+18327437657">(832) 743-7657</a> · <a href="mailto:hello@hiddengemrings.com">hello@hiddengemrings.com</a></span></footer>
+</main>
+
+<script src="hg-links.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var first = ((q.get('name') || q.get('n')) || '').replace(/[^A-Za-zÀ-ÿ' -]/g, '').trim().split(' ')[0];
+  if (first) document.getElementById('nm').textContent = ', ' + first.charAt(0).toUpperCase() + first.slice(1);
+  var lead = ((q.get('lead') || q.get('l')) || '').replace(/[^a-z0-9-]/gi, '');
+  HG.headline(document.getElementById('h1'), document.getElementById('lead'));
+  HG.pages({});
+
+  var RINGS = [
+    ['penelope', 'The Penelope', 'Pear solitaire, polished band'],
+    ['selah', 'The Selah', 'Elongated cushion, double claws'],
+    ['nova', 'The Nova', 'Oval in a sculptural bezel'],
+    ['allison', 'The Allison', 'Bezel cushion, split shank'],
+    ['souline', 'The Souline', 'Rose cut round, split shank'],
+    ['aurora', 'The Aurora', 'Curved diamond band'],
+    ['setlla', 'The Setlla', 'Curved band of pear, round and marquise']
+  ];
+  var KEY = 'hgLoved:' + (lead || 'x');
+  var loved = {}; try { loved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  var heart = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.2 5.3 3.2 1.7-2 3.2-3.2 5.3-3.2 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg>';
+  var grid = document.getElementById('rings');
+  grid.innerHTML = RINGS.map(function (r) {
+    return '<div class="ring' + (loved[r[0]] ? ' loved' : '') + '" data-id="' + r[0] + '"><img src="design-' + r[0] + '-yellow.jpg" alt="' + r[1] + '" loading="lazy">' +
+      '<button class="heart" type="button" aria-label="Love ' + r[1] + '" aria-pressed="' + !!loved[r[0]] + '">' + heart + '</button>' +
+      '<div class="rt"><b>' + r[1] + '</b><small>' + r[2] + '</small></div></div>';
+  }).join('');
+  function count() {
+    var n = Object.keys(loved).filter(function (k) { return loved[k]; }).length;
+    document.getElementById('lovedCount').textContent = n ? 'You loved ' + n + ' ring' + (n > 1 ? 's' : '') + '. Your ring specialist can see them.' : '';
+  }
+  count();
+  grid.addEventListener('click', function (e) {
+    var card = e.target.closest('.ring'); if (!card) return;
+    var id = card.dataset.id, on = !loved[id];
+    loved[id] = on; card.classList.toggle('loved', on);
+    card.querySelector('.heart').setAttribute('aria-pressed', on);
+    try { localStorage.setItem(KEY, JSON.stringify(loved)); } catch (x) {}
+    count();
+    if (lead) fetch(HG.API + '/intro/heart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead: lead, design: id, on: on }), keepalive: true }).catch(function () {});
+  });
+  if (lead) fetch(HG.API + '/intro/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lead: lead }), keepalive: true }).catch(function () {});
+})();
+</script>
+</body>
+</html>

@@ -1,5 +1,11 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
 <title>Start Your Ring Journey | Hidden Gem</title>
-<meta http-equiv="refresh" content="0; url=start.html">
-<script>location.replace('start.html' + location.search + location.hash);</script>
-</head><body><a href="start.html">Start Your Ring Journey</a></body></html>
+<script>
+var q = new URLSearchParams(location.search);
+if (q.has('n')) { q.set('name', q.get('n')); q.delete('n'); }
+if (q.has('l')) { q.set('lead', q.get('l')); q.delete('l'); }
+var s = q.toString();
+location.replace('/start' + (s ? '?' + s : '') + location.hash);
+</script>
+<meta http-equiv="refresh" content="1; url=/start">
+</head><body><a href="/start">Start Your Ring Journey</a></body></html>

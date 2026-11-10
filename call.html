@@ -198,7 +198,7 @@
     <div id="outPlan"></div>
     <label class="f"><span>Call notes</span><textarea data-k="notes"></textarea></label>
     <p class="status" id="saveMsg"></p>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><a class="btn ghost" href="approve-admin.html">Back to admin</a></div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><a class="btn ghost" href="/admin">Back to admin</a></div>
   </section>
   </div>
 </main>
@@ -309,7 +309,7 @@
   function sayBlocks(list) { return list.map(function (x) { return '<div class="say"><small>' + E(x[0]) + '</small>' + E(x[1]).replace(/\{first\}/g, E(first())) + '</div>'; }).join(''); }
   function first() { return lead ? String(lead.name || '').split(' ')[0] : ''; }
   function when(ms) { return ms ? new Date(ms).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
-  function introLink() { return 'https://hiddengemrings.com/intro.html?n=' + encodeURIComponent(first()) + '&l=' + encodeURIComponent(leadId); }
+  function introLink() { return 'https://hiddengemrings.com/welcome?name=' + encodeURIComponent(first()) + '&lead=' + encodeURIComponent(leadId); }
   function saveSoon() {
     clearTimeout(timer);
     timer = setTimeout(function () {
@@ -502,7 +502,7 @@
     });
   }
   function boot() {
-    if (!leadId) { document.querySelector('main').innerHTML = '<div class="card" style="margin:40px 0"><h2>Open this from a lead</h2><p class="sub">Go to the admin page and tap Call next to a lead.</p><a class="btn" href="approve-admin.html">Open admin</a></div>'; return; }
+    if (!leadId) { document.querySelector('main').innerHTML = '<div class="card" style="margin:40px 0"><h2>Open this from a lead</h2><p class="sub">Go to hiddengemrings.com/admin and tap Call next to a lead.</p><a class="btn" href="/admin">Open admin</a></div>'; return; }
     if (!key) { $('login').hidden = false; return; }
     refresh().then(function () {
       $('login').hidden = true; $('pages').hidden = false;
@@ -511,7 +511,7 @@
       setInterval(function () { refresh().catch(function () {}); }, 6000);
     }).catch(function (e) {
       if (e && /key/i.test(e.error || '')) { try { localStorage.removeItem(KEYS); } catch (x) {} key = ''; $('login').hidden = false; $('keyMsg').textContent = 'That key did not work.'; }
-      else document.querySelector('main').innerHTML = '<div class="card" style="margin:40px 0"><h2>Lead not found</h2><a class="btn" href="approve-admin.html">Back to admin</a></div>';
+      else document.querySelector('main').innerHTML = '<div class="card" style="margin:40px 0"><h2>Lead not found</h2><a class="btn" href="/admin">Back to admin</a></div>';
     });
   }
   $('keyBtn').addEventListener('click', function () { key = $('key').value.trim(); try { localStorage.setItem(KEYS, key); } catch (e) {} boot(); });
