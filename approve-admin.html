@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Hidden Gem Admin | Leads and Approvals</title>
+<script src="splash.js" data-tagline="Hidden Gem Admin"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -159,9 +160,19 @@
         '<p><a href="tel:+1' + tel + '">' + esc(l.phone) + '</a> · ' + esc(when(l.receivedAt)) + '</p>' +
         '<p>Budget: ' + esc(l.budget) + ' · Pay: ' + esc(l.pay) + (l.monthly ? ' · Monthly: ' + esc(l.monthly) : '') + '</p>' +
         '<p>Proposing: ' + esc(l.timeline) + ' · Credit: ' + esc(l.credit || 'n/a') + '</p>' +
+        '<p><b style="color:var(--brown-dark)">Stage: ' + esc(l.stage || 'Form sent') + '</b>' + (l.stageAt ? ' · ' + esc(when(l.stageAt)) : '') + (l.hearts && l.hearts.length ? ' · Loved ' + l.hearts.length : '') + '</p>' +
+        '<div class="row" style="margin-top:8px"><a class="btn" style="padding:11px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=gilbert">Call (Gilbert)</a><a class="btn ghost" style="padding:10px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=kim">Call (Kim)</a></div>' +
+        '<div class="stat stage" data-id="' + esc(l.id) + '" style="margin-top:8px">' + ['In production', 'Shipped', 'Delivered'].map(function (s) { return '<button type="button" data-stage="' + s + '" class="' + (l.stage === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div>' +
         '<div class="stat" data-id="' + esc(l.id) + '">' + STATUSES.map(function (s) { return '<button type="button" class="' + ((l.status || 'new') === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div></div></div>';
     }).join('');
-    document.querySelectorAll('.stat').forEach(function (g) {
+    document.querySelectorAll('.stat.stage button').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var g = b.parentNode;
+        fetch(API + '/admin/lead-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: g.dataset.id, status: 'approved', stage: b.dataset.stage }) }).then(refresh);
+      });
+    });
+    document.querySelectorAll('.stat:not(.stage)').forEach(function (g) {
       g.querySelectorAll('button').forEach(function (b) {
         b.addEventListener('click', function () {
           g.querySelectorAll('button').forEach(function (x) { x.classList.remove('selected'); }); b.classList.add('selected');
@@ -176,8 +187,9 @@
     var O = data.orders;
     if (!O.length) { $('orderList').innerHTML = '<p>No approval links yet.</p>'; return; }
     $('orderList').innerHTML = O.map(function (o) {
-      return '<div class="item"><div><h3><span class="tag ' + (o.approved ? 't-ok">SIGNED' : 't-wait">WAITING') + '</span>' + esc(o.customerName) + '</h3>' +
-        '<p>' + esc(o.ring) + ' · ' + esc(o.metal) + ' · ' + esc(o.price) + '</p>' +
+      var tag = o.paidInFull ? 't-ok">PAID IN FULL' : o.paid ? 't-ok">DEPOSIT PAID' : o.approved ? 't-ok">SIGNED' : o.options ? (o.chosen != null ? 't-wait">PICKED' : 't-wait">' + o.options.length + ' OPTIONS SENT') : 't-wait">WAITING';
+      return '<div class="item"><div><h3><span class="tag ' + tag + '</span>' + esc(o.customerName) + '</h3>' +
+        '<p>' + (o.ring ? esc(o.ring) + ' · ' + esc(o.metal) + ' · ' + esc(o.price) : 'Choosing from ' + (o.options ? o.options.length : 0) + ' rings') + '</p>' +
         '<p>' + (o.approved ? 'Signed by ' + esc(o.approval.name) + ' on ' + esc(when(o.approval.at)) : 'Created ' + esc(when(o.createdAt))) + '</p>' +
         '<p><a href="' + esc(o.link) + '" target="_blank">' + esc(o.link) + '</a></p></div></div>';
     }).join('');

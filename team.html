@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Team | Hidden Gem</title>
+<script src="splash.js" data-tagline="Hidden Gem Team"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -197,7 +198,8 @@
       var tag = (l.label || 'NEW').split(' ')[0];
       return '<div class="row"><div class="l"><div class="t"><span class="tag ' + tag + '">' + esc(l.label) + '</span>' + esc(l.name) + '</div>' +
         '<div class="m">' + esc(l.at) + ' · ' + esc(l.contact) + (l.slot ? ' (' + esc(l.slot) + ')' : '') + ' · ' + esc(l.budget || 'no budget') + '</div>' +
-        '<div class="m">Went to ' + esc(l.routedTo || 'n/a') + (l.reason ? ' · ' + esc(l.reason) : '') + '</div></div>' +
+        '<div class="m">Went to ' + esc(l.routedTo || 'n/a') + (l.reason ? ' · ' + esc(l.reason) : '') + '</div>' +
+        '<div class="m"><b style="color:var(--brown-dark)">Stage: ' + esc(l.stage || 'Form sent') + '</b> · <a href="call.html?lead=' + encodeURIComponent(l.id || '') + '&rep=gilbert">Call Link (Gilbert)</a> · <a href="call.html?lead=' + encodeURIComponent(l.id || '') + '&rep=kim">Call Link (Kim)</a></div></div>' +
         '<a class="act" href="sms:' + esc(l.phone.replace(/\D/g, '')) + '">' + esc(l.phone) + '</a></div>';
     }).join('') : '<div class="empty">No leads yet today.</div>';
 

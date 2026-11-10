@@ -334,6 +334,7 @@ async function handleTeamState(url, env, origin) {
       name: l.name, phone: fmtPhone(l.phone), label: l.label, contact: l.contact, budget: l.budget,
       at: labelTime(toHM(chiNow(l.receivedAt).mins)), routedTo: (l.routedNames || []).join(', '), reason: l.routeReason || '',
       slot: l.slotDate ? `${labelDate(l.slotDate)} at ${labelTime(l.slotTime)}` : '',
+      stage: l.stage || 'Form sent', id: l.id,
     }));
   const dates = ((await env.IG_KV.get('index:bookdates', 'json')) || []).filter((d) => d >= now.date).sort();
   const bookings = [];
@@ -511,6 +512,7 @@ async function handleLead(fields, request, env, origin) {
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
   lead.label = leadLabel(lead);
+  if (!lead.journey) stampStage(lead, 'Form sent');
 
   // Book the call slot (first time only).
   if (lead.contact === 'Book a call' && !lead.slotDate) {
@@ -527,6 +529,7 @@ async function handleLead(fields, request, env, origin) {
     const dates = (await env.IG_KV.get('index:bookdates', 'json')) || [];
     if (!dates.includes(d)) { dates.push(d); await env.IG_KV.put('index:bookdates', JSON.stringify(dates.sort().slice(-200))); }
     lead.slotDate = d; lead.slotTime = t;
+    stampStage(lead, 'Call booked');
   }
 
   if (!lead.routedEmails) {
@@ -652,39 +655,63 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
 // Creates a Checkout Session for the order's deposit and returns its URL.
 // Requires the order to already be approved, matching the site's existing
 // "approve first, then pay" flow.
-async function handleOrderCheckout(id, env, origin) {
+function orderTotalCents(o) { return parseMoneyCents(o.price); }
+function money(c) { return '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+// Creates a Checkout Session and returns its URL. plan:
+//   full    = whole price (card, Cash App, Apple Pay, Klarna, Affirm)
+//   deposit = 50% non-refundable deposit, balance before shipping
+//   balance = the remaining 50% after a deposit
+// Requires the design to be approved first ("approve first, then pay").
+async function handleOrderCheckout(id, fields, env, origin) {
   if (!env.STRIPE_SECRET_KEY) {
-    return json({ ok: false, error: 'Payments are not turned on yet. Please call (832) 743-7657.' }, 503, origin);
+    return json({ ok: false, error: `Payments are not turned on yet. Please call ${PUBLIC_PHONE}.` }, 503, origin);
   }
   const key = `order:${id}`;
   const o = await env.IG_KV.get(key, 'json');
   if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
   if (!o.approval) return json({ ok: false, error: 'Please approve your design first.' }, 400, origin);
-  if (o.paid) return json({ ok: true, alreadyPaid: true }, 200, origin);
+  if (o.paidInFull) return json({ ok: true, alreadyPaid: true }, 200, origin);
 
-  const totalCents = parseMoneyCents(o.price);
-  if (!totalCents) return json({ ok: false, error: 'We could not read the price on this order. Please call (832) 743-7657.' }, 400, origin);
+  const totalCents = orderTotalCents(o);
+  if (!totalCents) return json({ ok: false, error: `We could not read the price on this order. Please call ${PUBLIC_PHONE}.` }, 400, origin);
   const depositCents = Math.round(totalCents * DEPOSIT_RATE);
+  let plan = String((fields && fields.plan) || 'deposit');
+  if (o.paid) plan = 'balance'; // deposit already in: only the balance is left
+  if (!['full', 'finance', 'deposit', 'balance'].includes(plan)) plan = 'deposit';
+  const amount = plan === 'full' || plan === 'finance' ? totalCents : plan === 'deposit' ? depositCents : totalCents - (o.amountPaidCents || depositCents);
+  if (amount < 50) return json({ ok: false, error: 'Nothing left to pay on this order.' }, 400, origin);
+  const label = plan === 'finance' ? 'Monthly payments' : plan === 'full' ? 'Paid in full' : plan === 'deposit' ? '50% deposit' : 'Remaining balance';
+  const page = o.options ? 'pick.html' : 'approve.html';
 
-  const session = await stripeRequest(env, '/checkout/sessions', {
+  const base = {
     mode: 'payment',
     billing_address_collection: 'required',
     shipping_address_collection: { allowed_countries: ['US'] },
     client_reference_id: o.id,
     customer_email: o.customerEmail || undefined,
-    success_url: `${SITE}/approve.html?id=${o.id}&paid=1`,
-    cancel_url: `${SITE}/approve.html?id=${o.id}`,
-    metadata: { order_id: o.id },
-    payment_intent_data: { metadata: { order_id: o.id }, description: `Hidden Gem deposit — ${o.ring || 'custom ring'} (Order ${o.id})` },
+    success_url: `${SITE}/${page}?id=${o.id}&paid=1`,
+    cancel_url: `${SITE}/${page}?id=${o.id}`,
+    metadata: { order_id: o.id, plan },
+    payment_intent_data: { metadata: { order_id: o.id, plan }, description: `Hidden Gem ${label} — ${o.ring || 'custom ring'} (Order ${o.id})` },
     line_items: [{
       quantity: 1,
       price_data: {
         currency: 'usd',
-        unit_amount: depositCents,
-        product_data: { name: `Hidden Gem — 50% deposit — ${o.ring || 'custom ring'}`, description: `Order ${o.id} · ${o.customerName}` },
+        unit_amount: amount,
+        product_data: { name: `Hidden Gem — ${label} — ${o.ring || 'custom ring'}`, description: `Order ${o.id} · ${o.customerName}` },
       },
     }],
-  });
+  };
+  // Monthly payments: show only the financing options at checkout. Tries
+  // Affirm + Klarna, then Klarna alone (Affirm may still be in review),
+  // then falls back to the normal checkout with every method.
+  const tries = plan === 'finance' ? [['affirm', 'klarna'], ['klarna'], null] : [null];
+  let session;
+  for (const types of tries) {
+    session = await stripeRequest(env, '/checkout/sessions', types ? { ...base, payment_method_types: types } : base);
+    if (session.ok) break;
+  }
   if (!session.ok) return json({ ok: false, error: session.error }, 502, origin);
   return json({ ok: true, url: session.data.url }, 200, origin);
 }
@@ -707,16 +734,25 @@ async function handleStripeWebhook(request, env) {
     if (orderId) {
       const key = `order:${orderId}`;
       const o = await env.IG_KV.get(key, 'json');
-      if (o && !o.paid) {
+      const plan = (session.metadata && session.metadata.plan) || 'deposit';
+      const already = o && (o.payments || []).some((p) => p.session === session.id);
+      if (o && !already) {
+        o.payments = (o.payments || []).concat([{ session: session.id, plan, cents: session.amount_total, at: Date.now() }]);
+        o.amountPaidCents = (o.amountPaidCents || 0) + (session.amount_total || 0);
         o.paid = true;
-        o.paidAt = Date.now();
+        o.paidAt = o.paidAt || Date.now();
         o.stripeSessionId = session.id;
-        o.amountPaidCents = session.amount_total;
+        o.plan = o.plan && plan === 'balance' ? o.plan : plan;
+        if (plan === 'full' || plan === 'finance' || plan === 'balance' || o.amountPaidCents >= (orderTotalCents(o) || Infinity)) o.paidInFull = true;
         await env.IG_KV.put(key, JSON.stringify(o));
+        await markStage(env, o.leadId, plan === 'deposit' ? 'Deposit paid' : plan === 'finance' ? 'Financed' : 'Paid in full');
+        const total = orderTotalCents(o) || 0;
+        const left = Math.max(0, total - o.amountPaidCents);
+        const what = plan === 'finance' ? 'FINANCED IN FULL' : plan === 'full' ? 'PAID IN FULL' : plan === 'deposit' ? 'DEPOSIT PAID' : 'BALANCE PAID';
         await sendEmail(env, {
           to: [OWNER_ADDRESS, TO_ADDRESS],
-          subject: `PAID: ${o.customerName} just paid their deposit ($${(session.amount_total / 100).toFixed(2)})`,
-          html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Deposit received</h2><p><strong>${escapeHtml(o.customerName)}</strong> just paid <strong>$${(session.amount_total / 100).toFixed(2)}</strong> toward ${escapeHtml(o.ring)} (Order ${o.id}).</p><p style="color:#777;font-size:13px">Stripe session: ${escapeHtml(session.id)}</p></div>`,
+          subject: `${what}: ${o.customerName} paid ${money(session.amount_total)} (${o.ring})`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:560px"><div style="display:inline-block;background:#1f7a3a;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">${what}</div><h2 style="margin:14px 0 6px">${escapeHtml(o.customerName)} paid ${money(session.amount_total)}</h2><p>${escapeHtml(o.ring)} · ${escapeHtml(o.metal || '')} · size ${escapeHtml(o.size || 'n/a')}</p><p>Order total ${money(total)} · paid so far ${money(o.amountPaidCents)} · <strong>${left ? 'balance due before shipping ' + money(left) : 'nothing left to pay'}</strong></p><p>Financing or card is shown in Stripe: <a href="https://dashboard.stripe.com/payments">dashboard.stripe.com/payments</a></p><p style="color:#777;font-size:13px">Order ${o.id} · Stripe session ${escapeHtml(session.id)}</p></div>`,
         });
       }
     }
@@ -739,11 +775,110 @@ function publicOrder(o) {
   return {
     id: o.id, customerName: o.customerName, ring: o.ring, metal: o.metal, stone: o.stone,
     size: o.size, engraving: o.engraving, price: o.price, payment: o.payment, notes: o.notes,
-    hasImage: !!o.hasImage, delivery: 'Within 6 weeks of approval and completed payment or financing',
+    hasImage: !!o.hasImage, delivery: o.ready ? 'Ships within 3 to 5 business days after payment' : 'Within 6 weeks of approval and completed payment or financing',
     createdAt: o.createdAt, approved: !!o.approval,
     approval: o.approval ? { name: o.approval.name, at: o.approval.at } : null,
-    paid: !!o.paid,
+    paid: !!o.paid, paidInFull: !!o.paidInFull, plan: o.plan || '', amountPaidCents: o.amountPaidCents || 0,
+    payPref: o.payPref || '', ready: !!o.ready,
+    options: o.options ? o.options.map((x, i) => ({ i, name: x.name, metal: x.metal, stone: x.stone, price: x.price, ready: !!x.ready, noResize: !!x.noResize, hasImage: !!x.hasImage })) : null,
+    brief: o.brief || [], chosen: o.chosen == null ? null : o.chosen, sizeMethod: o.sizeMethod || '', sizeEstimated: !!o.sizeEstimated,
   };
+}
+
+const READY_DELIVERY = 'Ships within 3 to 5 business days after payment';
+const CUSTOM_DELIVERY = 'Within 6 weeks of approval and completed payment or financing';
+
+// Ring options: up to 6 rings for one customer on one link (pick.html).
+async function handleOptionsCreate(fields, env, origin, url) {
+  if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
+  const s = (v, n = 200) => String(v || '').trim().slice(0, n);
+  const raw = Array.isArray(fields.options) ? fields.options.slice(0, 6) : [];
+  const options = raw.map((x) => ({ name: s(x.name, 120), metal: s(x.metal, 60), stone: s(x.stone, 300), price: s(x.price, 40), ready: !!x.ready, noResize: !!x.noResize, image: String(x.image || '') }))
+    .filter((x) => x.name && parseMoneyCents(x.price));
+  const order = {
+    id: newId(), type: 'options',
+    customerName: s(fields.customerName, 120), customerPhone: s(fields.customerPhone, 40), customerEmail: s(fields.customerEmail, 160),
+    payPref: s(fields.payPref, 40), leadId: s(fields.leadId, 48), notes: s(fields.notes, 800), engraving: s(fields.engraving, 120),
+    createdAt: Date.now(), hasImage: false, ring: '', price: '', metal: '', stone: '', size: '', chosen: null,
+  };
+  // Everything gathered on the form and the call, shown to the customer as
+  // "Built from what you told us" on their Pick Your Ring page.
+  const brief = fields.brief && typeof fields.brief === 'object' ? fields.brief : {};
+  order.brief = Object.keys(brief).slice(0, 16).map((k) => [String(k).slice(0, 40), String(brief[k] || '').slice(0, 160)]).filter((x) => x[1]);
+  if (order.leadId) {
+    const lead = await env.IG_KV.get(`lead:${order.leadId}`, 'json');
+    if (lead) {
+      if (!order.customerEmail && lead.email) order.customerEmail = lead.email;
+      if (!order.customerPhone) order.customerPhone = lead.phone || '';
+      if (!order.payPref) order.payPref = lead.pay || '';
+      lead.orderId = order.id; lead.status = 'link sent'; lead.statusAt = Date.now();
+      stampStage(lead, 'Options sent');
+      await env.IG_KV.put(`lead:${order.leadId}`, JSON.stringify(lead));
+    }
+  }
+  if (!order.customerName) return json({ ok: false, error: 'Customer name is required' }, 400, origin);
+  if (!options.length) return json({ ok: false, error: 'Add at least one ring with a name and a price' }, 400, origin);
+  for (let i = 0; i < options.length; i++) {
+    const img = options[i].image;
+    if (img.startsWith('data:image/')) {
+      if (img.length > 6_000_000) return json({ ok: false, error: `Ring ${i + 1} photo is too large` }, 400, origin);
+      await env.IG_KV.put(`img:${order.id}:${i}`, img);
+      options[i].hasImage = true;
+    }
+    delete options[i].image;
+  }
+  order.options = options;
+  await env.IG_KV.put(`order:${order.id}`, JSON.stringify(order));
+  await addToIndex(env, 'index:orders', order.id);
+  return json({ ok: true, id: order.id, link: `${SITE}/pick.html?id=${order.id}` }, 200, origin);
+}
+
+// The customer picks a ring and a size. Allowed until the design is signed.
+async function handleOptionsChoose(id, fields, env, origin) {
+  const key = `order:${id}`;
+  const o = await env.IG_KV.get(key, 'json');
+  if (!o || !o.options) return json({ ok: false, error: 'Order not found' }, 404, origin);
+  if (o.approval) return json({ ok: false, error: 'This design is already approved.' }, 400, origin);
+  const i = Number(fields.index);
+  const opt = o.options[i];
+  if (!opt) return json({ ok: false, error: 'Please pick a ring' }, 400, origin);
+  const size = Number(fields.size);
+  if (!isFinite(size) || size < 3 || size > 13) return json({ ok: false, error: 'Please pick a ring size between 3 and 13' }, 400, origin);
+  const method = String(fields.sizeMethod || 'known');
+  if (!['known', 'measured', 'estimate'].includes(method)) return json({ ok: false, error: 'Please choose how you found the size' }, 400, origin);
+  if (method === 'estimate' && opt.noResize) return json({ ok: false, error: 'This ring can\'t be resized, so we need her exact size. Please measure a ring she wears or tell us her size.' }, 400, origin);
+  o.chosen = i;
+  o.ring = opt.name; o.metal = opt.metal; o.stone = opt.stone; o.price = opt.price; o.ready = !!opt.ready;
+  o.sizeMethod = method;
+  o.sizeEstimated = method !== 'known';
+  const detail = String(fields.sizeDetail || '').trim().slice(0, 160);
+  const how = method === 'known' ? 'known size' : method === 'measured' ? `measured from her ring${detail ? ', ' + detail : ''}` : `estimated${detail ? ', ' + detail : ''}`;
+  o.size = `${size} (${how})${o.sizeEstimated && !opt.noResize ? ' · free resize within 1 year, up to 2 sizes' : ''}`;
+  if (opt.hasImage) {
+    const img = await env.IG_KV.get(`img:${id}:${i}`);
+    if (img) { await env.IG_KV.put(`img:${id}`, img); o.hasImage = true; }
+  } else o.hasImage = false;
+  const photo = String(fields.sizePhoto || '');
+  if (photo.startsWith('data:image/') && photo.length < 6_000_000) { await env.IG_KV.put(`img:${id}:size`, photo); o.hasSizePhoto = true; }
+  await env.IG_KV.put(key, JSON.stringify(o));
+  await markStage(env, o.leadId, 'Ring picked');
+  return json({ ok: true, order: publicOrder(o) }, 200, origin);
+}
+
+async function handleOrderSeen(id, env, origin) {
+  const o = await env.IG_KV.get(`order:${id}`, 'json');
+  if (!o) return json({ ok: false }, 404, origin);
+  if (!o.seenAt) { o.seenAt = Date.now(); await env.IG_KV.put(`order:${id}`, JSON.stringify(o)); await markStage(env, o.leadId, 'Options opened'); }
+  return json({ ok: true }, 200, origin);
+}
+
+async function handleOptionImage(id, i, env) {
+  const data = await env.IG_KV.get(`img:${id}:${i}`);
+  if (!data) return new Response('Not found', { status: 404 });
+  const m = data.match(/^data:(image\/[a-z+]+);base64,(.*)$/);
+  if (!m) return new Response('Bad image', { status: 500 });
+  const bin = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
+  return new Response(bin, { headers: { 'Content-Type': m[1], 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' } });
 }
 
 async function handleOrderCreate(fields, env, origin, url) {
@@ -791,6 +926,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
   if (o.approval && o.approval.emailed) return json({ ok: true, order: publicOrder(o), duplicate: true }, 200, origin);
 
+  if (o.options && o.chosen == null) return json({ ok: false, error: 'Please pick your ring and size first.' }, 400, origin);
   const typed = String(fields.name || '').trim().slice(0, 120);
   const agreed = fields.agree === true || fields.agree === 'true';
   if (!agreed || typed.length < 3) {
@@ -809,12 +945,14 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   const rows = [
     ['Ring', o.ring], ['Metal', o.metal], ['Stone', o.stone], ['Ring size', o.size],
     ['Engraving', o.engraving || 'None'], ['Price', o.price], ['Payment', o.payment || 'n/a'],
-    ['Delivery', 'Within 6 weeks of approval and completed payment or financing'],
+    ['Delivery', o.ready ? READY_DELIVERY : CUSTOM_DELIVERY],
     ['Approved by (typed name)', o.approval.name], ['Approved at', chicagoTime(o.approval.at)],
     ['Agreement', o.approval.terms], ['Order ID', o.id],
   ];
   const table = `<table cellpadding="7" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') + `</table>`;
+  if (o.hasSizePhoto) rows.splice(4, 0, ['Size photo', `https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image/size`]);
+  if (o.payPref) rows.push(['Payment preference (form)', o.payPref]);
   const imgTag = o.hasImage ? `<p><img src="https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image" alt="Approved design" style="max-width:100%;border-radius:12px"></p>` : '';
 
   const ownerSent = await sendEmail(env, {
@@ -838,7 +976,78 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   }
   o.approval.emailed = true;
   await env.IG_KV.put(key, JSON.stringify(o));
+  await markStage(env, o.leadId, 'Approved');
   return json({ ok: true, order: publicOrder(o) }, 200, origin);
+}
+
+// === Customer journey ===
+// One timeline per lead so every link knows where the customer is.
+const STAGES = ['Form sent', 'Call booked', 'Called', 'Intro opened', 'Loved rings', 'Options sent', 'Options opened', 'Ring picked', 'Approved', 'Deposit paid', 'Financed', 'Paid in full', 'In production', 'Shipped', 'Delivered', 'Not ready', 'Lost'];
+function stampStage(lead, stage) {
+  if (!lead || !STAGES.includes(stage)) return lead;
+  lead.journey = lead.journey || [];
+  const last = lead.journey[lead.journey.length - 1];
+  if (!last || last.stage !== stage) lead.journey.push({ stage, at: Date.now() });
+  lead.journey = lead.journey.slice(-40);
+  lead.stage = stage; lead.stageAt = Date.now();
+  return lead;
+}
+async function markStage(env, leadId, stage) {
+  if (!leadId) return;
+  const lead = await env.IG_KV.get(`lead:${leadId}`, 'json');
+  if (!lead) return;
+  stampStage(lead, stage);
+  await env.IG_KV.put(`lead:${leadId}`, JSON.stringify(lead));
+}
+
+// === Customer Intro + Call Link ===
+const INTRO_RINGS = ['penelope', 'selah', 'nova', 'allison', 'souline', 'aurora', 'setlla'];
+async function handleIntroHeart(fields, env, origin) {
+  const id = String(fields.lead || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const d = String(fields.design || '');
+  if (!INTRO_RINGS.includes(d)) return json({ ok: false }, 400, origin);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false }, 404, origin);
+  const set = new Set(lead.hearts || []);
+  if (fields.on === true || fields.on === 'true') set.add(d); else set.delete(d);
+  lead.hearts = Array.from(set);
+  lead.heartsAt = Date.now();
+  if (lead.hearts.length) stampStage(lead, 'Loved rings');
+  await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+async function handleIntroSeen(fields, env, origin) {
+  const id = String(fields.lead || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false }, 404, origin);
+  lead.introSeenAt = lead.introSeenAt || Date.now();
+  lead.introLastAt = Date.now();
+  if (!(lead.journey || []).some((j) => j.stage === 'Intro opened')) stampStage(lead, 'Intro opened');
+  await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+async function handleAdminLead(url, env, origin) {
+  const ok = isAdmin(null, url, env) || teamAuth(null, url, env);
+  if (!ok) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(url.searchParams.get('id') || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  return json({ ok: true, lead }, 200, origin);
+}
+async function handleCallSave(fields, url, env, origin) {
+  if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  const call = fields.call && typeof fields.call === 'object' ? fields.call : {};
+  const clean = {};
+  Object.keys(call).slice(0, 40).forEach((k) => { clean[String(k).slice(0, 40)] = String(call[k] == null ? '' : call[k]).slice(0, 600); });
+  lead.call = { ...(lead.call || {}), ...clean, savedAt: Date.now(), rep: String(fields.rep || '').slice(0, 40) };
+  if (fields.status) { lead.status = String(fields.status).slice(0, 30); lead.statusAt = Date.now(); }
+  if (fields.orderId) lead.orderId = String(fields.orderId).slice(0, 40);
+  if (fields.stage) stampStage(lead, String(fields.stage));
+  await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
 }
 
 async function handleAdminList(url, env, origin) {
@@ -847,7 +1056,7 @@ async function handleAdminList(url, env, origin) {
   const orderIds = ((await env.IG_KV.get('index:orders', 'json')) || []).slice(0, 50);
   const leads = (await Promise.all(leadIds.map((id) => env.IG_KV.get(`lead:${id}`, 'json')))).filter(Boolean);
   const orders = (await Promise.all(orderIds.map((id) => env.IG_KV.get(`order:${id}`, 'json')))).filter(Boolean)
-    .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/approve.html?id=${o.id}` }));
+    .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/${o.options ? 'pick' : 'approve'}.html?id=${o.id}` }));
   return json({ ok: true, leads, orders }, 200, origin);
 }
 
@@ -858,6 +1067,7 @@ async function handleLeadStatus(fields, url, env, origin) {
   if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
   lead.status = String(fields.status || 'new').slice(0, 30);
   lead.statusAt = Date.now();
+  if (fields.stage) stampStage(lead, String(fields.stage));
   await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
   return json({ ok: true }, 200, origin);
 }
@@ -877,11 +1087,14 @@ export default {
       if (path === '/instagram/set-token') return handleSetToken(url, env);
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
+      if (path === '/admin/lead') return handleAdminLead(url, env, origin);
       if (path === '/team/public') return handlePublicStatus(env, origin);
       if (path === '/team/state') return handleTeamState(url, env, origin);
       if (path === '/book/slots') return handleSlots(env, origin);
       if (path === '/email/check') return handleEmailCheck(url, env, origin);
-      let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
+      let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image\/([0-5]|size)$/);
+      if (m) return handleOptionImage(m[1], m[2], env);
+      m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
       if (m) return handleOrderImage(m[1], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})$/);
       if (m) return handleOrderGet(m[1], env, origin);
@@ -914,11 +1127,19 @@ export default {
     if (path === '/lead/email') return handleLeadEmail(fields, env, origin);
     if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
+    if (path === '/order/create-options') return handleOptionsCreate(fields, env, origin, url);
+    const sm = path.match(/^\/order\/([a-z0-9]{6,32})\/seen$/);
+    if (sm) return handleOrderSeen(sm[1], env, origin);
+    const chm = path.match(/^\/order\/([a-z0-9]{6,32})\/choose$/);
+    if (chm) return handleOptionsChoose(chm[1], fields, env, origin);
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
+    if (path === '/admin/call-save') return handleCallSave(fields, url, env, origin);
+    if (path === '/intro/heart') return handleIntroHeart(fields, env, origin);
+    if (path === '/intro/seen') return handleIntroSeen(fields, env, origin);
     const am = path.match(/^\/order\/([a-z0-9]{6,32})\/approve$/);
     if (am) return handleOrderApprove(am[1], fields, request, env, origin);
     const cm = path.match(/^\/order\/([a-z0-9]{6,32})\/checkout$/);
-    if (cm) return handleOrderCheckout(cm[1], env, origin);
+    if (cm) return handleOrderCheckout(cm[1], fields, env, origin);
 
     // honeypot — silently accept so a bot can't tell it was rejected
     if (fields._honey) {

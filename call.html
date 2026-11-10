@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Customer Intro Call | Hidden Gem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="hg-links.css">
+<script src="splash.js" data-tagline="Customer Intro Call"></script>
+<style>
+  .say{background:var(--deep);color:#f4ede2;border-radius:18px;padding:16px 18px;margin:12px 0;font-size:1.04rem;line-height:1.55}
+  .say small{display:block;color:#d9c290;font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;margin-bottom:6px}
+  .say + .say{margin-top:8px}
+  .tip{background:var(--goldsoft);border-radius:14px;padding:12px 14px;font-size:.95rem;color:#5c4a2a;margin:10px 0}
+  .tip b{color:#6f5524}
+  .q{margin:18px 0 6px;font-weight:600;color:var(--deep)}
+  .q small{display:block;font-weight:400;color:var(--muted);font-size:.86rem}
+  .kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:10px}
+  .kv div{background:var(--cream);border-radius:12px;padding:10px 12px}
+  .kv span{display:block;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .kv b{color:var(--deep);font-weight:600}
+  .tl{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .tl span{font-size:.75rem;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--cream2);color:var(--muted)}
+  .tl span.done{background:#e4f2e8;color:var(--ok)}
+  .tl span.now{background:var(--deep);color:#fff}
+  .acc{border:1px solid var(--line);border-radius:16px;background:#fff;margin-top:10px;overflow:hidden}
+  .acc summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:600;color:var(--deep);display:flex;justify-content:space-between;gap:10px}
+  .acc summary::-webkit-details-marker{display:none}
+  .acc summary::after{content:'+';color:var(--gold);font-size:1.3rem;line-height:1}
+  .acc[open] summary::after{content:'–'}
+  .acc .in{padding:0 16px 16px}
+  .acc .in p{margin:6px 0}
+  .slots{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+  .slot{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:14px}
+  .slot.filled{border-color:var(--gold)}
+  .slot .pv{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:var(--cream2);display:block;margin-bottom:10px}
+  .slot select,.slot input{padding:10px 12px;font-size:.95rem}
+  .slot .row2{display:grid;grid-template-columns:1.35fr 1fr;gap:8px;margin-top:8px}
+  .slot select{padding-right:6px}
+  .slot label.ck{display:flex;gap:8px;align-items:center;font-size:.86rem;color:var(--muted);margin-top:8px}
+  .slot .hint{font-size:.8rem;color:#8a6d34;margin-top:4px;min-height:18px}
+  .lovepill{display:inline-block;background:var(--deep);color:var(--gold);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:999px;margin-left:6px}
+  .outs{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .outs .opt{justify-content:flex-start;text-align:left;min-height:56px}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--ok)}
+  .live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(31,122,58,.15)}
+  .repsw{display:flex;gap:6px;margin-top:10px}
+  #login{max-width:440px;margin:60px auto}
+  .linkbox{word-break:break-all;background:var(--cream);border-radius:12px;padding:12px;font-size:.92rem;margin-top:10px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <img src="logo-brown.png" alt="Hidden Gem">
+      <div class="who"><b id="repName">Customer Intro Call</b><span id="custTop">Call Link</span></div>
+      <nav class="seg" aria-label="Call sections">
+        <button type="button" data-go="0-2">Intro</button>
+        <button type="button" data-go="3-5">Create</button>
+        <button type="button" data-go="6-8">Sell</button>
+      </nav>
+    </div>
+    <div class="meta"><span id="plab"></span><span id="pcnt"></span></div>
+    <div class="prog"><i></i></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="login" class="card" hidden>
+    <h2>Sign in</h2>
+    <p class="sub">Use the admin key. It stays on this device.</p>
+    <input type="password" id="key" placeholder="Admin key" autocomplete="current-password">
+    <div class="btns"><button class="btn" id="keyBtn" type="button">Open Call Link</button></div>
+    <p class="status err" id="keyMsg"></p>
+  </div>
+
+  <div id="pages" hidden>
+  <!-- 0 PREP -->
+  <section class="pg" data-label="Before you dial">
+    <span class="eyebrow">Before You Dial</span>
+    <h1 class="fx" id="h1">Let's Win <span class="script" id="h1name">This Ring</span></h1>
+    <p class="lead fxlead" id="lead">30 seconds of prep. Know who they are before they pick up.</p>
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h3 id="cName" style="margin:0"></h3><span class="badge" id="cLabel"></span></div>
+      <p style="margin:6px 0 0"><a id="cTel" href="#"></a> · <span id="cWhen" class="fine"></span></p>
+      <div class="kv" id="formKv"></div>
+      <div class="tl" id="journey"></div>
+      <div class="repsw" id="repSw"></div>
+    </div>
+    <div class="tip" id="prepTip"></div>
+    <div class="say"><small>Your goal on this call</small>Make them feel safe, get the ring right, and send their 6 options before you hang up. Closing on the call is the win. A scheduled follow up is the backup.</div>
+    <div class="pgnav"><span></span><button class="btn" type="button" data-next>Start the call</button></div>
+  </section>
+
+  <!-- 1 OPEN -->
+  <section class="pg" data-label="Open the call">
+    <span class="eyebrow">Open</span>
+    <h2>The First <span class="script">30 Seconds</span></h2>
+    <div id="openScript"></div>
+    <div class="card" style="margin-top:14px">
+      <h3>Send the Hidden Gem Introduction now</h3>
+      <p class="fine">Text it while you talk. They follow along on speaker. You'll see when they open it and which rings they love.</p>
+      <div class="btns"><a class="btn" id="sendIntro" href="#">Text the intro link</a><button class="btn ghost" type="button" id="copyIntro">Copy link</button><span class="fine" id="introState"></span></div>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Their story</button></div>
+  </section>
+
+  <!-- 2 STORY -->
+  <section class="pg" data-label="Their story">
+    <span class="eyebrow">Discovery</span>
+    <h2>Get the <span class="script">Story</span></h2>
+    <p class="sub">People buy from people who listen. Ask, then let them talk. Tap answers as you go.</p>
+    <div id="storyScript"></div>
+    <div class="q">Who is the ring for?</div><div class="opts" data-k="forWho"></div>
+    <div class="q">When are you proposing?<small>From the form, confirm it.</small></div><div class="opts" data-k="when"></div>
+    <div class="q">Is it a surprise?</div><div class="opts" data-k="surprise"></div>
+    <div class="q">What jewelry does she wear every day?</div><div class="opts" data-k="wears"></div>
+    <div class="q">Her style in one word</div><div class="opts" data-k="vibe"></div>
+    <label class="f"><span>Their story (how they met, the proposal plan)</span><textarea id="storyNote" data-k="story"></textarea></label>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Create the ring</button></div>
+  </section>
+
+  <!-- 3 CREATE -->
+  <section class="pg" data-label="Ring creator">
+    <span class="eyebrow">Ring Creator</span>
+    <h2>Build <span class="script">Her Ring</span></h2>
+    <div class="tip" id="loveTip">Rings they loved on the intro page show up here live.</div>
+    <div id="createScript"></div>
+    <div class="q">Ring style</div><div class="opts" data-k="style"></div>
+    <div class="q">Stone shape</div><div class="opts" data-k="shape"></div>
+    <div class="q">Stone size</div><div class="opts" data-k="carat"></div>
+    <div class="q">Stone type</div><div class="opts" data-k="stoneType"></div>
+    <div class="q">Metal</div><div class="opts" data-k="metal"></div>
+    <div class="q">Band</div><div class="opts" data-k="band"></div>
+    <label class="f"><span>Engraving (optional)</span><input type="text" data-k="engraving" maxlength="60"></label>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Her size</button></div>
+  </section>
+
+  <!-- 4 SIZE -->
+  <section class="pg" data-label="Her size">
+    <span class="eyebrow">Ring Size</span>
+    <h2>Size <span class="script">Without Asking Her</span></h2>
+    <div id="sizeScript"></div>
+    <div class="q">Do you know her size?</div><div class="opts" data-k="sizeKnown"></div>
+    <div class="q">Size (exact or estimate)</div><div class="opts" data-k="size"></div>
+    <div class="tip"><b>The rule:</b> an estimate must be a calculated guess within 2 sizes. First resize is free within one year, up to 2 sizes. Eternity and full pavé bands can't be resized, so they need her exact size. On their link they can also measure a ring she wears in millimeters or send a photo.</div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Budget and payment</button></div>
+  </section>
+
+  <!-- 5 BUDGET -->
+  <section class="pg" data-label="Budget and payment">
+    <span class="eyebrow">Budget</span>
+    <h2>Make It <span class="script">Affordable</span></h2>
+    <div id="budgetScript"></div>
+    <div class="q">Budget (confirm)</div><div class="opts" data-k="budget"></div>
+    <div class="q">How they want to pay</div><div class="opts" data-k="pay"></div>
+    <div class="q">Comfortable monthly payment</div><div class="opts" data-k="monthly"></div>
+    <div class="card" style="margin-top:14px"><h3>Price guide (Houston, lab grown, 14k solitaire)</h3><div class="kv" id="priceGuide"></div><p class="fine" style="margin-top:8px">Add about $300 for a hidden halo, $350 for a diamond band, $250 for 18k, $650 for platinum. Natural diamonds run about 4x. Moissanite about half. Your suggested price for their answers: <b id="suggest"></b></p></div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Pitch and objections</button></div>
+  </section>
+
+  <!-- 6 PITCH -->
+  <section class="pg" data-label="Pitch and objections">
+    <span class="eyebrow">Sell</span>
+    <h2>Your <span class="script">Pitch</span></h2>
+    <div id="pitchScript"></div>
+    <h3 style="margin-top:22px">Every objection, handled</h3>
+    <div id="objections"></div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Build their 6 rings</button></div>
+  </section>
+
+  <!-- 7 BUILD -->
+  <section class="pg" data-label="Build 6 rings">
+    <span class="eyebrow">Pick Your Ring + Checkout</span>
+    <h2>Build Their <span class="script">6 Rings</span></h2>
+    <p class="sub">Suggested from their answers and the rings they loved. Swap any ring, upload your own from the Canva library, and adjust prices.</p>
+    <div class="btns" style="margin:0 0 14px"><button class="btn ghost" type="button" id="resuggest">Re-suggest from answers</button></div>
+    <div class="slots" id="slots"></div>
+    <div class="card" style="margin-top:16px">
+      <div class="say" style="margin-top:0"><small>Say this</small><span id="sendLine"></span></div>
+      <div class="btns"><button class="btn" type="button" id="createLink">Create their Pick Your Ring link</button></div>
+      <p class="status" id="createMsg"></p>
+      <div id="linkOut" hidden><div class="linkbox" id="pickLink"></div><div class="btns"><a class="btn gold" id="sendPick" href="#">Text it now</a><button class="btn ghost" type="button" id="copyPick">Copy link</button><a class="btn ghost" id="openPick" href="#" target="_blank">Open</a></div></div>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Close and outcome</button></div>
+  </section>
+
+  <!-- 8 CLOSE -->
+  <section class="pg" data-label="Close and outcome">
+    <span class="eyebrow">Close</span>
+    <h2>Close It <span class="script">Together</span></h2>
+    <div id="closeScript"></div>
+    <h3 style="margin-top:20px">How did it end? Tap one</h3>
+    <div class="outs" id="outs"></div>
+    <div id="outPlan"></div>
+    <label class="f"><span>Call notes</span><textarea data-k="notes"></textarea></label>
+    <p class="status" id="saveMsg"></p>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><a class="btn ghost" href="approve-admin.html">Back to admin</a></div>
+  </section>
+  </div>
+</main>
+
+<script src="hg-links.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), API = HG.API, E = HG.esc;
+  var leadId = (q.get('lead') || '').replace(/[^a-z0-9-]/gi, '');
+  var KEYS = 'hg_admin_key', key = ''; try { key = localStorage.getItem(KEYS) || ''; } catch (e) {}
+  var rep = (q.get('rep') || (function () { try { return localStorage.getItem('hg_rep'); } catch (e) { return ''; } })() || 'gilbert').toLowerCase() === 'kim' ? 'kim' : 'gilbert';
+  var lead = null, ans = {}, timer = null, slots = [];
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------------- choices ---------------- */
+  var C = {
+    forWho: ['Girlfriend', 'Fiancée', 'Wife (upgrade or anniversary)', 'Boyfriend or husband', 'Buying for myself', 'Shopping together'],
+    when: ['As soon as possible', 'In 1 to 3 months', 'In 3 to 6 months', 'Just looking for now'],
+    surprise: ['Total surprise', 'She knows, not the ring', 'We pick together'],
+    wears: ['Yellow gold', 'White gold or silver', 'Rose gold', 'Mixes metals', 'Barely wears jewelry'],
+    vibe: ['Classic', 'Modern', 'Vintage', 'Minimal', 'Glam'],
+    style: ['The Penelope', 'The Selah', 'The Nova', 'The Allison', 'The Souline', 'The Aurora', 'The Setlla', 'Something custom'],
+    shape: ['Oval', 'Round', 'Pear', 'Emerald', 'Cushion', 'Radiant', 'Princess', 'Marquise', 'Not sure yet'],
+    carat: ['Under 1 carat', '1 to 1.5 carats', '1.5 to 2 carats', '2 to 3 carats', '3 carats+', 'Not sure yet'],
+    stoneType: ['Lab grown diamond', 'Natural diamond', 'Moissanite', 'Not sure yet'],
+    metal: ['14k Yellow Gold', '14k White Gold', '14k Rose Gold', '18k Yellow Gold', '18k White Gold', 'Platinum'],
+    band: ['Plain band', 'Diamond band', 'Hidden halo', 'Not sure yet'],
+    sizeKnown: ['Knows her size', 'Will estimate', 'Will measure a ring she wears'],
+    size: ['4', '4.5', '5', '5.5', '6', '6.5', '7', '7.5', '8', '8.5', '9'],
+    budget: ['Under $2,000', '$2,000 to $4,000', '$4,000 to $7,000', '$7,000 to $10,000', '$10,000+', 'Not sure yet'],
+    pay: ['Monthly payments', 'Pay in full', '50% deposit', 'Not sure yet'],
+    monthly: ['Under $100', '$100 to $200', '$200 to $350', '$350 to $500', '$500+', 'Not sure yet']
+  };
+  var LIB = [
+    { id: 'penelope', name: 'The Penelope', shape: 'Pear', kind: 'solitaire' },
+    { id: 'selah', name: 'The Selah', shape: 'Cushion', kind: 'solitaire' },
+    { id: 'nova', name: 'The Nova', shape: 'Oval', kind: 'solitaire' },
+    { id: 'allison', name: 'The Allison', shape: 'Cushion', kind: 'solitaire' },
+    { id: 'souline', name: 'The Souline', shape: 'Round', kind: 'solitaire' },
+    { id: 'aurora', name: 'The Aurora', shape: 'Band', kind: 'band' },
+    { id: 'setlla', name: 'The Setlla', shape: 'Band', kind: 'band' }
+  ];
+  var PRICE = { 'Under 1 carat': [850, 1200], '1 to 1.5 carats': [1200, 1900], '1.5 to 2 carats': [1700, 2600], '2 to 3 carats': [2300, 3600], '3 carats+': [3400, 5500], 'Not sure yet': [1200, 2600] };
+
+  /* ---------------- scripts: Gilbert (male) and Kim (female) ---------------- */
+  var S = {
+    gilbert: {
+      name: 'Gilbert', title: "Gilbert's Call Link",
+      prep: '<b>Your edge:</b> you sold high ticket commercial trucks and were the top salesperson in the company two years running, and you ran your own restaurant for six years. You know trust closes big purchases. Speak to him man to man: calm, confident, no pressure. He is nervous about getting it wrong. Your job is to make it easy. Se habla español: switch any time it helps.',
+      open: [['Open', 'Hey {first}, this is Gilbert with Hidden Gem. You just filled out our form about a ring, is now still a good time for about 10 minutes?'],
+             ['Set the frame', "Perfect. Here's how this works: I'll ask you a few questions, we'll build her ring together, and before we hang up I'll text you 6 options made for what you told me. No pressure, and nothing gets made unless you approve it. Sound good?"],
+             ['Send the intro', "I just texted you a link. Put me on speaker and open it, it shows you who we are while we talk."]],
+      story: [['Ask', "Congrats man, that's huge. Tell me about her. How long have you two been together?"], ['Ask', 'How are you planning to pop the question? Anything special?'], ['Why it matters', "Every detail you give me goes into her ring. Most guys stress about this part. My job is to take that weight off you."]],
+      create: [['Guide', "Let's look at the rings on that page. Which ones did you heart? Good taste. Is she more of an oval or a pear type of woman?"], ['Lead him', "Guys usually come in thinking smaller to stay safe. Here's what I tell everyone: lab grown gets you a lot more diamond for the money, so you can go bigger without going over budget."]],
+      size: [['Say', "Real talk, most guys don't know her size. Here's how we get it without ruining the surprise."], ['Methods', '1) Borrow a ring she wears on her right hand and measure it on the link. 2) Ask her best friend, sister or mom. 3) Slide one of her rings on your pinky and mark where it stops. 4) If all else fails, most women are a 6. Your first resize is free, up to 2 sizes.']],
+      budget: [['Ask', "What number are you comfortable with? Monthly or total, either works."], ['Financing pitch', "Most of our clients do monthly payments through our lending partners. You apply on your phone in a couple minutes, and you know right away. That way you get the ring she deserves without draining your savings."]],
+      pitch: [['Value', "No showroom, no markup. At a mall jeweler you're paying for the lease and the name on the box. With us it goes into the diamond."], ['Protection', "You see the exact ring and approve it before we make anything. We send you a video before it ships. It's insured, tracked and signed for. And if we ever can't deliver, you get every dollar back."], ['Ownership', "I own this company with my wife. When you buy from us, you're dealing with the owner, not a commissioned salesman."]],
+      send: "I'm texting you your 6 options right now. Open it while we're on the phone, tell me which one jumps out, and I'll walk you through checkout.",
+      close: [['Trial close', 'Which one can you see on her hand?'], ['Assume the sale', "Good choice. Pick that one, put in her size, sign, and choose monthly payments. I'll stay on the line."], ['If he hesitates', "What's the one thing holding you back? Let's solve it right now."]]
+    },
+    kim: {
+      name: 'Kim', title: "Kim's Call Link",
+      prep: "<b>Your edge:</b> you're a woman who wears a ring every day. He wants to know what she'll actually love, and you're the expert in the room. Be warm, excited and reassuring, like a best friend who knows jewelry. If a woman or a couple is shopping, connect with her directly: it's her ring. Se habla español: switch any time it helps.",
+      open: [['Open', "Hi {first}! This is Kim with Hidden Gem. You just filled out our form about a ring, congratulations! Is now a good time for about 10 minutes?"],
+             ['Set the frame', "I'm so excited for you. I'll ask a few questions, we'll design her ring together, and before we hang up I'll text you 6 rings picked just for her. Nothing is made until you approve it."],
+             ['Send the intro', 'I just texted you a link, open it on speaker and follow along with me, it shows you who we are.']],
+      story: [['Ask', "Okay, tell me everything! How did you two meet?"], ['Ask', "How are you planning to propose? I love hearing these."], ['Why it matters', "Her ring should feel like her. The more you tell me, the more perfect it'll be."]],
+      create: [['Guide', "Which rings did you heart? Oh she'll love that. As a woman, I can tell you the shape is what she'll notice first. Ovals look bigger and make her finger look longer."], ['Her perspective', "She'll be looking at this ring every single day. Trust me, a little more sparkle is never a mistake. Lab grown lets you get that without spending more."]],
+      size: [['Say', "Don't worry, almost nobody knows her size. Here are my secret tricks."], ['Methods', "1) Borrow a ring from her jewelry box and measure it on the link. 2) Ask her best friend, sister or mom. They'll keep the secret. 3) Most women wear a 6 to 7. 4) Your first resize is free, up to 2 sizes, so you can't really get it wrong."]],
+      budget: [['Ask', "What feels comfortable for you? Monthly or total is totally fine."], ['Financing pitch', "Most of our couples do monthly payments. It takes a couple minutes on your phone, and she gets the ring she's dreaming about without you stressing."]],
+      pitch: [['Her reaction', "When she opens this box, she's going to cry. The custom box, the Polaroid, the handwritten note, every detail is made for that moment."], ['Value', "No showroom markup, so your money goes into a bigger, better diamond. That's what she'll show her friends."], ['Protection', "You approve everything first, we send you a video before it ships, it's fully insured, and her first resize is free. You're completely covered."]],
+      send: "I'm texting your 6 rings now! Open it while we're talking and tell me which one you love. I'll help you through checkout.",
+      close: [['Trial close', 'Which one do you see on her hand?'], ['Assume the sale', "She's going to love it. Pick it, add her size, sign, and choose monthly payments. I'm right here with you."], ['If they hesitate', "What's making you unsure? Tell me and we'll figure it out together."]]
+    }
+  };
+  var OBJ = [
+    ['"I need to think about it."', "Totally fair, it's a big decision. What specifically do you want to think over, the ring, the price or the timing? (Solve that one thing.) I'll leave your link open for 7 days at this price, and I'll check in tomorrow."],
+    ['"How do I know you\'re legit?"', "Great question, you should ask that. We're a registered Texas LLC. You approve your exact ring before anything is made, you pay through Stripe, the same secure checkout big brands use, we send a video before it ships, and it's insured and signed for. If we can't complete your ring, full refund. You can also meet us in Houston."],
+    ['"It\'s too expensive."', "Let's make it work. Three ways: monthly payments, a slightly smaller stone that still looks big in an oval, or moissanite. Which sounds best?"],
+    ['"I don\'t know her size."', 'Most people don\'t. Measure a ring she wears on the link, ask a friend or family member, or estimate within 2 sizes. Your first resize is free within one year.'],
+    ['"Is lab grown a real diamond?"', "Yes. Same chemistry, hardness and sparkle as a mined diamond, graded and certified. The only difference is where it was made, and you get a much bigger stone for the same money."],
+    ['"I want a natural diamond."', 'We can do natural. They run about 4 times the price of lab grown for the same size. Want me to put one natural option next to the lab grown ones so you can compare?'],
+    ['"Financing declined."', "No problem, that happens. Options: try our other lending partner, a 50% deposit to start now, or a ring at a lower price point. Which works best?"],
+    ['"I want to see it in person."', "We do appointments in Houston. Let's book one. Meanwhile I'll send your options so you can narrow it down first."],
+    ['"I need to talk to her family or a friend first."', "Of course. I'll text you the link so you can share it with them. When's a good time tomorrow to follow up?"],
+    ['"I\'m still months away."', "Perfect, you're ahead of the game. Custom rings take up to 6 weeks, so planning early is smart. I'll send you options now and check in as your date gets closer."],
+    ['"Can you change the design?"', "Absolutely, that's what we do. Tell me what to change and I'll send you a custom concept with an exact price within 24 hours."],
+    ['"How long does it take?"', "Ready to ship rings go out in 3 to 5 business days. Custom rings arrive within 6 weeks, with progress updates and a video before it ships."],
+    ['"What if she doesn\'t like it?"', "You approve every detail first, and we design around what you know about her style. Size is covered with a free resize. That's why we ask so many questions up front."],
+    ['"I found it cheaper somewhere else."', "Send it to me and I'll compare it honestly: stone size, certificate, metal and setting. Most cheaper rings cut corners on the diamond grade or don't include a certificate."]
+  ];
+  var OUTS = [
+    ['Bought on the call', 'Paid in full', 'Celebrate. Confirm their email for updates. Production starts after payment. Send progress texts: stone secured, ring cast, stone set.'],
+    ['Picking from the link later today', 'Options sent', 'Text in 2 hours: "Did one of the rings stand out to you". Call back the same evening.'],
+    ['Needs to think', 'Options sent', 'Follow up tomorrow, day 3 and day 7. Lead with something new each time: a new photo, a story, a reminder the price is held for 7 days.'],
+    ['Talking to family or friend', 'Options sent', 'Ask when they will talk. Follow up the next morning. Offer a quick 3 way call.'],
+    ['Wants to see in person', 'Called', 'Book a Houston appointment. Send options anyway so they narrow it down first.'],
+    ['Wants design changes', 'Called', 'Send a custom concept with an exact price within 24 hours. Then create a new options link.'],
+    ['Financing declined', 'Called', 'Offer the other lender, a 50% deposit, or a lower price ring. Send a new link the same day.'],
+    ['Not ready yet (1 to 6 months)', 'Not ready', 'Planning funnel: new ring photos day 1, day 3, week 1, then every 2 weeks. Check in a month before the proposal date.'],
+    ['Just looking', 'Not ready', 'Monthly inspiration texts and the newsletter. No pressure.'],
+    ['No answer', 'Form sent', 'Text right away, call again later today and tomorrow. After 3 tries, mark not ready and move to follow up.'],
+    ['Not interested or wrong number', 'Lost', 'Thank them and close it out.']
+  ];
+
+  /* ---------------- helpers ---------------- */
+  function sms(phone, body) { var d = String(phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, ''); return 'sms:+1' + d + '?&body=' + encodeURIComponent(body); }
+  function sayBlocks(list) { return list.map(function (x) { return '<div class="say"><small>' + E(x[0]) + '</small>' + E(x[1]).replace(/\{first\}/g, E(first())) + '</div>'; }).join(''); }
+  function first() { return lead ? String(lead.name || '').split(' ')[0] : ''; }
+  function when(ms) { return ms ? new Date(ms).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
+  function introLink() { return 'https://hiddengemrings.com/intro.html?n=' + encodeURIComponent(first()) + '&l=' + encodeURIComponent(leadId); }
+  function saveSoon() {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fetch(API + '/admin/call-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: leadId, rep: S[rep].name, call: ans }) })
+        .then(function (r) { return r.json(); }).then(function (j) { $('saveMsg').className = 'status ' + (j.ok ? 'ok' : 'err'); $('saveMsg').textContent = j.ok ? 'Saved' : 'Not saved'; }).catch(function () {});
+    }, 1200);
+  }
+
+  /* ---------------- render ---------------- */
+  function opts() {
+    document.querySelectorAll('.opts[data-k]').forEach(function (g) {
+      var k = g.dataset.k;
+      g.innerHTML = C[k].map(function (v) { return '<button type="button" class="opt" aria-pressed="' + (ans[k] === v) + '">' + E(v) + '</button>'; }).join('');
+      g.onclick = function (e) {
+        var b = e.target.closest('.opt'); if (!b) return;
+        ans[k] = b.textContent; g.querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        saveSoon(); priceHint(); if (k === 'style' || k === 'shape' || k === 'metal' || k === 'carat' || k === 'band' || k === 'stoneType') suggest(false);
+      };
+    });
+    document.querySelectorAll('textarea[data-k],input[data-k]').forEach(function (el) { el.value = ans[el.dataset.k] || ''; el.oninput = function () { ans[el.dataset.k] = el.value; saveSoon(); }; });
+  }
+  function scripts() {
+    var s = S[rep];
+    $('repName').textContent = s.title;
+    $('prepTip').innerHTML = s.prep;
+    $('openScript').innerHTML = sayBlocks(s.open);
+    $('storyScript').innerHTML = sayBlocks(s.story);
+    $('createScript').innerHTML = sayBlocks(s.create);
+    $('sizeScript').innerHTML = sayBlocks(s.size);
+    $('budgetScript').innerHTML = sayBlocks(s.budget);
+    $('pitchScript').innerHTML = sayBlocks(s.pitch);
+    $('closeScript').innerHTML = sayBlocks(s.close);
+    $('sendLine').textContent = s.send;
+    $('objections').innerHTML = OBJ.map(function (o) { return '<details class="acc"><summary>' + E(o[0]) + '</summary><div class="in"><p>' + E(o[1]) + '</p></div></details>'; }).join('');
+    $('repSw').innerHTML = ['gilbert', 'kim'].map(function (r) { return '<button type="button" class="opt' + (r === rep ? ' on' : '') + '" data-rep="' + r + '">' + S[r].title + '</button>'; }).join('');
+    $('repSw').onclick = function (e) { var b = e.target.closest('[data-rep]'); if (!b) return; rep = b.dataset.rep; try { localStorage.setItem('hg_rep', rep); } catch (x) {} scripts(); };
+    var intro = introLink();
+    $('sendIntro').href = sms(lead.phone, 'Hi ' + first() + ' this is ' + s.name + ' with Hidden Gem. Here is the page I mentioned so you can follow along with me ' + intro);
+    $('outs').innerHTML = OUTS.map(function (o, i) { return '<button type="button" class="opt" data-out="' + i + '">' + E(o[0]) + '</button>'; }).join('');
+    $('outs').onclick = function (e) {
+      var b = e.target.closest('[data-out]'); if (!b) return;
+      var o = OUTS[Number(b.dataset.out)];
+      $('outs').querySelectorAll('.opt').forEach(function (x) { x.classList.toggle('on', x === b); });
+      $('outPlan').innerHTML = '<div class="tip"><b>Next step:</b> ' + E(o[2]) + '</div>';
+      ans.outcome = o[0];
+      fetch(API + '/admin/call-save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: leadId, rep: s.name, call: ans, stage: o[1] === 'Form sent' ? '' : o[1], status: o[1] === 'Lost' ? 'declined' : o[1] === 'Not ready' ? 'not ready' : 'called' }) })
+        .then(function () { $('saveMsg').className = 'status ok'; $('saveMsg').textContent = 'Outcome saved'; refresh(); });
+    };
+  }
+  function lead2view() {
+    $('cName').textContent = lead.name; $('h1name').textContent = first() ? first() + "'s Ring" : 'This Ring';
+    $('custTop').textContent = lead.name;
+    $('cLabel').textContent = lead.label || 'NEW';
+    var tel = String(lead.phone || '').replace(/\D/g, '');
+    $('cTel').href = 'tel:+1' + tel.replace(/^1(?=\d{10}$)/, ''); $('cTel').textContent = lead.phone;
+    $('cWhen').textContent = 'Form sent ' + when(lead.receivedAt) + (lead.slotDate ? ' · booked call' : '');
+    var d = lead.design || {};
+    var rows = [['Budget', lead.budget], ['Pay', lead.pay], ['Monthly', lead.monthly], ['Proposing', lead.timeline], ['Credit', lead.credit], ['Style', d.style], ['Shape', d.shape], ['Size', d.carat], ['Stone', d.stoneType], ['Metal', d.metal], ['Band', d.band], ['Ring size', d.ringSize], ['Engraving', d.engraving], ['Email', lead.email]];
+    $('formKv').innerHTML = rows.filter(function (r) { return r[1]; }).map(function (r) { return '<div><span>' + E(r[0]) + '</span><b>' + E(r[1]) + '</b></div>'; }).join('');
+    var stages = ['Form sent', 'Called', 'Intro opened', 'Loved rings', 'Options sent', 'Options opened', 'Ring picked', 'Approved', 'Paid'];
+    var done = (lead.journey || []).map(function (j) { return j.stage; });
+    var cur = lead.stage || 'Form sent';
+    $('journey').innerHTML = stages.map(function (s) {
+      var hit = s === 'Paid' ? done.some(function (x) { return /paid|Financed/i.test(x); }) : done.indexOf(s) > -1;
+      return '<span class="' + (s === cur || (s === 'Paid' && /paid|Financed/i.test(cur)) ? 'now' : hit ? 'done' : '') + '">' + s + '</span>';
+    }).join('');
+    $('introState').innerHTML = lead.introSeenAt ? '<span class="live">Intro opened ' + E(when(lead.introLastAt || lead.introSeenAt)) + '</span>' : 'Not opened yet';
+    var h = lead.hearts || [];
+    $('loveTip').innerHTML = h.length ? '<b>They loved:</b> ' + h.map(function (x) { var r = LIB.filter(function (l) { return l.id === x; })[0]; return E(r ? r.name : x); }).join(', ') + ' <span class="live">live</span>' : 'Rings they love on the intro page show up here live.';
+  }
+  function seedAnswers() {
+    var d = lead.design || {}, c = lead.call || {};
+    var map = { budget: lead.budget, pay: lead.pay, monthly: lead.monthly, style: d.style, shape: d.shape, carat: d.carat, stoneType: d.stoneType, metal: d.metal, band: d.band, engraving: d.engraving };
+    var tl = { 'ASAP': 'As soon as possible', '1-3 months': 'In 1 to 3 months', '3-6 months': 'In 3 to 6 months', 'Just looking': 'Just looking for now' };
+    map.when = tl[lead.timeline] || lead.timeline;
+    Object.keys(map).forEach(function (k) {
+      if (!map[k] || ans[k]) return;
+      var v = String(map[k]);
+      var hit = (C[k] || []).filter(function (x) { return x.toLowerCase().indexOf(v.toLowerCase()) === 0 || v.toLowerCase().indexOf(x.toLowerCase()) === 0; })[0];
+      if (k === 'metal') hit = (C.metal).filter(function (x) { return x.toLowerCase().indexOf(v.toLowerCase().replace(/ gold/, '')) > -1; })[0] || hit;
+      if (k === 'carat') hit = (C.carat).filter(function (x) { return x.indexOf(v) === 0; })[0] || hit;
+      if (hit) ans[k] = hit; else if (k === 'engraving') ans[k] = v === 'No' ? '' : '';
+    });
+    Object.keys(c).forEach(function (k) { if (['savedAt', 'rep'].indexOf(k) < 0 && c[k]) ans[k] = c[k]; });
+  }
+
+  /* ---------------- price + 6 ring builder ---------------- */
+  function metalKey(m) { m = String(m || '').toLowerCase(); return m.indexOf('rose') > -1 ? 'rose' : (m.indexOf('white') > -1 || m.indexOf('platinum') > -1) ? 'white' : 'yellow'; }
+  function priceFor(carat, extra) {
+    var r = PRICE[carat || 'Not sure yet'] || PRICE['Not sure yet'], mid = (r[0] + r[1]) / 2;
+    var st = ans.stoneType || 'Lab grown diamond';
+    if (/Natural/.test(st)) mid *= 4; else if (/Moissanite/.test(st)) mid *= 0.55;
+    var m = ans.metal || '';
+    if (/18k/.test(m)) mid += 250; if (/Platinum/.test(m)) mid += 650;
+    if (ans.band === 'Diamond band') mid += 350; if (ans.band === 'Hidden halo') mid += 300;
+    mid += extra || 0;
+    return Math.round(mid / 50) * 50 - 1;
+  }
+  function priceHint() {
+    $('priceGuide').innerHTML = Object.keys(PRICE).filter(function (k) { return k !== 'Not sure yet'; }).map(function (k) { return '<div><span>' + k + '</span><b>$' + PRICE[k][0].toLocaleString() + ' to $' + PRICE[k][1].toLocaleString() + '</b></div>'; }).join('');
+    $('suggest').textContent = '$' + priceFor(ans.carat).toLocaleString();
+  }
+  function stoneText(shape) {
+    var c = ans.carat && ans.carat !== 'Not sure yet' ? ans.carat.replace('carats', 'ct').replace('carat', 'ct') : '1.5 ct';
+    var st = ans.stoneType && ans.stoneType !== 'Not sure yet' ? ans.stoneType.toLowerCase() : 'lab grown diamond';
+    var sh = shape && shape !== 'Band' ? shape.toLowerCase() + ' ' : '';
+    return c + ' ' + sh + st + (/lab|natural/.test(st) ? ', IGI certified' : '');
+  }
+  function suggest(force) {
+    if (slots.some(function (s) { return s.touched; }) && !force) { drawSlots(); return; }
+    var hearts = lead.hearts || [], shape = ans.shape, styleName = ans.style;
+    var ranked = LIB.slice().sort(function (a, b) {
+      function sc(x) { return (hearts.indexOf(x.id) > -1 ? 10 : 0) + (x.name === styleName ? 8 : 0) + (shape && x.shape === shape ? 5 : 0) + (x.kind === 'solitaire' ? 1 : 0); }
+      return sc(b) - sc(a);
+    });
+    var mk = metalKey(ans.metal), metal = ans.metal || '14k Yellow Gold';
+    slots = ranked.slice(0, 6).map(function (x, i) {
+      return { lib: x.id, name: x.name, metal: metal, metalKey: mk, stone: x.kind === 'band' ? 'Diamond band, lab grown diamonds' : stoneText(x.shape), price: '$' + priceFor(ans.carat, x.kind === 'band' ? -300 : (i % 2 ? 150 : 0)).toLocaleString(), ready: false, noResize: false, upload: '' };
+    });
+    drawSlots();
+  }
+  function drawSlots() {
+    var hearts = lead.hearts || [];
+    $('slots').innerHTML = slots.map(function (s, i) {
+      var src = s.upload || (s.lib ? 'design-' + s.lib + '-' + s.metalKey + '.jpg' : '');
+      return '<div class="slot filled" data-i="' + i + '"><img class="pv" src="' + (src || 'design-penelope-yellow.jpg') + '" alt="">' +
+        '<b style="font-family:Newsreader,serif;font-size:1.1rem;color:var(--deep)">Ring ' + (i + 1) + (s.lib && hearts.indexOf(s.lib) > -1 ? '<span class="lovepill">Loved</span>' : '') + '</b>' +
+        '<select data-f="lib"><option value="">Upload my own</option>' + LIB.map(function (l) { return '<option value="' + l.id + '"' + (s.lib === l.id ? ' selected' : '') + '>' + l.name + '</option>'; }).join('') + '</select>' +
+        '<input type="file" accept="image/*" data-f="upload" style="margin-top:8px' + (s.lib ? ';display:none' : '') + '">' +
+        '<input type="text" data-f="name" value="' + E(s.name) + '" placeholder="Ring name" style="margin-top:8px">' +
+        '<div class="row2"><select data-f="metal">' + C.metal.map(function (m) { return '<option' + (s.metal === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select><input type="text" data-f="price" value="' + E(s.price) + '" placeholder="$2,499"></div>' +
+        '<input type="text" data-f="stone" value="' + E(s.stone) + '" placeholder="1.5 ct lab grown oval, IGI certified" style="margin-top:8px">' +
+        '<label class="ck"><input type="checkbox" data-f="ready"' + (s.ready ? ' checked' : '') + '>Ready to ship (3 to 5 business days)</label>' +
+        '<label class="ck"><input type="checkbox" data-f="noResize"' + (s.noResize ? ' checked' : '') + '>Can\'t be resized (eternity or full pavé)</label>' +
+        '<div class="hint"></div></div>';
+    }).join('');
+    $('slots').querySelectorAll('.slot').forEach(function (el) {
+      var s = slots[Number(el.dataset.i)];
+      el.querySelectorAll('[data-f]').forEach(function (f) {
+        f.addEventListener(f.type === 'file' ? 'change' : 'input', function () {
+          s.touched = true;
+          var k = f.dataset.f;
+          if (k === 'lib') { s.lib = f.value; var l = LIB.filter(function (x) { return x.id === f.value; })[0]; if (l) { s.name = l.name; s.upload = ''; } drawSlots(); return; }
+          if (k === 'metal') { s.metal = f.value; s.metalKey = metalKey(f.value); drawSlots(); return; }
+          if (k === 'upload') { var file = f.files[0]; if (!file) return; resize(URL.createObjectURL(file), function (d) { s.upload = d; s.lib = ''; drawSlots(); }); return; }
+          if (f.type === 'checkbox') s[k] = f.checked; else s[k] = f.value;
+        });
+        if (f.tagName === 'SELECT') f.addEventListener('change', function () { f.dispatchEvent(new Event('input')); });
+      });
+    });
+  }
+  function resize(url, cb) {
+    var im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = function () { var mx = 1200, sc = Math.min(1, mx / Math.max(im.naturalWidth, im.naturalHeight)); var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * sc); c.height = Math.round(im.naturalHeight * sc); var x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.86)); };
+    im.onerror = function () { cb(''); };
+    im.src = url;
+  }
+  function imgData(s) { return new Promise(function (res) { if (s.upload) return res(s.upload); if (!s.lib) return res(''); resize('design-' + s.lib + '-' + s.metalKey + '.jpg', res); }); }
+
+  function createLink() {
+    var btn = $('createLink'), msg = $('createMsg');
+    var good = slots.filter(function (s) { return s.name && HG.cents(s.price); });
+    if (!good.length) { msg.className = 'status err'; msg.textContent = 'Add at least one ring with a name and price.'; return; }
+    btn.disabled = true; msg.className = 'status'; msg.textContent = 'Preparing ring photos...';
+    Promise.all(good.map(imgData)).then(function (imgs) {
+      var brief = { 'Ring style': ans.style, 'Shape': ans.shape, 'Stone size': ans.carat, 'Stone': ans.stoneType, 'Metal': ans.metal, 'Band': ans.band, 'Her size': ans.size ? ans.size + (ans.sizeKnown === 'Knows her size' ? '' : ' (estimate)') : '', 'Budget': ans.budget, 'Pay': ans.pay, 'Proposing': ans.when };
+      var body = { key: key, leadId: leadId, customerName: lead.name, customerPhone: lead.phone, customerEmail: lead.email || '', payPref: ans.pay || lead.pay || '', engraving: ans.engraving || '', notes: ans.notes || '', brief: brief,
+        options: good.map(function (s, i) { return { name: s.name, metal: s.metal, stone: s.stone, price: s.price, ready: !!s.ready, noResize: !!s.noResize, image: imgs[i] }; }) };
+      msg.textContent = 'Creating their link...';
+      return fetch(API + '/order/create-options', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+    }).then(function (j) {
+      btn.disabled = false;
+      if (!j.ok) { msg.className = 'status err'; msg.textContent = j.error || 'Could not create the link.'; return; }
+      msg.className = 'status ok'; msg.textContent = 'Their Pick Your Ring link is ready.';
+      $('linkOut').hidden = false; $('pickLink').textContent = j.link; $('openPick').href = j.link;
+      $('sendPick').href = sms(lead.phone, 'Here are your 6 ring options ' + first() + '. Pick your favorite and check out right from this link ' + j.link);
+      refresh();
+    }).catch(function () { btn.disabled = false; msg.className = 'status err'; msg.textContent = 'Could not reach the server. Try again.'; });
+  }
+  function copy(t, b) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { var o = b.textContent; b.textContent = 'Copied'; setTimeout(function () { b.textContent = o; }, 1500); }).catch(function () {}); }
+
+  /* ---------------- boot ---------------- */
+  function refresh() {
+    return fetch(API + '/admin/lead?id=' + encodeURIComponent(leadId) + '&key=' + encodeURIComponent(key)).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) throw j;
+      var fresh = !lead; lead = j.lead;
+      if (fresh) { seedAnswers(); scripts(); opts(); priceHint(); suggest(true); }
+      else if (!slots.some(function (s) { return s.touched; })) suggest(true);
+      lead2view();
+    });
+  }
+  function boot() {
+    if (!leadId) { document.querySelector('main').innerHTML = '<div class="card" style="margin:40px 0"><h2>Open this from a lead</h2><p class="sub">Go to the admin page and tap Call next to a lead.</p><a class="btn" href="approve-admin.html">Open admin</a></div>'; return; }
+    if (!key) { $('login').hidden = false; return; }
+    refresh().then(function () {
+      $('login').hidden = true; $('pages').hidden = false;
+      HG.pages({});
+      HG.headline($('h1'), $('lead'));
+      setInterval(function () { refresh().catch(function () {}); }, 6000);
+    }).catch(function (e) {
+      if (e && /key/i.test(e.error || '')) { try { localStorage.removeItem(KEYS); } catch (x) {} key = ''; $('login').hidden = false; $('keyMsg').textContent = 'That key did not work.'; }
+      else document.querySelector('main').innerHTML = '<div class="card" style="margin:40px 0"><h2>Lead not found</h2><a class="btn" href="approve-admin.html">Back to admin</a></div>';
+    });
+  }
+  $('keyBtn').addEventListener('click', function () { key = $('key').value.trim(); try { localStorage.setItem(KEYS, key); } catch (e) {} boot(); });
+  $('copyIntro').addEventListener('click', function () { copy(introLink(), $('copyIntro')); });
+  $('createLink').addEventListener('click', createLink);
+  $('copyPick').addEventListener('click', function () { copy($('pickLink').textContent, $('copyPick')); });
+  $('resuggest').addEventListener('click', function () { slots.forEach(function (s) { s.touched = false; }); suggest(true); });
+  boot();
+})();
+</script>
+</body>
+</html>
