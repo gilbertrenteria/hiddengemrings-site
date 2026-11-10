@@ -668,7 +668,6 @@ async function handleOrderCheckout(id, env, origin) {
 
   const session = await stripeRequest(env, '/checkout/sessions', {
     mode: 'payment',
-    automatic_payment_methods: { enabled: true },
     billing_address_collection: 'required',
     shipping_address_collection: { allowed_countries: ['US'] },
     client_reference_id: o.id,
