@@ -1269,6 +1269,12 @@ function centralTime(ts) {
 async function handleTrack(request, env, origin) {
   const ok = () => json({ ok: true }, 200, origin);
   if (BOT_UA.test(request.headers.get('User-Agent') || '')) return ok();
+  const cf = request.cf || {};
+  // drop crawlers, verified bots and traffic from cloud/data center networks
+  if (cf.botManagement && (cf.botManagement.verifiedBot || (cf.botManagement.score && cf.botManagement.score < 30))) return ok();
+  if (/amazon|aws|google cloud|googlebot|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|oracle|alibaba|tencent|cloudflare|fastly|vultr|scaleway|leaseweb|choopa|m247|datacamp|hostinger|contabo/i.test(String(cf.asOrganization || ''))) return ok();
+  const city = [cf.city, cf.regionCode || cf.region].filter(Boolean).join(', ');
+  const place = city ? `${city}${cf.postalCode ? ' ' + cf.postalCode : ''}${cf.country && cf.country !== 'US' ? ' (' + cf.country + ')' : ''}` : 'Unknown';
   let t;
   try { t = JSON.parse(await request.text()); } catch (e) { return ok(); }
   const ev = String(t.ev || '');
@@ -1288,7 +1294,7 @@ async function handleTrack(request, env, origin) {
   const st = (await env.IG_KV.get(sk, 'json')) || { pages: {}, events: {}, sources: {}, visitors: {} };
   st.events[ev] = (st.events[ev] || 0) + 1;
   if (ev === 'view' || ev === 'rings_open' || ev === 'approve_open') st.pages[page] = (st.pages[page] || 0) + 1;
-  if (!st.visitors[sid]) { st.visitors[sid] = 1; st.sources[src] = (st.sources[src] || 0) + 1; }
+  if (!st.visitors[sid]) { st.visitors[sid] = 1; st.sources[src] = (st.sources[src] || 0) + 1; st.places = st.places || {}; st.places[place] = (st.places[place] || 0) + 1; }
   await env.IG_KV.put(sk, JSON.stringify(st), { expirationTtl: 86400 * 40 });
 
   let label = TRACK_EVENTS[ev];
@@ -1308,13 +1314,13 @@ async function handleTrack(request, env, origin) {
     if (o) { who = o.customerName || ''; ring = o.ring || ''; }
   }
   const title = who ? `${who} ${label}` : (label.charAt(0).toUpperCase() + label.slice(1));
-  const rows = [['When', centralTime()], ['Page', 'hiddengemrings.com' + page], ['Came from', src]];
+  const rows = [['When', centralTime()], ['Location', place], ['Page', 'hiddengemrings.com' + page], ['Came from', src]];
   if (ring) rows.push(['Ring', ring]);
   Object.entries(data).slice(0, 14).forEach(([k, v]) => { if (v) rows.push([k, String(v).slice(0, 200)]); });
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 10px">${escapeHtml(title)}</h2><table cellpadding="6" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') +
     `</table><p style="color:#777;font-size:12px">Real visitors only. Bots and link previews are filtered out.</p></div>`;
-  await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem: ${title}`, html });
+  await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem: ${title}${city ? ' (' + city + ')' : ''}`, html });
   return ok();
 }
 async function sendDailySummary(env) {
@@ -1328,7 +1334,7 @@ async function sendDailySummary(env) {
     `<li>Quiz started: ${e.quiz_start || 0}</li><li>Quiz left unfinished: ${e.quiz_abandon || 0}</li>` +
     `<li>Pick Your Ring links opened: ${e.rings_open || 0}</li><li>Design approval links opened: ${e.approve_open || 0}</li>` +
     `<li>Ring browsers (3+ rings): ${e.collection_hot || 0}</li></ul>` +
-    `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
+    `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Visitor locations</h3><ul>${list(st && st.places)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
     `<p style="color:#777;font-size:12px">Finished quizzes are emailed the moment they come in.</p></div>`;
   await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem daily summary: ${visitors} visitors on ${day}`, html });
 }
