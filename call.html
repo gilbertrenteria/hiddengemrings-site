@@ -17,6 +17,16 @@
   .pace b{color:var(--deep)}.pace .st{font-weight:700;border-radius:999px;padding:3px 10px;font-size:.78rem;letter-spacing:.04em}
   .pace .st.ok{background:#e3f1e6;color:#1f7a3a}.pace .st.warn{background:#fbecd2;color:#8a5a12}.pace .st.late{background:#f8dcdc;color:#a33}
   .pace button{margin-left:auto;border:1px solid var(--line);background:var(--cream2);border-radius:999px;padding:6px 12px;font:600 .8rem 'Work Sans',sans-serif;cursor:pointer;color:var(--deep)}
+.say.pic{background:#2f251d;border-left:4px solid var(--gold);margin:8px 0 4px;font-size:.98rem}
+  .fromform{display:inline-block;margin-left:8px;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;background:var(--goldsoft);color:#7a5d24;border-radius:999px;padding:3px 8px;vertical-align:middle}
+  .readback{margin-top:16px;border-radius:18px;padding:18px;background:linear-gradient(135deg,#3a2d22,#241b14);color:#f4ede2;font-family:'Newsreader',serif;font-size:1.22rem;line-height:1.5;display:none}
+  .readback.on{display:block}.readback small{display:block;font-family:'Work Sans',sans-serif;color:#d9c290;font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;margin-bottom:6px}
+.inspo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+  .inspo-grid figure{position:relative;margin:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--cream2)}
+  .inspo-grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+  .inspo-grid figcaption{display:flex}.inspo-grid figcaption button{flex:1;border:0;background:#fff;font:600 .72rem 'Work Sans',sans-serif;padding:6px 2px;cursor:pointer;color:var(--deep)}
+  .inspo-grid figcaption button+button{border-left:1px solid var(--line);color:#a33}
+  .inspo-links a{display:block;font-size:.88rem;word-break:break-all;margin-top:4px}
   .tip{background:var(--goldsoft);border-radius:14px;padding:12px 14px;font-size:.95rem;color:#5c4a2a;margin:10px 0}
   .tip b{color:#6f5524}
   .q{margin:18px 0 6px;font-weight:600;color:var(--deep)}
@@ -70,8 +80,8 @@
       <div class="who"><b id="repName">Customer Intro Call</b><span id="custTop">Call Link</span></div>
       <nav class="seg" aria-label="Call sections">
         <button type="button" data-go="0-2">Intro</button>
-        <button type="button" data-go="3-5">Create</button>
-        <button type="button" data-go="6-8">Sell</button>
+        <button type="button" data-go="3-4">Create</button>
+        <button type="button" data-go="5-6">Sell</button>
       </nav>
     </div>
     <div class="meta"><span id="plab"></span><span id="pcnt"></span></div>
@@ -93,13 +103,18 @@
   <section class="pg" data-label="Before you dial">
     <span class="eyebrow">Before You Dial</span>
     <h1 class="fx" id="h1">Let's Win <span class="script" id="h1name">This Ring</span></h1>
-    <p class="lead fxlead" id="lead">30 seconds of prep. Know who they are before they pick up.</p>
+    <p class="lead fxlead" id="lead">Their form answers are below. On the call you confirm them, you don't ask again.</p>
     <div class="card" style="margin-top:16px">
       <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h3 id="cName" style="margin:0"></h3><span class="badge" id="cLabel"></span></div>
       <p style="margin:6px 0 0"><a id="cTel" href="#"></a> · <span id="cWhen" class="fine"></span></p>
       <div class="kv" id="formKv"></div>
       <div class="tl" id="journey"></div>
       <div class="repsw" id="repSw"></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Send the thank you and ask for inspo</h3>
+      <p class="fine" style="margin:4px 0 0" id="thanksPreview"></p>
+      <div class="btns"><a class="btn gold" id="sendThanks" href="#">Text it now</a></div>
     </div>
     <div class="tip" id="prepTip"></div>
     <div class="say"><small>Your goal on this call</small>Make them feel safe, get the ring right, and send their 6 options before you hang up. Closing on the call is the win. A scheduled follow up is the backup.</div>
@@ -121,77 +136,66 @@
   </section>
 
   <!-- 2 STORY -->
-  <section class="pg" data-label="Their story">
-    <span class="eyebrow">Discovery</span>
-    <h2>Get the <span class="script">Story</span></h2>
-    <p class="sub">People buy from people who listen. Ask, then let them talk. Tap answers as you go.</p>
+  <section class="pg" data-label="Her story">
+    <span class="eyebrow">Her Story</span>
+    <h2>Get to Know <span class="script">Her</span></h2>
     <div id="storyScript"></div>
-    <div class="q">Who is the ring for?</div><div class="opts" data-k="forWho"></div>
-    <div class="q">When are you proposing?<small>From the form, confirm it.</small></div><div class="opts" data-k="when"></div>
+    <div class="q">Who is it for?</div><div class="opts" data-k="forWho"></div>
     <div class="q">Is it a surprise?</div><div class="opts" data-k="surprise"></div>
-    <div class="q">What jewelry does she wear every day?</div><div class="opts" data-k="wears"></div>
+    <div class="q">Does she wear more gold or silver?<small>This answers the metal for you.</small></div><div class="opts" data-k="wears"></div>
     <div class="q">Her style in one word</div><div class="opts" data-k="vibe"></div>
-    <label class="f"><span>Their story (how they met, the proposal plan)</span><textarea id="storyNote" data-k="story"></textarea></label>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Create the ring</button></div>
+    <label class="f"><span>Quick notes (how they met, the proposal plan)</span><textarea id="storyNote" data-k="story"></textarea></label>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Design her ring</button></div>
   </section>
 
-  <!-- 3 CREATE -->
-  <section class="pg" data-label="Ring creator">
-    <span class="eyebrow">Ring Creator</span>
-    <h2>Build <span class="script">Her Ring</span></h2>
+  <!-- 3 DESIGN -->
+  <section class="pg" data-label="Design her ring">
+    <span class="eyebrow">Design Her Ring</span>
+    <h2>Paint the <span class="script">Picture</span></h2>
+    <div class="card" style="margin:12px 0 6px">
+      <h3>Her inspiration</h3>
+      <p class="fine" style="margin:4px 0 8px">Photos or links they texted or emailed. Ask: "Walk me through what you love about this one."</p>
+      <div class="inspo-grid" id="inspoGrid"></div>
+      <div class="btns" style="margin-top:8px"><label class="btn ghost" style="cursor:pointer">Add photos<input type="file" accept="image/*" multiple id="inspoFile" hidden></label></div>
+      <label class="f" style="margin-top:10px"><span>Links (one per line)</span><textarea data-k="inspoLinks" placeholder="Pinterest, Instagram or website links"></textarea></label>
+      <div id="inspoLinkList"></div>
+    </div>
     <div id="createScript"></div>
-    <div class="q"><span class="qn">1</span>What shape is the center stone?<small>Ask: "Picture her ring. Is the stone round, oval, or more like a teardrop?"</small></div><div class="tiles" id="shapeTiles"></div>
-    <div class="q"><span class="qn">2</span>What setting style?<small>Ask: "Just the one stone, or a little extra sparkle around it or down the band?"</small></div><div class="tiles" id="settingTiles"></div>
-    <div class="q"><span class="qn">3</span>How big is the stone?<small>Ask: "Delicate, noticeable, or show stopper?"</small></div><div class="opts" data-k="carat"></div>
-    <div class="q"><span class="qn">4</span>Stone type</div><div class="opts" data-k="stoneType"></div>
-    <div class="q"><span class="qn">5</span>Metal color<small>Ask: "Does she wear more gold or more silver jewelry?"</small></div><div class="opts" data-k="metal"></div>
-    <div class="q"><span class="qn">6</span>Band look</div><div class="opts" data-k="bandLook"></div>
-    <div class="q"><span class="qn">7</span>Band width<small>Ask: "Are her hands more petite or does she like bold pieces?"</small></div><div class="opts" data-k="bandWidth"></div>
-    <div class="q"><span class="qn">8</span>How high does the stone sit?<small>Ask: "Does she work with her hands a lot? Low sits flush and won't snag. High catches more light."</small></div><div class="opts" data-k="profile"></div>
-    <div class="q">Signature design they loved (optional)</div><div class="opts" data-k="style"></div>
-    <div class="tip"><b>Only at Hidden Gem:</b> every ring can carry a hidden engraving inside the band. Ask what they want hidden in there.</div>
-    <label class="f"><span>Engraving (optional)</span><input type="text" data-k="engraving" maxlength="60"></label>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Her size</button></div>
+    <div class="q" data-qk="shape"><span class="qn">1</span>Shape</div><div class="tiles" id="shapeTiles"></div><div data-pic="shape"></div>
+    <div class="q" data-qk="setting"><span class="qn">2</span>Setting</div><div class="tiles" id="settingTiles"></div><div data-pic="setting"></div>
+    <div class="q" data-qk="carat"><span class="qn">3</span>Size of the diamond</div><div class="opts" data-k="carat"></div><div data-pic="carat"></div>
+    <div class="q" data-qk="stoneType"><span class="qn">4</span>Stone</div><div class="opts" data-k="stoneType"></div><div data-pic="stoneType"></div>
+    <div class="q" data-qk="metal"><span class="qn">5</span>Metal</div><div class="opts" data-k="metal"></div><div data-pic="metal"></div>
+    <div class="q" data-qk="bandLook"><span class="qn">6</span>Band</div><div class="opts" data-k="bandLook"></div><div data-pic="bandLook"></div>
+    <div class="q" data-qk="bandWidth"><span class="qn">7</span>Band width</div><div class="opts" data-k="bandWidth"></div><div data-pic="bandWidth"></div>
+    <div class="q" data-qk="profile"><span class="qn">8</span>How high it sits</div><div class="opts" data-k="profile"></div><div data-pic="profile"></div>
+    <label class="f"><span>Hidden engraving inside the band (optional)</span><input type="text" data-k="engraving" maxlength="60" placeholder="A date, a name, a word"></label>
+    <div class="readback" id="readback"></div>
+    <div class="btns" id="confirmRow" hidden><button class="btn" type="button" id="confirmRing">Yes, that's her ring</button></div>
+    <details class="acc" style="margin-top:12px"><summary>They loved one of our signature designs?</summary><div class="in"><div class="opts" data-k="style"></div></div></details>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Size and budget</button></div>
   </section>
 
-  <!-- 4 SIZE -->
-  <section class="pg" data-label="Her size">
-    <span class="eyebrow">Ring Size</span>
-    <h2>Size <span class="script">Without Asking Her</span></h2>
+  <!-- 4 SIZE + BUDGET -->
+  <section class="pg" data-label="Size and budget">
+    <span class="eyebrow">Size and Budget</span>
+    <h2>Lock In the <span class="script">Details</span></h2>
     <div id="sizeScript"></div>
-    <div class="q">Do you know her size?</div><div class="opts" data-k="sizeKnown"></div>
-    <div class="q">Size (exact or estimate)</div><div class="opts" data-k="size"></div>
-    <div class="tip"><b>The rule:</b> an estimate must be a calculated guess within 2 sizes. First resize is free within one year, up to 2 sizes. Eternity and full pavé bands can't be resized, so they need her exact size. On their link they can also measure a ring she wears in millimeters or send a photo.</div>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Budget and payment</button></div>
+    <div class="q">Her size</div><div class="opts" data-k="sizeKnown"></div><div class="opts" data-k="size" style="margin-top:8px"></div>
+    <div id="budgetScript" style="margin-top:16px"></div>
+    <div class="q" data-qk="budget">Budget</div><div class="opts" data-k="budget"></div>
+    <div class="q" data-qk="pay">How they want to pay</div><div class="opts" data-k="pay"></div>
+    <div class="q" data-qk="monthly">Monthly payment</div><div class="opts" data-k="monthly"></div>
+    <div class="card" style="margin-top:14px"><h3>Suggested price for their ring: <span id="suggest"></span></h3><details class="acc"><summary>Price guide (Houston, lab grown, 14k)</summary><div class="in"><div class="kv" id="priceGuide"></div><p class="fine" style="margin-top:8px">Settings add $100 to $750. Pavé band +$350, 18k +$250, platinum +$650. Natural about 4x. Moissanite about half. First resize free within a year, up to 2 sizes. Eternity bands need her exact size.</p></div></details></div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Send 6 rings</button></div>
   </section>
 
-  <!-- 5 BUDGET -->
-  <section class="pg" data-label="Budget and payment">
-    <span class="eyebrow">Budget</span>
-    <h2>Make It <span class="script">Affordable</span></h2>
-    <div id="budgetScript"></div>
-    <div class="q">Budget (confirm)</div><div class="opts" data-k="budget"></div>
-    <div class="q">How they want to pay</div><div class="opts" data-k="pay"></div>
-    <div class="q">Comfortable monthly payment</div><div class="opts" data-k="monthly"></div>
-    <div class="card" style="margin-top:14px"><h3>Price guide (Houston, lab grown, 14k solitaire)</h3><div class="kv" id="priceGuide"></div><p class="fine" style="margin-top:8px">Add about $300 for a hidden halo, $350 for a diamond band, $250 for 18k, $650 for platinum. Natural diamonds run about 4x. Moissanite about half. Your suggested price for their answers: <b id="suggest"></b></p></div>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Pitch and objections</button></div>
-  </section>
-
-  <!-- 6 PITCH -->
-  <section class="pg" data-label="Pitch and objections">
-    <span class="eyebrow">Sell</span>
-    <h2>Your <span class="script">Pitch</span></h2>
-    <div id="pitchScript"></div>
-    <h3 style="margin-top:22px">Every objection, handled</h3>
-    <div id="objections"></div>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Build their 6 rings</button></div>
-  </section>
-
-  <!-- 7 BUILD -->
-  <section class="pg" data-label="Build 6 rings">
+  <!-- 5 SEND -->
+  <section class="pg" data-label="Send 6 rings">
     <span class="eyebrow">Pick Your Ring + Checkout</span>
-    <h2>Build Their <span class="script">6 Rings</span></h2>
-    <p class="sub">Suggested from their answers and the rings they loved. Swap any ring, upload your own from the Canva library, and adjust prices.</p>
+    <h2>Send Their <span class="script">6 Rings</span></h2>
+    <div id="pitchScript"></div>
+    <p class="sub" style="margin-top:12px">Built from their answers. Swap any ring or price, then send.</p>
     <div class="btns" style="margin:0 0 14px"><button class="btn ghost" type="button" id="resuggest">Re-suggest from answers</button></div>
     <div class="slots" id="slots"></div>
     <div class="card" style="margin-top:16px">
@@ -200,10 +204,12 @@
       <p class="status" id="createMsg"></p>
       <div id="linkOut" hidden><div class="linkbox" id="pickLink"></div><div class="btns"><a class="btn gold" id="sendPick" href="#">Text it now</a><button class="btn ghost" type="button" id="copyPick">Copy link</button><a class="btn ghost" id="openPick" href="#" target="_blank">Open</a></div></div>
     </div>
-    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Close and outcome</button></div>
+    <h3 style="margin-top:22px">If they push back</h3>
+    <div id="objections"></div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Close</button></div>
   </section>
 
-  <!-- 8 CLOSE -->
+  <!-- 6 CLOSE -->
   <section class="pg" data-label="Close and outcome">
     <span class="eyebrow">Close</span>
     <h2>Close It <span class="script">Together</span></h2>
@@ -234,7 +240,7 @@
     forWho: ['Girlfriend', 'Fiancée', 'Wife (upgrade or anniversary)', 'Boyfriend or husband', 'Buying for myself', 'Shopping together'],
     when: ['As soon as possible', 'In 1 to 3 months', 'In 3 to 6 months', 'Just looking for now'],
     surprise: ['Total surprise', 'She knows, not the ring', 'We pick together'],
-    wears: ['Yellow gold', 'White gold or silver', 'Rose gold', 'Mixes metals', 'Barely wears jewelry'],
+    wears: ['Gold', 'Silver or white gold', 'Rose gold', 'Mixes both', 'Barely wears jewelry'],
     vibe: ['Classic', 'Modern', 'Vintage', 'Minimal', 'Glam'],
     style: ['The Penelope', 'The Selah', 'The Nova', 'The Allison', 'The Souline', 'The Aurora', 'The Setlla', 'Something custom'],
     shape: HGLIB.SHAPES.map(function (x) { return x.label; }),
@@ -273,13 +279,13 @@
       timecheck: [['Ask for 30 minutes', "Before we start, doing this right takes about 30 minutes. We'll design her ring together, and before we hang up you'll have 6 rings made just for her on your phone, ready to pick. Do you have 30 minutes right now?"]],
       timeyes: [['If yes', "Perfect. Find a spot where you can focus and keep your phone handy. Here's how it works: I ask a few questions, we build her ring, I text you 6 options, and nothing gets made unless you approve it. Let's go."]],
       timeno: [['If not now', "No problem at all. Doing this right matters more than doing it fast. What works better, later today or tomorrow? I'll lock in 30 minutes just for you."], ['Then', 'Pick a time together, choose the "Call back at a set time" outcome on the last page, and put the time in the notes.']],
-      story: [['Ask', "Congrats man, that's huge. Tell me about her. How long have you two been together?"], ['Ask', 'How are you planning to pop the question? Anything special?'], ['Why it matters', "Every detail you give me goes into her ring. Most guys stress about this part. My job is to take that weight off you."]],
-      create: [['Guide', "Let's build her ring together. First thing we lock in is the shape. Is she more of an oval or a pear type of woman? Then we pick how much sparkle goes around it."], ['Lead him', "Guys usually come in thinking smaller to stay safe. Here's what I tell everyone: lab grown gets you a lot more diamond for the money, so you can go bigger without going over budget."]],
-      size: [['Say', "Real talk, most guys don't know her size. Here's how we get it without ruining the surprise."], ['Methods', '1) Borrow a ring she wears on her right hand and measure it on the link. 2) Ask her best friend, sister or mom. 3) Slide one of her rings on your pinky and mark where it stops. 4) If all else fails, most women are a 6. Your first resize is free, up to 2 sizes.']],
-      budget: [['Ask', "What number are you comfortable with? Monthly or total, either works."], ['Financing pitch', "Most of our clients do monthly payments through our lending partners. You apply on your phone in a couple minutes, and you know right away. That way you get the ring she deserves without draining your savings."]],
-      pitch: [['Value', "No showroom, no markup. At a mall jeweler you're paying for the lease and the name on the box. With us it goes into the diamond."], ['Protection', "You see the exact ring and approve it before we make anything. We send you a video before it ships. It's insured, tracked and signed for. And if we ever can't deliver, you get every dollar back."], ['Ownership', "I own this company with my wife. When you buy from us, you're dealing with the owner, not a commissioned salesman."]],
-      send: "I'm texting you your 6 options right now. Open it while we're on the phone, tell me which one jumps out, and I'll walk you through checkout.",
-      close: [['Trial close', 'Which one can you see on her hand?'], ['Assume the sale', "Good choice. Pick that one, put in her size, sign, and choose monthly payments. I'll stay on the line."], ['If he hesitates', "What's the one thing holding you back? Let's solve it right now."]]
+      story: [['Ask', "Tell me about her. How did you two meet?"], ['Ask', "Does she wear more gold or silver jewelry?"]],
+      create: [['Set it up', "Close your eyes for a second. I'm going to paint her ring for you, one piece at a time. Stop me when it feels like her."]],
+      size: [['Ask', "Do you know her size? If not, no stress. Slide one of her rings on your pinky and see where it stops, or ask her best friend. First resize is free."]],
+      budget: [['Confirm', "On the form you said {budget}. Still feel right? Most guys do monthly payments. Takes two minutes on your phone."]],
+      pitch: [['Why us', "No showroom, no markup, so your money goes into the diamond. You approve everything first, we send you a video before it ships, and it's fully insured. And you're talking to the owner."]],
+      send: "I'm texting you 6 rings built from everything you just told me. Open it while I'm on the line and tell me which one you can see on her hand.",
+      close: [['Trial close', 'Which one can you see on her hand?'], ['Assume the sale', "Great pick. Tap it, add her size, sign, and choose monthly payments. I'm right here."], ['If he hesitates', "What's the one thing holding you back? Let's solve it right now."]]
     },
     kim: {
       name: 'Kim', title: "Kim's Call Link",
@@ -289,13 +295,13 @@
       timecheck: [['Ask for 30 minutes', "Before we start, doing this the right way takes about 30 minutes. We'll design her ring together, and before we hang up you'll have 6 rings picked just for her on your phone. Do you have 30 minutes right now?"]],
       timeyes: [['If yes', "Yay! Get comfortable and keep your phone close. I'll ask a few questions, we'll design her ring, I'll text you 6 options, and nothing is made until you approve it."]],
       timeno: [['If not now', "Totally okay. I'd rather give her ring the time it deserves. Is later today or tomorrow better? I'll save 30 minutes just for you."], ['Then', 'Pick a time together, choose the "Call back at a set time" outcome on the last page, and put the time in the notes.']],
-      story: [['Ask', "Okay, tell me everything! How did you two meet?"], ['Ask', "How are you planning to propose? I love hearing these."], ['Why it matters', "Her ring should feel like her. The more you tell me, the more perfect it'll be."]],
-      create: [['Guide', "Let's design her ring together. As a woman, I can tell you the shape is what she'll notice first. Ovals look bigger and make her finger look longer. Once we pick the shape, we'll choose the setting and the band together."], ['Her perspective', "She'll be looking at this ring every single day. Trust me, a little more sparkle is never a mistake. Lab grown lets you get that without spending more."]],
-      size: [['Say', "Don't worry, almost nobody knows her size. Here are my secret tricks."], ['Methods', "1) Borrow a ring from her jewelry box and measure it on the link. 2) Ask her best friend, sister or mom. They'll keep the secret. 3) Most women wear a 6 to 7. 4) Your first resize is free, up to 2 sizes, so you can't really get it wrong."]],
-      budget: [['Ask', "What feels comfortable for you? Monthly or total is totally fine."], ['Financing pitch', "Most of our couples do monthly payments. It takes a couple minutes on your phone, and she gets the ring she's dreaming about without you stressing."]],
-      pitch: [['Her reaction', "When she opens this box, she's going to cry. The custom box, the Polaroid, the handwritten note, every detail is made for that moment."], ['Value', "No showroom markup, so your money goes into a bigger, better diamond. That's what she'll show her friends."], ['Protection', "You approve everything first, we send you a video before it ships, it's fully insured, and her first resize is free. You're completely covered."]],
-      send: "I'm texting your 6 rings now! Open it while we're talking and tell me which one you love. I'll help you through checkout.",
-      close: [['Trial close', 'Which one do you see on her hand?'], ['Assume the sale', "She's going to love it. Pick it, add her size, sign, and choose monthly payments. I'm right here with you."], ['If they hesitate', "What's making you unsure? Tell me and we'll figure it out together."]]
+      story: [['Ask', "Okay, tell me about her! How did you two meet?"], ['Ask', "Is she more of a gold girl or a silver girl?"]],
+      create: [['Set it up', "Let's picture her hand together. I'll describe her ring piece by piece, and you tell me when it feels like her."]],
+      size: [['Ask', "Do you know her size? Most of us don't! Borrow a ring from her jewelry box or ask her best friend. Her first resize is free."]],
+      budget: [['Confirm', "You said {budget} on the form. Still comfortable? Most couples do monthly payments, it's quick on your phone."]],
+      pitch: [['Why us', "No showroom markup, so it all goes into her diamond. You approve everything first, we send a video before it ships, it's insured, and you're working with the owners."]],
+      send: "I'm texting you 6 rings made from everything you told me! Open it while we're talking and tell me which one you can see on her hand.",
+      close: [['Trial close', 'Which one do you see on her hand?'], ['Assume the sale', "She's going to love it. Tap it, add her size, sign, and choose monthly payments. I'm right here."], ['If they hesitate', "What's making you unsure? Tell me and we'll figure it out together."]]
     }
   };
   var OBJ = [
@@ -331,7 +337,7 @@
 
   /* ---------------- helpers ---------------- */
   function sms(phone, body) { var d = String(phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, ''); return 'sms:+1' + d + '?&body=' + encodeURIComponent(body); }
-  function sayBlocks(list) { return list.map(function (x) { return '<div class="say"><small>' + E(x[0]) + '</small>' + E(x[1]).replace(/\{first\}/g, E(first())) + '</div>'; }).join(''); }
+  function sayBlocks(list) { return list.map(function (x) { return '<div class="say"><small>' + E(x[0]) + '</small>' + E(x[1]).replace(/\{first\}/g, E(first())).replace(/\{budget\}/g, E(ans.budget || lead && lead.budget || 'your budget')) + '</div>'; }).join(''); }
   function first() { return lead ? String(lead.name || '').split(' ')[0] : ''; }
   function when(ms) { return ms ? new Date(ms).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
   function saveSoon() {
@@ -351,11 +357,12 @@
       g.onclick = function (e) {
         var b = e.target.closest('.opt'); if (!b) return;
         ans[k] = b.textContent; g.querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
-        saveSoon(); priceHint(); if (k === 'metal') tiles(); suggest(false);
+        if (k === 'wears' && !ans.metal) { var wm = { 'Gold': '14k Yellow Gold', 'Silver or white gold': '14k White Gold', 'Rose gold': '14k Rose Gold' }[ans.wears]; if (wm) { ans.metal = wm; opts(); } }
+        saveSoon(); priceHint(); if (k === 'metal') tiles(); suggest(false); pics();
       };
     });
-    tiles();
-    document.querySelectorAll('textarea[data-k],input[data-k]').forEach(function (el) { el.value = ans[el.dataset.k] || ''; el.oninput = function () { ans[el.dataset.k] = el.value; saveSoon(); }; });
+    tiles(); pics();
+    document.querySelectorAll('textarea[data-k],input[data-k]').forEach(function (el) { el.value = ans[el.dataset.k] || ''; el.oninput = function () { ans[el.dataset.k] = el.value; saveSoon(); pics(); if (el.dataset.k === 'inspoLinks') inspoDraw(); }; });
   }
   function tiles() {
     var mk = metalKey(ans.metal), hearts = (lead && lead.hearts) || [], sh = HGLIB.shapeId(ans.shape);
@@ -368,11 +375,49 @@
       var x = HGLIB.style(st), lv = sh && hearts.indexOf(sh + '-' + st) > -1;
       return '<button type="button" class="tile" data-v="' + x.label + '" aria-pressed="' + (ans.setting === x.label) + '"><img src="' + HGLIB.url(sh || 'oval', st, mk) + '" alt="" loading="lazy"><span>' + x.label + (lv ? ' <b class="lv">&#9829;</b>' : '') + '</span></button>';
     }).join('');
-    $('shapeTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.shape = b.dataset.v; var ok = HGLIB.HAS[HGLIB.shapeId(ans.shape)]; if (ans.setting && ok.indexOf(HGLIB.styleId(ans.setting)) < 0) ans.setting = ''; tiles(); saveSoon(); priceHint(); suggest(false); };
-    $('settingTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.setting = b.dataset.v; tiles(); saveSoon(); priceHint(); suggest(false); };
+    $('shapeTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.shape = b.dataset.v; pics(); var ok = HGLIB.HAS[HGLIB.shapeId(ans.shape)]; if (ans.setting && ok.indexOf(HGLIB.styleId(ans.setting)) < 0) ans.setting = ''; tiles(); saveSoon(); priceHint(); suggest(false); };
+    $('settingTiles').onclick = function (e) { var b = e.target.closest('.tile'); if (!b) return; ans.setting = b.dataset.v; tiles(); saveSoon(); priceHint(); suggest(false); pics(); };
+  }
+  /* picture lines: what to say so they can see the ring */
+  var VOICE = {
+    shape: { 'Oval': "An oval. Like an egg laid on its side. It stretches her finger and looks bigger than it is.", 'Round': "A round. The classic circle with the most sparkle of any diamond. Like a tiny disco ball.", 'Pear': "A pear. A teardrop, round on one end and pointed on the other. Romantic and a little different.", 'Emerald': "An emerald cut. A long rectangle with clipped corners. Like looking into a clear pool of water. Old Hollywood.", 'Elongated Cushion': "An elongated cushion. A soft rectangle with rounded corners, like a little pillow stretched long.", 'Cushion': "A cushion. A square with soft rounded corners, like a pillow. Big fire and sparkle.", 'Radiant': "A radiant. A rectangle with cut corners that sparkles like a round. Crisp and bright.", 'Princess': "A princess. A clean square with sharp corners. Modern and bold.", 'Marquise': "A marquise. Long with a point on each end, like a little boat. Vintage glam and covers the most finger.", 'Asscher': "An asscher. A square with stepped facets that look like a hall of mirrors inside. Art deco." },
+    setting: { 'Solitaire': "Just her diamond on a band. Clean and timeless, all eyes on the stone.", 'Hidden Halo': "A secret ring of tiny diamonds tucked under the stone. From the top it looks simple. From the side it sparkles. Only she knows it's there.", 'Halo': "A frame of tiny diamonds all the way around her diamond. It makes the center look a whole size bigger.", 'Pavé Band': "Tiny diamonds running down the band like a line of light leading to her diamond.", 'Three Stone': "Her diamond with a smaller one on each side. Past, present and future.", 'Five Stone': "A row of five diamonds across her finger. Sparkle from every angle.", 'Bezel': "A thin rim of gold hugs the whole edge of the stone. Sleek, modern, and nothing to snag.", 'Toi et Moi': "Two stones side by side. It's French for you and me. One stone for each of you." },
+    carat: { 'Under 1 carat': "Dainty and elegant. A little smaller than a pencil eraser.", '1 to 1.5 carats': "About the width of a pencil eraser. The size people notice from across the table.", '1.5 to 2 carats': "A bit bigger than a pencil eraser. Clearly a statement.", '2 to 3 carats': "Close to the size of a chickpea. This one turns heads.", '3 carats+': "Show stopper. She'll get stopped at the grocery store." },
+    stoneType: { 'Lab grown diamond': "A real diamond, grown instead of mined. Same sparkle, same hardness, and a lot more diamond for your money.", 'Natural diamond': "Mined from the earth. Same look, but about four times the price for the same size.", 'Moissanite': "Its own gem, not a diamond. Even more rainbow sparkle at the lowest price." },
+    metal: { '14k Yellow Gold': "Warm classic yellow gold. Timeless.", '14k White Gold': "A bright silver look that makes the diamond look even whiter.", '14k Rose Gold': "Soft pink gold. Romantic and modern.", '18k Yellow Gold': "Richer, deeper yellow gold. Luxurious.", '18k White Gold': "Brighter white gold with a richer feel.", 'Platinum': "The heaviest, whitest metal. Built to last forever." },
+    bandLook: { 'Plain polished': "A smooth shiny band. Lets the diamond do all the talking.", 'Pavé diamonds': "Tiny diamonds set down the band, so it sparkles from every angle.", 'Split shank': "The band splits into two thin lines as it reaches the stone, like a Y. Very elegant." },
+    bandWidth: { 'Thin and delicate': "Thin like a gold thread. It makes her diamond look even bigger.", 'Classic': "The most popular width. Feels right on almost every hand.", 'Bold': "Wider and strong. Great with a bigger stone or for bold style." },
+    profile: { 'Sits low': "Sits close to her finger like a button. Won't snag on sweaters, great if she works with her hands.", 'Sits high': "Lifted up so light pours in from the sides. Maximum sparkle, and her wedding band slides right under." }
+  };
+  var FORMK = {};
+  function pics() {
+    document.querySelectorAll('[data-pic]').forEach(function (el) {
+      var k = el.dataset.pic, line = VOICE[k] && VOICE[k][ans[k]];
+      el.innerHTML = line ? '<div class="say pic"><small>Help them picture it</small>' + E(line) + '</div>' : '';
+    });
+    document.querySelectorAll('[data-qk]').forEach(function (q) {
+      var k = q.dataset.qk, b = q.querySelector('.fromform');
+      var on = FORMK[k] && ans[k] === FORMK[k];
+      if (on && !b) q.insertAdjacentHTML('beforeend', '<span class="fromform">From form, confirm</span>');
+      if (!on && b) b.remove();
+    });
+    var rb = $('readback'); if (!rb) return;
+    if (!ans.shape) { rb.className = 'readback'; $('confirmRow').hidden = true; return; }
+    var ct = { 'Under 1 carat': 'a dainty', '1 to 1.5 carats': 'a 1 to 1.5 carat', '1.5 to 2 carats': 'a 1.5 to 2 carat', '2 to 3 carats': 'a 2 to 3 carat', '3 carats+': 'a 3 carat plus' }[ans.carat] || 'a beautiful';
+    var st = { 'Lab grown diamond': 'lab grown diamond', 'Natural diamond': 'natural diamond', 'Moissanite': 'moissanite' }[ans.stoneType] || 'diamond';
+    var t = 'So picture this. ' + ct.charAt(0).toUpperCase() + ct.slice(1) + ' ' + ans.shape.toLowerCase() + ' ' + st;
+    if (ans.setting) t += ' in a ' + ans.setting.toLowerCase() + ' setting';
+    var w = { 'Thin and delicate': 'thin ', 'Classic': '', 'Bold': 'bold ' }[ans.bandWidth] || '';
+    t += ', on a ' + w + (ans.metal ? ans.metal.replace('14k ', '').toLowerCase() : 'gold') + ' band';
+    t += { 'Pavé diamonds': ' lined with tiny diamonds', 'Split shank': ' that splits in two as it reaches the stone', 'Plain polished': ' polished smooth' }[ans.bandLook] || '';
+    t += { 'Sits low': ', sitting low and close to her finger', 'Sits high': ', lifted up high to catch the light' }[ans.profile] || '';
+    t += '.';
+    if (ans.engraving) t += ' And hidden inside the band: "' + ans.engraving + '".';
+    $('confirmRow').hidden = false;
+    rb.className = 'readback on'; rb.innerHTML = '<small>Read it back to them</small>' + E(t) + ' Can you see it on her hand?';
   }
   /* call pace: minutes per page, 30 minutes total */
-  var PACE = [0, 2, 4, 8, 2, 2, 4, 3, 5], callStart = 0;
+  var PACE = [0, 2, 3, 10, 4, 4, 7], callStart = 0;
   function paceInit() {
     try { var v = JSON.parse(sessionStorage.getItem('hg_pace_' + leadId) || '0'); if (v) callStart = v; } catch (e) {}
     document.querySelectorAll('section.pg').forEach(function (pg, i) {
@@ -393,18 +438,50 @@
     var pg = document.querySelector('section.pg.on'); if (!pg) return;
     var all = [].slice.call(document.querySelectorAll('section.pg')), i = all.indexOf(pg), box = pg.querySelector('.pace'); if (!box) return;
     var doneBy = 0; for (var k = 0; k <= i; k++) doneBy += PACE[k];
-    if (i === 0) { box.innerHTML = '<span>Call plan: <b>30 minutes</b>. Open 2, story 4, ring creator 8, size 2, budget 2, pitch 4, build 3, close 5.</span>' + (callStart ? '<span>Call time <b>' + mmss(Date.now() - callStart) + '</b></span><button type="button" data-pace-reset>Reset timer</button>' : ''); return; }
+    if (i === 0) { box.innerHTML = '<span>Call plan: <b>30 minutes</b>. Open 2, her story 3, design 10, size and budget 4, send rings 4, close 7.</span>' + (callStart ? '<span>Call time <b>' + mmss(Date.now() - callStart) + '</b></span><button type="button" data-pace-reset>Reset timer</button>' : ''); return; }
     var aim = '<span>Aim: <b>' + PACE[i] + ' min</b> on this page</span><span>Finish this page by <b>' + doneBy + ':00</b></span>';
     if (!callStart) { box.innerHTML = aim + '<button type="button" data-pace-start>Start call timer</button>'; return; }
     var el = (Date.now() - callStart) / 60000, st = el <= doneBy ? 'ok' : el <= doneBy + 3 ? 'warn' : 'late';
     var lbl = st === 'ok' ? 'On pace' : st === 'warn' ? 'A little behind, keep moving' : 'Behind, tighten up';
     box.innerHTML = aim + '<span>Call time <b>' + mmss(Date.now() - callStart) + '</b></span><span class="st ' + st + '">' + lbl + '</span>';
   }
+  var inspo = [];
+  function thanksText() { return 'Hi ' + first() + ' thank you for choosing Hidden Gem. If you have any rings she loves please text photos or links to 832 743 7657 or email hello@hiddengemrings.com. We will use them to design her perfect ring.'; }
+  function inspoLoad() { fetch(API + '/admin/inspo?id=' + encodeURIComponent(leadId) + '&key=' + encodeURIComponent(key)).then(function (r) { return r.json(); }).then(function (j) { if (j.ok) { inspo = j.pics; inspoDraw(); } }).catch(function () {}); }
+  function inspoPost(body) { body.key = key; body.id = leadId; return fetch(API + '/admin/inspo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }).then(function (j) { if (j.ok) { inspo = j.pics; inspoDraw(); } return j; }); }
+  function inspoDraw() {
+    $('inspoGrid').innerHTML = inspo.map(function (src, i) { return '<figure><img src="' + src + '" alt=""><figcaption><button type="button" data-use="' + i + '">Use in a ring</button><button type="button" data-del="' + i + '">Remove</button></figcaption></figure>'; }).join('') || '<p class="fine" style="margin:0">No photos yet.</p>';
+    var links = String(ans.inspoLinks || '').split(/\s+/).filter(function (x) { return /^https?:\/\//i.test(x); });
+    $('inspoLinkList').innerHTML = links.length ? '<div class="inspo-links">' + links.map(function (u) { return '<a href="' + E(u) + '" target="_blank" rel="noopener">' + E(u) + '</a>'; }).join('') + '</div>' : '';
+  }
+  function inspoInit() {
+    $('inspoFile').addEventListener('change', function () {
+      [].slice.call(this.files).forEach(function (f) { shrink(URL.createObjectURL(f), function (d) { if (d) inspoPost({ image: d }); }); });
+      this.value = '';
+    });
+    $('inspoGrid').addEventListener('click', function (e) {
+      var u = e.target.closest('[data-use]'), d = e.target.closest('[data-del]');
+      if (d) inspoPost({ remove: Number(d.dataset.del) });
+      if (u) {
+        var i = Number(u.dataset.use), s = slots.slice().reverse().filter(function (x) { return !x.upload; })[0] || slots[slots.length - 1];
+        if (!s) return; resize(inspo[i], function (big) { s.upload = big || inspo[i]; s.lib = ''; s.combo = ''; s.name = s.name && !/^The /.test(s.name) ? s.name : 'Her inspiration ring'; s.touched = true; drawSlots(); u.textContent = 'Added to Ring ' + (slots.indexOf(s) + 1); });
+      }
+    });
+    $('confirmRing').addEventListener('click', function () { ans.confirmed = 'yes'; saveSoon(); suggest(false); var n = document.querySelector('section.pg.on [data-next]'); if (n) n.click(); });
+    $('sendThanks').addEventListener('click', function () { ans.thanksSent = new Date().toISOString(); saveSoon(); });
+  }
+  function shrink(url, cb) {
+    var im = new Image();
+    im.onload = function () { var mx = 700, sc = Math.min(1, mx / Math.max(im.naturalWidth, im.naturalHeight)); var c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * sc); c.height = Math.round(im.naturalHeight * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.78)); };
+    im.onerror = function () { cb(''); }; im.src = url;
+  }
   function scripts() {
     var s = S[rep];
     $('repName').textContent = s.title;
     $('prepTip').innerHTML = s.prep;
     $('openScript').innerHTML = sayBlocks(s.open);
+    $('thanksPreview').textContent = thanksText();
+    $('sendThanks').href = sms(lead.phone, thanksText());
     $('timeScript').innerHTML = sayBlocks(s.timecheck);
     function timeDraw() {
       $('timeOpts').querySelectorAll('.opt').forEach(function (x) { x.setAttribute('aria-pressed', ans.time30 === x.dataset.t); });
@@ -459,12 +536,16 @@
     map.when = tl[lead.timeline] || lead.timeline;
     Object.keys(map).forEach(function (k) {
       if (!map[k] || ans[k]) return;
-      var v = String(map[k]);
+      var v = String(map[k]).replace(/Lab-grown/i, 'Lab grown');
       var hit = (C[k] || []).filter(function (x) { return x.toLowerCase().indexOf(v.toLowerCase()) === 0 || v.toLowerCase().indexOf(x.toLowerCase()) === 0; })[0];
       if (k === 'metal') hit = (C.metal).filter(function (x) { return x.toLowerCase().indexOf(v.toLowerCase().replace(/ gold/, '')) > -1; })[0] || hit;
       if (k === 'carat') hit = (C.carat).filter(function (x) { return x.indexOf(v) === 0; })[0] || hit;
+      if (hit) FORMK[k] = hit;
       if (hit) ans[k] = hit; else if (k === 'engraving') ans[k] = v === 'No' ? '' : '';
     });
+    if (/hidden halo/i.test(d.band || '')) FORMK.setting = 'Hidden Halo';
+    if (/diamond band/i.test(d.band || '')) FORMK.bandLook = 'Pavé diamonds';
+    if (/plain/i.test(d.band || '')) FORMK.bandLook = 'Plain polished';
     if (!ans.setting && /hidden halo/i.test(d.band || '')) ans.setting = 'Hidden Halo';
     if (!ans.bandLook && /diamond band/i.test(d.band || '')) ans.bandLook = 'Pavé diamonds';
     if (!ans.bandLook && /plain/i.test(d.band || '')) ans.bandLook = 'Plain polished';
@@ -571,7 +652,7 @@
     if (!good.length) { msg.className = 'status err'; msg.textContent = 'Add at least one ring with a name and price.'; return; }
     btn.disabled = true; msg.className = 'status'; msg.textContent = 'Preparing ring photos...';
     Promise.all(good.map(imgData)).then(function (imgs) {
-      var brief = { 'Shape': ans.shape, 'Setting': ans.setting, 'Signature design': ans.style, 'Stone size': ans.carat, 'Stone': ans.stoneType, 'Metal': ans.metal, 'Band': ans.bandLook || ans.band, 'Band width': ans.bandWidth, 'Stone height': ans.profile, 'Her size': ans.size ? ans.size + (ans.sizeKnown === 'Knows her size' ? '' : ' (estimate)') : '', 'Budget': ans.budget, 'Pay': ans.pay, 'Proposing': ans.when };
+      var brief = { 'Shape': ans.shape, 'Setting': ans.setting, 'Signature design': ans.style, 'Stone size': ans.carat, 'Stone': ans.stoneType, 'Metal': ans.metal, 'Band': ans.bandLook || ans.band, 'Band width': ans.bandWidth, 'Stone height': ans.profile, 'Her size': ans.size ? ans.size + (ans.sizeKnown === 'Knows her size' ? '' : ' (estimate)') : '', 'Budget': ans.budget, 'Pay': ans.pay, 'Proposing': ans.when, 'Her inspiration': ans.inspoLinks ? 'Links shared on the call' : '' };
       var body = { key: key, leadId: leadId, customerName: lead.name, customerPhone: lead.phone, customerEmail: lead.email || '', payPref: ans.pay || lead.pay || '', engraving: ans.engraving || '', notes: ans.notes || '', brief: brief,
         options: good.map(function (s, i) { return { name: s.name, metal: s.metal, stone: s.stone, price: s.price, ready: !!s.ready, noResize: !!s.noResize, image: imgs[i], imageUrl: s.combo && !s.upload ? slotSrc(s) : '' }; }) };
       msg.textContent = 'Creating their link...';
@@ -592,7 +673,7 @@
     return fetch(API + '/admin/lead?id=' + encodeURIComponent(leadId) + '&key=' + encodeURIComponent(key)).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.ok) throw j;
       var fresh = !lead; lead = j.lead;
-      if (fresh) { seedAnswers(); scripts(); opts(); priceHint(); suggest(true); }
+      if (fresh) { seedAnswers(); scripts(); opts(); priceHint(); suggest(true); inspoInit(); inspoLoad(); }
       else { tiles(); if (!slots.some(function (s) { return s.touched; })) suggest(true); }
       lead2view();
     });

@@ -260,6 +260,12 @@
     .po-icon{width:56px;height:56px;}
   }
   @media(prefers-reduced-motion: reduce){.po-step,.po-done{animation:none;}.po-bar span{transition:none;}}
+.po-inspo{background:#fff;border:1px solid rgba(92,77,64,.18);border-radius:18px;padding:18px 18px 14px;margin:16px 0 6px;text-align:left}
+.po-inspo strong{font-family:'Newsreader',serif;font-size:1.25rem;font-weight:500;color:var(--brown-dark)}
+.po-inspo p{margin:6px 0 0;line-height:1.55}
+.po-inspo-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.po-inspo-btns .btn{flex:1 1 140px;text-align:center;justify-content:center}
+.po-inspo .ghost-btn{background:transparent!important;color:var(--brown-dark)!important;border:1.5px solid var(--brown-dark)!important;box-shadow:none!important}
 </style>
 <header>
   <div class="nav-row">
@@ -528,6 +534,12 @@
       <img class="po-icon" src="icon-design.png" alt="">
       <h2>Your design is in<span class="po-firstname"></span>!</h2>
       <p class="po-lead">Expect a text at <strong class="po-phoneshow"></strong> within 24 hours with your custom concept and exact price.</p>
+      <div class="po-inspo">
+        <strong>Thank you for choosing Hidden Gem.</strong>
+        <p>Have photos or links of rings she loves? Send them our way and we'll use them to design her perfect ring.</p>
+        <div class="po-inspo-btns"><a class="btn" data-inspo="text" href="sms:+18327437657">Text photos</a><a class="btn ghost-btn" data-inspo="mail" href="mailto:hello@hiddengemrings.com?subject=Ring%20inspiration">Email links</a></div>
+        <p class="po-fine" style="margin-top:8px">(832) 743-7657 · hello@hiddengemrings.com</p>
+      </div>
       <ol class="po-next">
         <li><strong>You get your concept and price</strong> by text.</li>
         <li><strong>Say yes</strong> and we send a secure link to check your payment options with our lending partner.</li>
@@ -542,6 +554,12 @@
       <h2>You're all set<span id="poFirst"></span>!</h2>
       <p class="po-lead" id="poDoneLead">One of our ring specialists will be reaching out shortly.</p>
       <p class="po-fine" id="poDoneEmail" hidden></p>
+      <div class="po-inspo">
+        <strong>Thank you for choosing Hidden Gem.</strong>
+        <p>Have photos or links of rings she loves? Send them our way and we'll use them to design her perfect ring.</p>
+        <div class="po-inspo-btns"><a class="btn" data-inspo="text" href="sms:+18327437657">Text photos</a><a class="btn ghost-btn" data-inspo="mail" href="mailto:hello@hiddengemrings.com?subject=Ring%20inspiration">Email links</a></div>
+        <p class="po-fine" style="margin-top:8px">(832) 743-7657 · hello@hiddengemrings.com</p>
+      </div>
       <ol class="po-next">
         <li><strong>We reach out</strong> with ring designs that match your style and budget.</li>
         <li><strong>You get a secure link</strong> to check your payment options with our lending partner, right on your phone.</li>
@@ -976,6 +994,7 @@
       else if (state.a.contactPref === 'Text me') msg = 'One of our ring specialists will be texting you shortly.';
       else msg = 'One of our ring specialists will be calling you shortly.';
       document.getElementById('poDoneLead').innerHTML = msg;
+      try { var fn = (state.a.name || '').trim().split(' ')[0]; if (fn) { document.querySelectorAll('[data-inspo=text]').forEach(function (x) { x.href = 'sms:+18327437657?&body=' + encodeURIComponent('Hi this is ' + fn + '. Here is some ring inspiration '); }); document.querySelectorAll('[data-inspo=mail]').forEach(function (x) { x.href = 'mailto:hello@hiddengemrings.com?subject=' + encodeURIComponent('Ring inspiration from ' + fn); }); } } catch (e) {}
       var de = document.getElementById('poDoneEmail');
       if (state.eSent && state.email) { de.hidden = false; de.textContent = 'We emailed a copy of your picks to ' + state.email + '.'; } else de.hidden = true;
       eStep.hidden = true;

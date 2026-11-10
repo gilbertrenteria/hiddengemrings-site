@@ -482,6 +482,7 @@ async function handleLeadEmail(fields, env, origin) {
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">Your picks</h3>` +
     `<table cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:15px">` +
     picks.map(([k, v]) => `<tr><td style="color:#776C5C;padding-right:14px">${escapeHtml(k)}</td><td style="color:#423529;font-weight:600">${escapeHtml(v)}</td></tr>`).join('') + `</table>` +
+    `<div style="background:#fff;border:1px solid #E4DACB;border-radius:14px;padding:16px 18px;margin:22px 0 0"><p style="margin:0 0 6px;font-size:17px;color:#423529"><strong>Thank you for choosing Hidden Gem.</strong></p><p style="margin:0;font-size:15.5px;line-height:1.55">Have photos or links of rings she loves? Text them to <a href="sms:${PUBLIC_TEL}" style="color:#423529">${PUBLIC_PHONE}</a> or reply to this email. We'll use them to design her perfect ring.</p></div>` +
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">What happens next</h3>` +
     `<ol style="font-size:16px;line-height:1.55;padding-left:20px"><li>We send ring designs that match your style and budget.</li><li>You get a secure link to check your payment options with our lending partner, right on your phone.</li><li>You approve your final design and we start making your ring. Delivered within 6 weeks.</li></ol>` +
     `<p style="margin:24px 0"><a href="${SITE}/collection" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
@@ -1046,13 +1047,36 @@ async function handleCallSave(fields, url, env, origin) {
   if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
   const call = fields.call && typeof fields.call === 'object' ? fields.call : {};
   const clean = {};
-  Object.keys(call).slice(0, 40).forEach((k) => { clean[String(k).slice(0, 40)] = String(call[k] == null ? '' : call[k]).slice(0, 600); });
+  Object.keys(call).slice(0, 40).forEach((k) => { clean[String(k).slice(0, 40)] = String(call[k] == null ? '' : call[k]).slice(0, k === 'inspoLinks' || k === 'notes' || k === 'story' ? 3000 : 600); });
   lead.call = { ...(lead.call || {}), ...clean, savedAt: Date.now(), rep: String(fields.rep || '').slice(0, 40) };
   if (fields.status) { lead.status = String(fields.status).slice(0, 30); lead.statusAt = Date.now(); }
   if (fields.orderId) lead.orderId = String(fields.orderId).slice(0, 40);
   if (fields.stage) stampStage(lead, String(fields.stage));
   await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
   return json({ ok: true }, 200, origin);
+}
+
+// Inspiration photos the customer texted or emailed, added by the rep on the Call Link.
+async function handleInspoGet(url, env, origin) {
+  if (!(isAdmin(null, url, env) || teamAuth(null, url, env))) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(url.searchParams.get('id') || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const list = (await env.IG_KV.get(`inspo:${id}`, 'json')) || [];
+  return json({ ok: true, pics: list }, 200, origin);
+}
+async function handleInspoSave(fields, url, env, origin) {
+  if (!(isAdmin(fields, url, env) || teamAuth(fields, url, env))) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  if (!(await env.IG_KV.get(`lead:${id}`))) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  let list = (await env.IG_KV.get(`inspo:${id}`, 'json')) || [];
+  if (fields.remove != null) list = list.filter((_, i) => i !== Number(fields.remove));
+  const img = String(fields.image || '');
+  if (img) {
+    if (!/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 400000) return json({ ok: false, error: 'Photo too large' }, 400, origin);
+    if (list.length >= 12) return json({ ok: false, error: 'Up to 12 photos' }, 400, origin);
+    list.push(img);
+  }
+  await env.IG_KV.put(`inspo:${id}`, JSON.stringify(list));
+  return json({ ok: true, pics: list }, 200, origin);
 }
 
 async function handleAdminList(url, env, origin) {
@@ -1093,6 +1117,7 @@ export default {
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
       if (path === '/admin/lead') return handleAdminLead(url, env, origin);
+      if (path === '/admin/inspo') return handleInspoGet(url, env, origin);
       if (path === '/team/public') return handlePublicStatus(env, origin);
       if (path === '/team/state') return handleTeamState(url, env, origin);
       if (path === '/book/slots') return handleSlots(env, origin);
@@ -1139,6 +1164,7 @@ export default {
     if (chm) return handleOptionsChoose(chm[1], fields, env, origin);
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
     if (path === '/admin/call-save') return handleCallSave(fields, url, env, origin);
+    if (path === '/admin/inspo') return handleInspoSave(fields, url, env, origin);
     if (path === '/intro/heart') return handleIntroHeart(fields, env, origin);
     if (path === '/intro/seen') return handleIntroSeen(fields, env, origin);
     const am = path.match(/^\/order\/([a-z0-9]{6,32})\/approve$/);
