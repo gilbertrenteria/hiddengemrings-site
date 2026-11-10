@@ -1291,7 +1291,14 @@ async function handleTrack(request, env, origin) {
   if (!st.visitors[sid]) { st.visitors[sid] = 1; st.sources[src] = (st.sources[src] || 0) + 1; }
   await env.IG_KV.put(sk, JSON.stringify(st), { expirationTtl: 86400 * 40 });
 
-  const label = TRACK_EVENTS[ev];
+  let label = TRACK_EVENTS[ev];
+  if (ev === 'view') {
+    // one "someone is on your site" alert per visitor visit (12 hours)
+    const vk = `vis:${sid}`;
+    if (await env.IG_KV.get(vk)) return ok();
+    await env.IG_KV.put(vk, '1', { expirationTtl: 43200 });
+    label = 'Someone is on your site';
+  }
   if (!label) return ok();
 
   let who = '', ring = '';
