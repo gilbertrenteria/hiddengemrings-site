@@ -24,6 +24,16 @@ const FROM_ADDRESS = 'Hidden Gem Website <forms@mail.gilbertrenteria.dev>';
 const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.dev>';
 const SITE = 'https://hiddengemrings.com';
 
+// Stripe — deposit is charged at checkout once the customer approves their
+// design on approve.html. Needs two secrets added in the Cloudflare
+// dashboard (Workers > long-bar-d49d > Settings > Variables and Secrets):
+//   STRIPE_SECRET_KEY      the Secret key from the Stripe Dashboard
+//   STRIPE_WEBHOOK_SECRET  the signing secret for the /stripe/webhook endpoint
+// Card is always offered; Affirm/Klarna/Afterpay show up automatically for
+// eligible orders once turned on in Stripe Dashboard > Settings > Payment methods.
+const STRIPE_API = 'https://api.stripe.com/v1';
+const DEPOSIT_RATE = 0.5; // 50% non-refundable deposit, matches site policy
+
 function corsHeaders(origin) {
   const allow = ALLOWED_ORIGINS.has(origin) ? origin : 'https://hiddengemrings.com';
   return {
@@ -578,6 +588,143 @@ async function addToIndex(env, indexKey, id) {
   }
 }
 
+// === Stripe payments ===
+// Minimal hand-rolled Stripe client (form-encoded REST calls) — no SDK/build
+// step needed, matches how this Worker is deployed (plain worker.js).
+
+// Turns a free-typed price like "$4,500" or "4500.00" into whole cents.
+function parseMoneyCents(str) {
+  const m = String(str || '').match(/[\d,]+(\.\d{1,2})?/);
+  if (!m) return null;
+  const n = parseFloat(m[0].replace(/,/g, ''));
+  if (!isFinite(n) || n <= 0) return null;
+  return Math.round(n * 100);
+}
+
+// Flattens a nested object/array into Stripe's bracket form-encoding,
+// e.g. { a: { b: 1 } } -> "a[b]=1", { a: [{ b: 1 }] } -> "a[0][b]=1".
+function toStripeForm(params, prefix) {
+  const out = [];
+  for (const [k, v] of Object.entries(params || {})) {
+    if (v === undefined || v === null || v === '') continue;
+    const key = prefix ? `${prefix}[${k}]` : k;
+    if (Array.isArray(v)) {
+      v.forEach((item, i) => {
+        if (item && typeof item === 'object') out.push(...toStripeForm(item, `${key}[${i}]`));
+        else out.push([`${key}[${i}]`, item]);
+      });
+    } else if (typeof v === 'object') {
+      out.push(...toStripeForm(v, key));
+    } else {
+      out.push([key, v]);
+    }
+  }
+  return out;
+}
+
+async function stripeRequest(env, path, params) {
+  const body = new URLSearchParams(toStripeForm(params));
+  const res = await fetch(`${STRIPE_API}${path}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.STRIPE_SECRET_KEY}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { ok: false, error: (data.error && data.error.message) || `Stripe ${res.status}` };
+  return { ok: true, data };
+}
+
+// Verifies the Stripe-Signature header per Stripe's documented scheme
+// (HMAC-SHA256 of "timestamp.payload" using the webhook signing secret).
+async function verifyStripeSignature(payload, sigHeader, secret) {
+  const parts = Object.fromEntries(String(sigHeader || '').split(',').map((p) => p.split('=')));
+  if (!parts.t || !parts.v1) return false;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(`${parts.t}.${payload}`));
+  const hex = Array.from(new Uint8Array(sigBuf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hex === parts.v1;
+}
+
+// Creates a Checkout Session for the order's deposit and returns its URL.
+// Requires the order to already be approved, matching the site's existing
+// "approve first, then pay" flow.
+async function handleOrderCheckout(id, env, origin) {
+  if (!env.STRIPE_SECRET_KEY) {
+    return json({ ok: false, error: 'Payments are not turned on yet. Please call (832) 743-7657.' }, 503, origin);
+  }
+  const key = `order:${id}`;
+  const o = await env.IG_KV.get(key, 'json');
+  if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
+  if (!o.approval) return json({ ok: false, error: 'Please approve your design first.' }, 400, origin);
+  if (o.paid) return json({ ok: true, alreadyPaid: true }, 200, origin);
+
+  const totalCents = parseMoneyCents(o.price);
+  if (!totalCents) return json({ ok: false, error: 'We could not read the price on this order. Please call (832) 743-7657.' }, 400, origin);
+  const depositCents = Math.round(totalCents * DEPOSIT_RATE);
+
+  const session = await stripeRequest(env, '/checkout/sessions', {
+    mode: 'payment',
+    automatic_payment_methods: { enabled: true },
+    billing_address_collection: 'required',
+    shipping_address_collection: { allowed_countries: ['US'] },
+    client_reference_id: o.id,
+    customer_email: o.customerEmail || undefined,
+    success_url: `${SITE}/approve.html?id=${o.id}&paid=1`,
+    cancel_url: `${SITE}/approve.html?id=${o.id}`,
+    metadata: { order_id: o.id },
+    payment_intent_data: { metadata: { order_id: o.id }, description: `Hidden Gem deposit — ${o.ring || 'custom ring'} (Order ${o.id})` },
+    line_items: [{
+      quantity: 1,
+      price_data: {
+        currency: 'usd',
+        unit_amount: depositCents,
+        product_data: { name: `Hidden Gem — 50% deposit — ${o.ring || 'custom ring'}`, description: `Order ${o.id} · ${o.customerName}` },
+      },
+    }],
+  });
+  if (!session.ok) return json({ ok: false, error: session.error }, 502, origin);
+  return json({ ok: true, url: session.data.url }, 200, origin);
+}
+
+// Stripe calls this directly (server-to-server) once a Checkout Session
+// completes. Marks the order paid in KV and emails the team.
+async function handleStripeWebhook(request, env) {
+  if (!env.STRIPE_WEBHOOK_SECRET) return new Response('Webhook not configured', { status: 500 });
+  const sig = request.headers.get('Stripe-Signature') || '';
+  const payload = await request.text();
+  const valid = await verifyStripeSignature(payload, sig, env.STRIPE_WEBHOOK_SECRET);
+  if (!valid) return new Response('Invalid signature', { status: 400 });
+
+  let event;
+  try { event = JSON.parse(payload); } catch (e) { return new Response('Bad JSON', { status: 400 }); }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const orderId = (session.metadata && session.metadata.order_id) || session.client_reference_id;
+    if (orderId) {
+      const key = `order:${orderId}`;
+      const o = await env.IG_KV.get(key, 'json');
+      if (o && !o.paid) {
+        o.paid = true;
+        o.paidAt = Date.now();
+        o.stripeSessionId = session.id;
+        o.amountPaidCents = session.amount_total;
+        await env.IG_KV.put(key, JSON.stringify(o));
+        await sendEmail(env, {
+          to: [OWNER_ADDRESS, TO_ADDRESS],
+          subject: `PAID: ${o.customerName} just paid their deposit ($${(session.amount_total / 100).toFixed(2)})`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Deposit received</h2><p><strong>${escapeHtml(o.customerName)}</strong> just paid <strong>$${(session.amount_total / 100).toFixed(2)}</strong> toward ${escapeHtml(o.ring)} (Order ${o.id}).</p><p style="color:#777;font-size:13px">Stripe session: ${escapeHtml(session.id)}</p></div>`,
+        });
+      }
+    }
+  }
+  return new Response('ok', { status: 200 });
+}
+
 // === Design approvals ===
 // Gilbert creates an order from approve-admin.html (needs ADMIN_KEY). The
 // customer opens approve.html?id=..., checks the final-sale box, types
@@ -596,6 +743,7 @@ function publicOrder(o) {
     hasImage: !!o.hasImage, delivery: 'Within 6 weeks of approval and completed payment or financing',
     createdAt: o.createdAt, approved: !!o.approval,
     approval: o.approval ? { name: o.approval.name, at: o.approval.at } : null,
+    paid: !!o.paid,
   };
 }
 
@@ -745,6 +893,10 @@ export default {
       return json({ ok: false, error: 'Method not allowed' }, 405, origin);
     }
 
+    // Stripe posts here directly with a raw body + signature header — must
+    // be read before the generic JSON/formData parsing below.
+    if (path === '/stripe/webhook') return handleStripeWebhook(request, env);
+
     let fields;
     try {
       const ct = request.headers.get('Content-Type') || '';
@@ -766,6 +918,8 @@ export default {
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
     const am = path.match(/^\/order\/([a-z0-9]{6,32})\/approve$/);
     if (am) return handleOrderApprove(am[1], fields, request, env, origin);
+    const cm = path.match(/^\/order\/([a-z0-9]{6,32})\/checkout$/);
+    if (cm) return handleOrderCheckout(cm[1], env, origin);
 
     // honeypot — silently accept so a bot can't tell it was rejected
     if (fields._honey) {

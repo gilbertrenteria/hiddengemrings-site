@@ -115,8 +115,47 @@
 
   function renderApproved(o, img) {
     document.getElementById('intro').textContent = 'Thank you! Your design is approved and we are starting on your ring.';
-    card.innerHTML = '<div class="approved"><span class="badge">Approved</span><p>Signed by <strong>' + esc(o.approval.name) + '</strong></p><p>' + esc(when(o.approval.at)) + '</p></div>' + img + specs(o) +
+    var payBlock;
+    if (o.paid) {
+      payBlock = '<div class="approved" style="margin-top:18px"><span class="badge">Deposit Paid</span><p>Thank you — your deposit has been received.</p></div>';
+    } else {
+      payBlock = '<button class="btn" id="payBtn" type="button">Pay Your Deposit Now</button>' +
+        '<p class="status" id="payStatus" role="status" aria-live="polite"></p>' +
+        '<p class="fine">Secure checkout by Stripe. Pay by card, or choose Affirm/Klarna at checkout to split it into payments.</p>';
+    }
+    card.innerHTML = '<div class="approved"><span class="badge">Approved</span><p>Signed by <strong>' + esc(o.approval.name) + '</strong></p><p>' + esc(when(o.approval.at)) + '</p></div>' + img + specs(o) + payBlock +
       '<p class="fine">A copy of this approval was saved and sent to Hidden Gem' + ' and to your email if you gave us one. Your ring will be delivered within 6 weeks.</p>';
+    var payBtn = document.getElementById('payBtn');
+    if (payBtn) {
+      payBtn.addEventListener('click', function () {
+        payBtn.disabled = true;
+        var st = document.getElementById('payStatus');
+        st.className = 'status'; st.textContent = 'Opening secure checkout...';
+        fetch(API + '/order/' + o.id + '/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (j.ok && j.url) { location.href = j.url; return; }
+            if (j.ok && j.alreadyPaid) { st.textContent = 'This deposit was already paid.'; return; }
+            st.className = 'status err'; st.textContent = j.error || 'Could not start checkout. Please call (832) 743-7657.'; payBtn.disabled = false;
+          })
+          .catch(function () { st.className = 'status err'; st.textContent = 'Could not start checkout. Please call (832) 743-7657.'; payBtn.disabled = false; });
+      });
+    }
+    // Returning from a successful Stripe Checkout: the webhook usually marks
+    // the order paid within a second or two, just ahead of this redirect —
+    // poll briefly so the "Deposit Paid" badge shows without a manual refresh.
+    if (!o.paid && params.get('paid') === '1') {
+      var tries = 0;
+      (function poll() {
+        tries++;
+        if (tries > 6) return;
+        setTimeout(function () {
+          fetch(API + '/order/' + o.id).then(function (r) { return r.json(); }).then(function (j) {
+            if (j.ok && j.order.paid) { renderApproved(j.order, img); } else { poll(); }
+          }).catch(poll);
+        }, 1500);
+      })();
+    }
   }
 
   fetchOrder(0);
