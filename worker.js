@@ -319,7 +319,7 @@ async function routeLead(env, contact) {
 }
 
 function recipients(reps) {
-  return Array.from(new Set(reps.map((r) => r.email).concat([OWNER_ADDRESS]).filter(Boolean)));
+  return Array.from(new Set([PUBLIC_EMAIL].concat(reps.map((r) => r.email), [OWNER_ADDRESS]).filter(Boolean)));
 }
 
 function teamAuth(fields, url, env) { return isAdmin(fields, url, env); }
@@ -423,7 +423,7 @@ const DESIGN_FIELDS = [
 ];
 
 function leadRecipients(lead) {
-  return Array.from(new Set((lead.routedEmails || []).concat([OWNER_ADDRESS])));
+  return Array.from(new Set([PUBLIC_EMAIL].concat(lead.routedEmails || [], [OWNER_ADDRESS]).filter(Boolean)));
 }
 
 async function handleDesign(fields, env, origin) {
@@ -1138,6 +1138,7 @@ export default {
     // Stripe posts here directly with a raw body + signature header — must
     // be read before the generic JSON/formData parsing below.
     if (path === '/stripe/webhook') return handleStripeWebhook(request, env);
+    if (path === '/track') return handleTrack(request, env, origin);
 
     let fields;
     try {
@@ -1218,6 +1219,7 @@ export default {
 
   // Cron Trigger: keeps the cached Instagram feed fresh.
   async scheduled(event, env, ctx) {
+    if (event.cron === '0 14 * * *') { await sendDailySummary(env); return; }
     await refreshMediaCache(env);
   },
 };
@@ -1242,4 +1244,84 @@ async function sendEmail(env, { to, subject, html, replyTo, from }) {
   } catch (err) {
     return { ok: false, error: String(err && err.message || err) };
   }
+}
+
+
+// ----- Visit alerts and daily summary (track.js on the site) -----
+// Alerts go to the public inbox and the owner inbox. track.js only sends
+// after a real tap, scroll, click or keypress, and crawlers are filtered here
+// too, so link previews never alert.
+const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|meta-externalagent|whatsapp|telegram|discord|slack|skype|headless|lighthouse|python|curl|wget|httpclient|okhttp|go-http/i;
+const TRACK_EVENTS = {
+  view: null,
+  quiz_start: 'Someone started the quiz',
+  quiz_abandon: 'Someone left the quiz before finishing',
+  rings_open: 'opened their Pick Your Ring link',
+  approve_open: 'opened their design approval link',
+  collection_hot: 'Someone is browsing rings (3+ rings looked at)',
+};
+function centralDay(ts) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(ts || new Date());
+}
+function centralTime(ts) {
+  return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(ts || new Date());
+}
+async function handleTrack(request, env, origin) {
+  const ok = () => json({ ok: true }, 200, origin);
+  if (BOT_UA.test(request.headers.get('User-Agent') || '')) return ok();
+  let t;
+  try { t = JSON.parse(await request.text()); } catch (e) { return ok(); }
+  const ev = String(t.ev || '');
+  if (!(ev in TRACK_EVENTS) || !t.sid) return ok();
+  const sid = String(t.sid).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+  const page = String(t.page || '/').slice(0, 60);
+  const src = String(t.src || 'Unknown').slice(0, 60);
+  const data = (t.data && typeof t.data === 'object') ? t.data : {};
+
+  // one alert per visitor per event (12 hours)
+  const dk = `trk:${sid}:${ev}:${ev === 'view' ? page : ''}`;
+  if (await env.IG_KV.get(dk)) return ok();
+  await env.IG_KV.put(dk, '1', { expirationTtl: 43200 });
+
+  // daily counts for the summary email
+  const sk = `stats:${centralDay()}`;
+  const st = (await env.IG_KV.get(sk, 'json')) || { pages: {}, events: {}, sources: {}, visitors: {} };
+  st.events[ev] = (st.events[ev] || 0) + 1;
+  if (ev === 'view' || ev === 'rings_open' || ev === 'approve_open') st.pages[page] = (st.pages[page] || 0) + 1;
+  if (!st.visitors[sid]) { st.visitors[sid] = 1; st.sources[src] = (st.sources[src] || 0) + 1; }
+  await env.IG_KV.put(sk, JSON.stringify(st), { expirationTtl: 86400 * 40 });
+
+  const label = TRACK_EVENTS[ev];
+  if (!label) return ok();
+
+  let who = '', ring = '';
+  const id = String(t.id || '').replace(/[^a-z0-9]/g, '').slice(0, 32);
+  if (id && (ev === 'rings_open' || ev === 'approve_open')) {
+    const o = await env.IG_KV.get(`order:${id}`, 'json');
+    if (o) { who = o.customerName || ''; ring = o.ring || ''; }
+  }
+  const title = who ? `${who} ${label}` : (label.charAt(0).toUpperCase() + label.slice(1));
+  const rows = [['When', centralTime()], ['Page', 'hiddengemrings.com' + page], ['Came from', src]];
+  if (ring) rows.push(['Ring', ring]);
+  Object.entries(data).slice(0, 14).forEach(([k, v]) => { if (v) rows.push([k, String(v).slice(0, 200)]); });
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 10px">${escapeHtml(title)}</h2><table cellpadding="6" style="border-collapse:collapse">` +
+    rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') +
+    `</table><p style="color:#777;font-size:12px">Real visitors only. Bots and link previews are filtered out.</p></div>`;
+  await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem: ${title}`, html });
+  return ok();
+}
+async function sendDailySummary(env) {
+  const day = centralDay(new Date(Date.now() - 86400000));
+  const st = await env.IG_KV.get(`stats:${day}`, 'json');
+  const e = (st && st.events) || {};
+  const visitors = st ? Object.keys(st.visitors || {}).length : 0;
+  const list = (obj) => Object.entries(obj || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<li>${escapeHtml(k)}: ${v}</li>`).join('') || '<li>None</li>';
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Hidden Gem daily summary for ${day}</h2>` +
+    `<p><strong>${visitors}</strong> real visitors</p><ul>` +
+    `<li>Quiz started: ${e.quiz_start || 0}</li><li>Quiz left unfinished: ${e.quiz_abandon || 0}</li>` +
+    `<li>Pick Your Ring links opened: ${e.rings_open || 0}</li><li>Design approval links opened: ${e.approve_open || 0}</li>` +
+    `<li>Ring browsers (3+ rings): ${e.collection_hot || 0}</li></ul>` +
+    `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
+    `<p style="color:#777;font-size:12px">Finished quizzes are emailed the moment they come in.</p></div>`;
+  await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem daily summary: ${visitors} visitors on ${day}`, html });
 }

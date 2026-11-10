@@ -746,10 +746,19 @@
       if (key === 'slot') loadSlots();
     }
 
+    // alert when someone answers some questions but leaves before sending
+    window.addEventListener('pagehide', function () {
+      if (!window.HGTrack || state.sent || state.pending) return;
+      var a = state.a || {}, keys = ['budget', 'pay', 'monthly', 'timeline', 'credit'];
+      if (!keys.some(function (k) { return a[k]; })) return;
+      HGTrack('quiz_abandon', { Budget: a.budget, Payment: a.pay, Monthly: a.monthly, Timing: a.timeline, Credit: a.credit, Name: a.name, Phone: a.phone }, true);
+    });
+
     steps.forEach(function (s) {
       s.querySelectorAll('.po-chips button').forEach(function (b) {
         b.addEventListener('click', function () {
           state.a[s.dataset.key] = b.dataset.v; save();
+          if (window.HGTrack && !state.sent) HGTrack('quiz_start', { 'First answer': s.dataset.key + ': ' + b.dataset.v });
           s.querySelectorAll('.po-chips button').forEach(function (x) { x.classList.remove('selected'); });
           b.classList.add('selected');
           var vis = visibleSteps();
@@ -1094,4 +1103,5 @@
   })();
 </script>
 
+<script src="track.js" defer></script>
 </body></html>
