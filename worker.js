@@ -1310,11 +1310,10 @@ async function sendEmail(env, { to, subject, html, replyTo, from }) {
       result = { ok: false, error: String(err && err.message || err) };
     }
   }
-  const inboxes = (Array.isArray(payload.to) ? payload.to : [payload.to]).map((a) => {
-    const d = String(a).split('@')[1] || '';
-    return /hiddengemrings\.com|yahoo\.com/i.test(d) ? String(a) : 'customer (' + d + ')';
-  });
-  await logEmail(env, { time: centralTime(), at: Date.now(), type: emailType(subject), to: inboxes, ok: result.ok, resendId: result.id || '', error: result.ok ? '' : String(result.error || '').slice(0, 160) });
+  const etype = emailType(subject);
+  const toCustomer = /to customer/i.test(etype);
+  const inboxes = (Array.isArray(payload.to) ? payload.to : [payload.to]).map((a) => toCustomer ? 'customer (' + (String(a).split('@')[1] || '') + ')' : String(a));
+  await logEmail(env, { time: centralTime(), at: Date.now(), type: etype, to: inboxes, ok: result.ok, resendId: result.id || '', error: result.ok ? '' : String(result.error || '').slice(0, 160) });
   return result;
 }
 
