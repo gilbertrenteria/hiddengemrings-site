@@ -1273,7 +1273,19 @@ async function handleEmailLog(url, env, origin) {
   const day = url.searchParams.get('day') || centralDay();
   const list = (await env.IG_KV.get(`emaillog:${day}`, 'json')) || [];
   const failed = list.filter((x) => !x.ok).length;
-  return json({ ok: true, day, sent: list.length - failed, failed, emails: list }, 200, origin);
+  if (url.searchParams.get('format') === 'json') return json({ ok: true, day, sent: list.length - failed, failed, emails: list }, 200, origin);
+  const leads = list.filter((x) => /LEAD/.test(x.type)).length;
+  const row = (x) => `<tr><td>${escapeHtml(x.time.replace(/^\w+, /, ''))}</td><td${/LEAD/.test(x.type) ? ' style="font-weight:700;color:#8a5a00"' : ''}>${escapeHtml(x.type)}</td><td>${escapeHtml((x.to || []).join(', '))}</td><td style="font-weight:700;color:${x.ok ? '#2e7d32' : '#c62828'}">${x.ok ? 'Sent' : 'FAILED'}</td></tr>`;
+  const prev = new Date(new Date(day + 'T12:00:00Z').getTime() - 86400000).toISOString().slice(0, 10);
+  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Hidden Gem email log</title>` +
+    `<style>body{font-family:-apple-system,Arial,sans-serif;background:#F2EEE6;color:#3b322a;margin:0;padding:18px}h1{font-size:22px;margin:0 0 4px}p{margin:4px 0 14px;color:#6B5B4C}` +
+    `.cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.c{background:#fff;border-radius:12px;padding:10px 14px;min-width:90px}.c b{display:block;font-size:22px}` +
+    `table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:14px}td,th{padding:9px 10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}th{background:#8A7F6E;color:#fff;font-weight:600}a{color:#8a5a00}</style></head><body>` +
+    `<h1>Hidden Gem email log</h1><p>${escapeHtml(day)} · Central time · refresh to update · <a href="?day=${prev}">previous day</a></p>` +
+    `<div class="cards"><div class="c"><b>${list.length - failed}</b>Sent</div><div class="c"><b style="color:${failed ? '#c62828' : 'inherit'}">${failed}</b>Failed</div><div class="c"><b>${leads}</b>Lead emails</div></div>` +
+    `<table><tr><th>Time</th><th>Type</th><th>Sent to</th><th>Status</th></tr>${list.map(row).join('') || '<tr><td colspan="4">No emails yet today</td></tr>'}</table>` +
+    `<p style="margin-top:14px;font-size:12px">If something shows Sent but is not in your inbox, check Spam. Logging started Nov 11, 4:30 PM.</p></body></html>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 async function sendEmail(env, { to, subject, html, replyTo, from }) {
   const payload = { from: from || FROM_ADDRESS, to: to || [OWNER_ADDRESS, TO_ADDRESS], subject, html };
