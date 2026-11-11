@@ -1282,7 +1282,9 @@ async function trackDiag(env, reason, cf, ua) {
 async function handleTrackStats(url, env, origin) {
   const day = url.searchParams.get('day') || centralDay();
   const st = (await env.IG_KV.get(`stats:${day}`, 'json')) || {};
-  return json({ ok: true, day, alerted_visitors: Object.keys(st.visitors || {}).length, sources: st.sources || {}, places: st.places || {}, events: st.events || {}, ...((await env.IG_KV.get(`trackdiag:${day}`, 'json')) || {}) }, 200, origin);
+  const leadIds = (await env.IG_KV.get('index:leads', 'json')) || [];
+  const latest = leadIds.length ? await env.IG_KV.get(`lead:${leadIds[0]}`, 'json') : null;
+  return json({ ok: true, day, total_leads: leadIds.length, latest_lead_at: latest ? (latest.receivedAt || null) : null, latest_lead_id: leadIds[0] || null, alerted_visitors: Object.keys(st.visitors || {}).length, sources: st.sources || {}, places: st.places || {}, events: st.events || {}, ...((await env.IG_KV.get(`trackdiag:${day}`, 'json')) || {}) }, 200, origin);
 }
 async function handleTrack(request, env, origin) {
   const ok = () => json({ ok: true }, 200, origin);
