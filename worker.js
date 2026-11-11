@@ -1117,6 +1117,7 @@ export default {
       if (path === '/instagram/set-token') return handleSetToken(url, env);
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/track/stats') return handleTrackStats(url, env, origin);
+      if (path === '/email/log') return handleEmailLog(url, env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
       if (path === '/admin/lead') return handleAdminLead(url, env, origin);
       if (path === '/admin/inspo') return handleInspoGet(url, env, origin);
@@ -1226,26 +1227,62 @@ export default {
   },
 };
 
-async function sendEmail(env, { to, subject, html, replyTo, from }) {
+// Every email the site sends is logged (time, type, which inboxes, delivered or not)
+// so delivery can be checked. Names, phones and amounts are never stored in the log.
+function emailType(subject) {
+  const s = String(subject || '');
+  const map = [
+    [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
+    [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
+    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ lead, /i, 'NEW LEAD (form filled)'],
+    [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'],
+    [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
+  ];
+  for (const [re, label] of map) if (re.test(s)) return label;
+  return 'Other';
+}
+async function logEmail(env, entry) {
   try {
-    const payload = { from: from || FROM_ADDRESS, to: to || [OWNER_ADDRESS, TO_ADDRESS], subject, html };
-    if (replyTo) payload.reply_to = replyTo;
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
+    const k = `emaillog:${centralDay()}`;
+    const list = (await env.IG_KV.get(k, 'json')) || [];
+    list.unshift(entry);
+    await env.IG_KV.put(k, JSON.stringify(list.slice(0, 300)), { expirationTtl: 86400 * 30 });
+  } catch (e) {}
+}
+async function handleEmailLog(url, env, origin) {
+  const day = url.searchParams.get('day') || centralDay();
+  const list = (await env.IG_KV.get(`emaillog:${day}`, 'json')) || [];
+  const failed = list.filter((x) => !x.ok).length;
+  return json({ ok: true, day, sent: list.length - failed, failed, emails: list }, 200, origin);
+}
+async function sendEmail(env, { to, subject, html, replyTo, from }) {
+  const payload = { from: from || FROM_ADDRESS, to: to || [OWNER_ADDRESS, TO_ADDRESS], subject, html };
+  if (replyTo) payload.reply_to = replyTo;
+  let result = { ok: false, error: 'not sent' };
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const b = await res.json().catch(() => ({}));
+        result = { ok: true, id: b.id || '' };
+        break;
+      }
       const body = await res.text().catch(() => '');
-      return { ok: false, error: `Resend ${res.status}: ${body.slice(0, 300)}` };
+      result = { ok: false, error: `Resend ${res.status}: ${body.slice(0, 300)}` };
+    } catch (err) {
+      result = { ok: false, error: String(err && err.message || err) };
     }
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: String(err && err.message || err) };
   }
+  const inboxes = (Array.isArray(payload.to) ? payload.to : [payload.to]).map((a) => {
+    const d = String(a).split('@')[1] || '';
+    return /hiddengemrings\.com|yahoo\.com/i.test(d) ? String(a) : 'customer (' + d + ')';
+  });
+  await logEmail(env, { time: centralTime(), at: Date.now(), type: emailType(subject), to: inboxes, ok: result.ok, resendId: result.id || '', error: result.ok ? '' : String(result.error || '').slice(0, 160) });
+  return result;
 }
 
 
@@ -1360,12 +1397,16 @@ async function sendDailySummary(env) {
   const e = (st && st.events) || {};
   const visitors = st ? Object.keys(st.visitors || {}).length : 0;
   const list = (obj) => Object.entries(obj || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<li>${escapeHtml(k)}: ${v}</li>`).join('') || '<li>None</li>';
+  const elog = (await env.IG_KV.get(`emaillog:${day}`, 'json')) || [];
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Hidden Gem daily summary for ${day}</h2>` +
     `<p><strong>${visitors}</strong> real visitors</p><ul>` +
     `<li>Quiz started: ${e.quiz_start || 0}</li><li>Quiz left unfinished: ${e.quiz_abandon || 0}</li>` +
     `<li>Pick Your Ring links opened: ${e.rings_open || 0}</li><li>Design approval links opened: ${e.approve_open || 0}</li>` +
     `<li>Ring browsers (3+ rings): ${e.collection_hot || 0}</li></ul>` +
     `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Approximate visitor locations</h3><ul>${list(st && st.places)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
+    `<h3>Every email the site sent (${elog.length})</h3>` +
+    (elog.length ? `<table cellpadding="4" style="border-collapse:collapse;font-size:13px">` + elog.slice().reverse().map((x) => `<tr><td>${escapeHtml(x.time)}</td><td>${escapeHtml(x.type)}</td><td style="color:${x.ok ? '#2e7d32' : '#c62828'}">${x.ok ? 'Sent' : 'FAILED'}</td></tr>`).join('') + `</table>` : '<p>None</p>') +
+    `<p>If any alert above is not in your inbox, check Spam. Live log: https://long-bar-d49d.gilbertrenteria.workers.dev/email/log</p>` +
     `<p style="color:#777;font-size:12px">Finished quizzes are emailed the moment they come in.</p></div>`;
   await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem daily summary: ${visitors} visitors on ${day}`, html });
 }
