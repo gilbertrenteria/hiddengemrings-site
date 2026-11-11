@@ -586,6 +586,24 @@ async function handleLead(fields, request, env, origin) {
   return json({ ok: true, mode: lead.routeMode, slot }, 200, origin);
 }
 
+// Safety net: every 10 minutes, any saved lead whose email never went out is
+// emailed again, so a filled form can never be missed.
+async function resendUnsentLeads(env) {
+  const ids = ((await env.IG_KV.get('index:leads', 'json')) || []).slice(0, 25);
+  for (const id of ids) {
+    const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+    if (!lead || lead.emailed || !lead.name || !lead.phone) continue;
+    if (Date.now() - (lead.receivedAt || 0) > 3 * 86400000) continue;
+    const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
+    const rows = [['Name', lead.name], ['Phone', lead.phone], ['Prefers', lead.contact || ''], ['Budget', lead.budget || ''], ['Received', chicagoTime(lead.receivedAt)]];
+    const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 10px">New lead (resent by the safety check)</h2><table cellpadding="6">` +
+      rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C">${escapeHtml(k)}</td><td>${escapeHtml(String(v))}</td></tr>`).join('') +
+      `</table><p><a href="tel:+1${tel}">Call ${escapeHtml(lead.name.split(' ')[0])}</a> · <a href="${SITE}/team">Team page</a></p></div>`;
+    const sent = await sendEmail(env, { to: leadRecipients(lead), subject: `RESENT: ${lead.label || 'Website'} lead, ${lead.name}`, html });
+    if (sent.ok) { lead.emailed = true; lead.emailedAt = Date.now(); lead.resent = true; await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead)); }
+  }
+}
+
 async function addToIndex(env, indexKey, id) {
   const list = (await env.IG_KV.get(indexKey, 'json')) || [];
   if (!list.includes(id)) {
@@ -1222,6 +1240,7 @@ export default {
 
   // Cron Trigger: keeps the cached Instagram feed fresh.
   async scheduled(event, env, ctx) {
+    if (event.cron === '*/10 * * * *') { await resendUnsentLeads(env); return; }
     if (event.cron === '0 14 * * *') { await sendDailySummary(env); return; }
     await refreshMediaCache(env);
   },
@@ -1234,7 +1253,7 @@ function emailType(subject) {
   const map = [
     [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
     [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
-    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ lead, /i, 'NEW LEAD (form filled)'],
+    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
     [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'],
     [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
   ];

@@ -13,4 +13,4 @@ binding = "IG_KV"
 id = "1da47ceb018747cfacd6a48ff64eaea1" # hidden-gem-instagram
 
 [triggers]
-crons = ["0 6 * * *", "0 14 * * *"]
+crons = ["0 6 * * *", "0 14 * * *", "*/10 * * * *"]
