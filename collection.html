@@ -133,7 +133,21 @@
   }
   .design-card-media img{width:100%;aspect-ratio:.86;object-fit:cover;display:block;transition:opacity .2s ease;}
   .design-card h3{font-family:'Newsreader',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:0 0 6px;}
-  .design-card .metal-label{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--taupe-dark);margin:0 0 10px;}
+  .metal-label{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.08em;
+    font-size:10.5px;font-weight:600;color:var(--brown-dark);
+    background:var(--white);border:1px solid rgba(92,77,64,.16);
+    padding:5px 14px 5px 11px;border-radius:999px;margin:0 0 12px;
+    box-shadow:0 1px 4px rgba(92,77,64,.08);
+  }
+  .metal-label::before{
+    content:'';width:9px;height:9px;border-radius:50%;flex-shrink:0;
+    background:var(--dot-color,#D8B13A);border:1px solid rgba(0,0,0,.12);
+  }
+  .metal-label[data-metal="white"]{--dot-color:#E7E4DD;}
+  .metal-label[data-metal="yellow"]{--dot-color:#D8B13A;}
+  .metal-label[data-metal="rose"]{--dot-color:#E3B6AC;}
   .design-card p{font-size:15.5px;color:var(--ink);line-height:1.65;margin:0 0 16px;}
   .design-card .btn{padding:11px 22px;font-size:11px;}
   @media(max-width:900px){.design-grid{grid-template-columns:repeat(2,1fr);}}
@@ -160,7 +174,6 @@
   .metal-swatches button:hover{transform:translateY(-1px);}
   .metal-swatches button.active{border-color:var(--brown-dark);}
   .style-card h3{font-family:'Newsreader',serif;font-weight:600;font-size:23px;color:var(--brown-dark);margin:0 0 6px;}
-  .style-card .metal-label{font-family:'Work Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--taupe-dark);margin:0 0 10px;}
   .style-card p{font-size:15.5px;color:var(--ink);line-height:1.65;margin:0 0 16px;}
   .style-card .btn{padding:11px 22px;font-size:11px;}
   @media(max-width:900px){.style-grid{grid-template-columns:repeat(2,1fr);}}
@@ -564,6 +577,8 @@
     const img = card.querySelector('.style-card-media img, .design-card-media img');
     const label = card.querySelector('.metal-label');
     const names = {white:'White Gold', yellow:'Yellow Gold', rose:'Rose Gold'};
+    const activeBtn = card.querySelector('.metal-swatches button.active');
+    if (label && activeBtn) label.dataset.metal = activeBtn.dataset.metal;
     card.querySelectorAll('.metal-swatches button').forEach(sw => {
       sw.addEventListener('click', () => {
         const metal = sw.dataset.metal;
@@ -580,7 +595,7 @@
           img.style.opacity = '0';
           setTimeout(() => { img.src = url; img.style.opacity = '1'; }, 120);
         }
-        if (label) label.textContent = names[metal];
+        if (label) { label.textContent = names[metal]; label.dataset.metal = metal; }
         card.querySelectorAll('.metal-swatches button').forEach(b => b.classList.remove('active'));
         sw.classList.add('active');
       });
