@@ -25,7 +25,7 @@ const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.d
 const SITE = 'https://hiddengemrings.com';
 
 // Stripe — deposit is charged at checkout once the customer approves their
-// design on approve.html. Needs two secrets added in the Cloudflare
+// design on /approve. Needs two secrets added in the Cloudflare
 // dashboard (Workers > long-bar-d49d > Settings > Variables and Secrets):
 //   STRIPE_SECRET_KEY      the Secret key from the Stripe Dashboard
 //   STRIPE_WEBHOOK_SECRET  the signing secret for the /stripe/webhook endpoint
@@ -201,7 +201,7 @@ async function handleEmailCheck(url, env, origin) {
 }
 
 // === Team status, lead routing and call booking ===
-// The team page (team.html, password = ADMIN_KEY) sets who is Online, who
+// The team page (/team, password = ADMIN_KEY) sets who is Online, who
 // gets leads first, the weekly call hours and the rep names and emails.
 // Everything lives in IG_KV:
 //   team:config        reps, lead order, round-robin pointer
@@ -210,7 +210,7 @@ async function handleEmailCheck(url, env, origin) {
 //   index:bookdates    list of dates that have bookings
 
 const TZ = 'America/Chicago';
-const SLOT_MIN = 15;
+const SLOT_MIN = 30;
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DEFAULT_CONFIG = {
@@ -267,7 +267,7 @@ function labelDate(dateStr) {
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-// Open 15 minute slots for one date (Chicago time), minus booked ones.
+// Open 30 minute slots for one date (Chicago time), minus booked ones.
 async function openSlotsFor(env, dateStr, wd, avail, now) {
   const day = avail.days[wd];
   if (!day || !day.on || (avail.blocked || []).includes(dateStr)) return [];
@@ -278,7 +278,8 @@ async function openSlotsFor(env, dateStr, wd, avail, now) {
   for (let t = from; t + SLOT_MIN <= to; t += SLOT_MIN) {
     if (t < earliest) continue;
     const hm = toHM(t);
-    if (!booked[hm]) out.push(hm);
+    // skip if any booked call (including older 15 minute bookings) overlaps this slot
+    if (!Object.keys(booked).some((b) => { const bm = toMins(b); return bm > t - SLOT_MIN && bm < t + SLOT_MIN; })) out.push(hm);
   }
   return out;
 }
@@ -318,7 +319,7 @@ async function routeLead(env, contact) {
 }
 
 function recipients(reps) {
-  return Array.from(new Set(reps.map((r) => r.email).concat([OWNER_ADDRESS]).filter(Boolean)));
+  return Array.from(new Set([PUBLIC_EMAIL].concat(reps.map((r) => r.email), [OWNER_ADDRESS]).filter(Boolean)));
 }
 
 function teamAuth(fields, url, env) { return isAdmin(fields, url, env); }
@@ -334,6 +335,7 @@ async function handleTeamState(url, env, origin) {
       name: l.name, phone: fmtPhone(l.phone), label: l.label, contact: l.contact, budget: l.budget,
       at: labelTime(toHM(chiNow(l.receivedAt).mins)), routedTo: (l.routedNames || []).join(', '), reason: l.routeReason || '',
       slot: l.slotDate ? `${labelDate(l.slotDate)} at ${labelTime(l.slotTime)}` : '',
+      stage: l.stage || 'Form sent', id: l.id,
     }));
   const dates = ((await env.IG_KV.get('index:bookdates', 'json')) || []).filter((d) => d >= now.date).sort();
   const bookings = [];
@@ -421,7 +423,7 @@ const DESIGN_FIELDS = [
 ];
 
 function leadRecipients(lead) {
-  return Array.from(new Set((lead.routedEmails || []).concat([OWNER_ADDRESS])));
+  return Array.from(new Set([PUBLIC_EMAIL].concat(lead.routedEmails || [], [OWNER_ADDRESS]).filter(Boolean)));
 }
 
 async function handleDesign(fields, env, origin) {
@@ -466,7 +468,7 @@ async function handleLeadEmail(fields, env, origin) {
 
   const first = escapeHtml(lead.name.split(' ')[0]);
   let howNext;
-  if (lead.contact === 'Book a call') howNext = `Your 15 minute call is booked for <strong>${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}</strong> (Central). One of our ring specialists will call you then.`;
+  if (lead.contact === 'Book a call') howNext = `Your 30 minute call is booked for <strong>${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}</strong> (Central). One of our ring specialists will call you then.`;
   else if (lead.routeMode === 'offline') howNext = `Our ring specialists are away right now. We will ${lead.contact === 'Text me' ? 'text' : 'call'} you during business hours (Mon to Sat, 9 AM to 9 PM).`;
   else if (lead.contact === 'Call me') howNext = 'One of our ring specialists will be calling you shortly.';
   else howNext = 'One of our ring specialists will be texting you shortly.';
@@ -480,10 +482,11 @@ async function handleLeadEmail(fields, env, origin) {
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">Your picks</h3>` +
     `<table cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:15px">` +
     picks.map(([k, v]) => `<tr><td style="color:#776C5C;padding-right:14px">${escapeHtml(k)}</td><td style="color:#423529;font-weight:600">${escapeHtml(v)}</td></tr>`).join('') + `</table>` +
+    `<div style="background:#fff;border:1px solid #E4DACB;border-radius:14px;padding:16px 18px;margin:22px 0 0"><p style="margin:0 0 6px;font-size:17px;color:#423529"><strong>Thank you for choosing Hidden Gem.</strong></p><p style="margin:0;font-size:15.5px;line-height:1.55">Have photos or links of rings she loves? Text them to <a href="sms:${PUBLIC_TEL}" style="color:#423529">${PUBLIC_PHONE}</a> or reply to this email. We'll use them to design her perfect ring.</p></div>` +
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">What happens next</h3>` +
     `<ol style="font-size:16px;line-height:1.55;padding-left:20px"><li>We send ring designs that match your style and budget.</li><li>You get a secure link to check your payment options with our lending partner, right on your phone.</li><li>You approve your final design and we start making your ring. Delivered within 6 weeks.</li></ol>` +
-    `<p style="margin:24px 0"><a href="${SITE}/collection.html" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
-    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Call or text <a href="tel:${PUBLIC_TEL}" style="color:#776C5C">${PUBLIC_PHONE}</a> or just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies.html" style="color:#776C5C">Our policies</a></p></div>`;
+    `<p style="margin:24px 0"><a href="${SITE}/collection" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
+    `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Call or text <a href="tel:${PUBLIC_TEL}" style="color:#776C5C">${PUBLIC_PHONE}</a> or just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies" style="color:#776C5C">Our policies</a></p></div>`;
   const sent = await sendEmail(env, { to: [email], subject: `Your Hidden Gem ring picks, ${lead.name.split(' ')[0]}`, html, replyTo: PUBLIC_EMAIL, from: CUSTOMER_FROM });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.recapSent = true;
@@ -511,6 +514,7 @@ async function handleLead(fields, request, env, origin) {
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
   lead.label = leadLabel(lead);
+  if (!lead.journey) stampStage(lead, 'Form sent');
 
   // Book the call slot (first time only).
   if (lead.contact === 'Book a call' && !lead.slotDate) {
@@ -527,6 +531,7 @@ async function handleLead(fields, request, env, origin) {
     const dates = (await env.IG_KV.get('index:bookdates', 'json')) || [];
     if (!dates.includes(d)) { dates.push(d); await env.IG_KV.put('index:bookdates', JSON.stringify(dates.sort().slice(-200))); }
     lead.slotDate = d; lead.slotTime = t;
+    stampStage(lead, 'Call booked');
   }
 
   if (!lead.routedEmails) {
@@ -551,6 +556,7 @@ async function handleLead(fields, request, env, origin) {
     ['Credit (self reported)', lead.credit || 'not answered'],
     ['Sent to', `${(lead.routedNames || []).join(', ')} (${lead.routeReason})`],
     ['Received', chicagoTime(lead.receivedAt)],
+    ['Approximate location', (() => { const c = request.cf || {}; const t = [c.city, c.regionCode || c.region].filter(Boolean).join(', '); return t ? t + (c.postalCode ? ' (near ' + c.postalCode + ')' : '') : 'Unknown'; })()],
   ];
   const color = { 'READY': '#1f7a3a', 'WARM': '#b07a12', 'PLANNING': '#5b6b8a', 'JUST LOOKING': '#777' }[lead.label] || '#54453A';
   const html =
@@ -563,7 +569,7 @@ async function handleLead(fields, request, env, origin) {
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${k === 'Phone' ? v : escapeHtml(v)}</td></tr>`).join('') +
     `</table>` +
     `<p style="margin-top:18px"><a href="sms:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700;margin-right:8px">Text ${escapeHtml(lead.name.split(' ')[0])}</a> <a href="tel:+1${tel}" style="background:#fff;color:#54453A;border:2px solid #54453A;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:700">Call</a></p>` +
-    `<p style="color:#777;font-size:13px">Team page: <a href="${SITE}/team.html">${SITE}/team.html</a></p>` +
+    `<p style="color:#777;font-size:13px">Team page: <a href="${SITE}/team">${SITE}/team</a></p>` +
     `</div>`;
 
   const who = (lead.routedNames || []).length === 1 ? ` for ${lead.routedNames[0]}` : '';
@@ -652,39 +658,63 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
 // Creates a Checkout Session for the order's deposit and returns its URL.
 // Requires the order to already be approved, matching the site's existing
 // "approve first, then pay" flow.
-async function handleOrderCheckout(id, env, origin) {
+function orderTotalCents(o) { return parseMoneyCents(o.price); }
+function money(c) { return '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+// Creates a Checkout Session and returns its URL. plan:
+//   full    = whole price (card, Cash App, Apple Pay, Klarna, Affirm)
+//   deposit = 50% non-refundable deposit, balance before shipping
+//   balance = the remaining 50% after a deposit
+// Requires the design to be approved first ("approve first, then pay").
+async function handleOrderCheckout(id, fields, env, origin) {
   if (!env.STRIPE_SECRET_KEY) {
-    return json({ ok: false, error: 'Payments are not turned on yet. Please call (832) 743-7657.' }, 503, origin);
+    return json({ ok: false, error: `Payments are not turned on yet. Please call ${PUBLIC_PHONE}.` }, 503, origin);
   }
   const key = `order:${id}`;
   const o = await env.IG_KV.get(key, 'json');
   if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
   if (!o.approval) return json({ ok: false, error: 'Please approve your design first.' }, 400, origin);
-  if (o.paid) return json({ ok: true, alreadyPaid: true }, 200, origin);
+  if (o.paidInFull) return json({ ok: true, alreadyPaid: true }, 200, origin);
 
-  const totalCents = parseMoneyCents(o.price);
-  if (!totalCents) return json({ ok: false, error: 'We could not read the price on this order. Please call (832) 743-7657.' }, 400, origin);
+  const totalCents = orderTotalCents(o);
+  if (!totalCents) return json({ ok: false, error: `We could not read the price on this order. Please call ${PUBLIC_PHONE}.` }, 400, origin);
   const depositCents = Math.round(totalCents * DEPOSIT_RATE);
+  let plan = String((fields && fields.plan) || 'deposit');
+  if (o.paid) plan = 'balance'; // deposit already in: only the balance is left
+  if (!['full', 'finance', 'deposit', 'balance'].includes(plan)) plan = 'deposit';
+  const amount = plan === 'full' || plan === 'finance' ? totalCents : plan === 'deposit' ? depositCents : totalCents - (o.amountPaidCents || depositCents);
+  if (amount < 50) return json({ ok: false, error: 'Nothing left to pay on this order.' }, 400, origin);
+  const label = plan === 'finance' ? 'Monthly payments' : plan === 'full' ? 'Paid in full' : plan === 'deposit' ? '50% deposit' : 'Remaining balance';
+  const page = o.options ? 'rings' : 'approve';
 
-  const session = await stripeRequest(env, '/checkout/sessions', {
+  const base = {
     mode: 'payment',
     billing_address_collection: 'required',
     shipping_address_collection: { allowed_countries: ['US'] },
     client_reference_id: o.id,
     customer_email: o.customerEmail || undefined,
-    success_url: `${SITE}/approve.html?id=${o.id}&paid=1`,
-    cancel_url: `${SITE}/approve.html?id=${o.id}`,
-    metadata: { order_id: o.id },
-    payment_intent_data: { metadata: { order_id: o.id }, description: `Hidden Gem deposit — ${o.ring || 'custom ring'} (Order ${o.id})` },
+    success_url: `${SITE}/${page}?id=${o.id}&paid=1`,
+    cancel_url: `${SITE}/${page}?id=${o.id}`,
+    metadata: { order_id: o.id, plan },
+    payment_intent_data: { metadata: { order_id: o.id, plan }, description: `Hidden Gem ${label} — ${o.ring || 'custom ring'} (Order ${o.id})` },
     line_items: [{
       quantity: 1,
       price_data: {
         currency: 'usd',
-        unit_amount: depositCents,
-        product_data: { name: `Hidden Gem — 50% deposit — ${o.ring || 'custom ring'}`, description: `Order ${o.id} · ${o.customerName}` },
+        unit_amount: amount,
+        product_data: { name: `Hidden Gem — ${label} — ${o.ring || 'custom ring'}`, description: `Order ${o.id} · ${o.customerName}` },
       },
     }],
-  });
+  };
+  // Monthly payments: show only the financing options at checkout. Tries
+  // Affirm + Klarna, then Klarna alone (Affirm may still be in review),
+  // then falls back to the normal checkout with every method.
+  const tries = plan === 'finance' ? [['affirm', 'klarna'], ['klarna'], null] : [null];
+  let session;
+  for (const types of tries) {
+    session = await stripeRequest(env, '/checkout/sessions', types ? { ...base, payment_method_types: types } : base);
+    if (session.ok) break;
+  }
   if (!session.ok) return json({ ok: false, error: session.error }, 502, origin);
   return json({ ok: true, url: session.data.url }, 200, origin);
 }
@@ -707,16 +737,25 @@ async function handleStripeWebhook(request, env) {
     if (orderId) {
       const key = `order:${orderId}`;
       const o = await env.IG_KV.get(key, 'json');
-      if (o && !o.paid) {
+      const plan = (session.metadata && session.metadata.plan) || 'deposit';
+      const already = o && (o.payments || []).some((p) => p.session === session.id);
+      if (o && !already) {
+        o.payments = (o.payments || []).concat([{ session: session.id, plan, cents: session.amount_total, at: Date.now() }]);
+        o.amountPaidCents = (o.amountPaidCents || 0) + (session.amount_total || 0);
         o.paid = true;
-        o.paidAt = Date.now();
+        o.paidAt = o.paidAt || Date.now();
         o.stripeSessionId = session.id;
-        o.amountPaidCents = session.amount_total;
+        o.plan = o.plan && plan === 'balance' ? o.plan : plan;
+        if (plan === 'full' || plan === 'finance' || plan === 'balance' || o.amountPaidCents >= (orderTotalCents(o) || Infinity)) o.paidInFull = true;
         await env.IG_KV.put(key, JSON.stringify(o));
+        await markStage(env, o.leadId, plan === 'deposit' ? 'Deposit paid' : plan === 'finance' ? 'Financed' : 'Paid in full');
+        const total = orderTotalCents(o) || 0;
+        const left = Math.max(0, total - o.amountPaidCents);
+        const what = plan === 'finance' ? 'FINANCED IN FULL' : plan === 'full' ? 'PAID IN FULL' : plan === 'deposit' ? 'DEPOSIT PAID' : 'BALANCE PAID';
         await sendEmail(env, {
           to: [OWNER_ADDRESS, TO_ADDRESS],
-          subject: `PAID: ${o.customerName} just paid their deposit ($${(session.amount_total / 100).toFixed(2)})`,
-          html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Deposit received</h2><p><strong>${escapeHtml(o.customerName)}</strong> just paid <strong>$${(session.amount_total / 100).toFixed(2)}</strong> toward ${escapeHtml(o.ring)} (Order ${o.id}).</p><p style="color:#777;font-size:13px">Stripe session: ${escapeHtml(session.id)}</p></div>`,
+          subject: `${what}: ${o.customerName} paid ${money(session.amount_total)} (${o.ring})`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:560px"><div style="display:inline-block;background:#1f7a3a;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">${what}</div><h2 style="margin:14px 0 6px">${escapeHtml(o.customerName)} paid ${money(session.amount_total)}</h2><p>${escapeHtml(o.ring)} · ${escapeHtml(o.metal || '')} · size ${escapeHtml(o.size || 'n/a')}</p><p>Order total ${money(total)} · paid so far ${money(o.amountPaidCents)} · <strong>${left ? 'balance due before shipping ' + money(left) : 'nothing left to pay'}</strong></p><p>Financing or card is shown in Stripe: <a href="https://dashboard.stripe.com/payments">dashboard.stripe.com/payments</a></p><p style="color:#777;font-size:13px">Order ${o.id} · Stripe session ${escapeHtml(session.id)}</p></div>`,
         });
       }
     }
@@ -725,8 +764,8 @@ async function handleStripeWebhook(request, env) {
 }
 
 // === Design approvals ===
-// Gilbert creates an order from approve-admin.html (needs ADMIN_KEY). The
-// customer opens approve.html?id=..., checks the final-sale box, types
+// Gilbert creates an order from /admin (needs ADMIN_KEY). The
+// customer opens /approve?id=..., checks the final-sale box, types
 // their full name and approves. The approval is saved with the date, time,
 // IP and device, and a copy is emailed to Gilbert and to the customer.
 
@@ -739,11 +778,113 @@ function publicOrder(o) {
   return {
     id: o.id, customerName: o.customerName, ring: o.ring, metal: o.metal, stone: o.stone,
     size: o.size, engraving: o.engraving, price: o.price, payment: o.payment, notes: o.notes,
-    hasImage: !!o.hasImage, delivery: 'Within 6 weeks of approval and completed payment or financing',
+    hasImage: !!o.hasImage, delivery: o.ready ? 'Ships within 3 to 5 business days after payment' : 'Within 6 weeks of approval and completed payment or financing',
     createdAt: o.createdAt, approved: !!o.approval,
     approval: o.approval ? { name: o.approval.name, at: o.approval.at } : null,
-    paid: !!o.paid,
+    paid: !!o.paid, paidInFull: !!o.paidInFull, plan: o.plan || '', amountPaidCents: o.amountPaidCents || 0,
+    payPref: o.payPref || '', ready: !!o.ready,
+    options: o.options ? o.options.map((x, i) => ({ i, name: x.name, metal: x.metal, stone: x.stone, price: x.price, ready: !!x.ready, noResize: !!x.noResize, hasImage: !!x.hasImage, imageUrl: x.imageUrl || '' })) : null,
+    imageUrl: o.imageUrl || '',
+    brief: o.brief || [], chosen: o.chosen == null ? null : o.chosen, sizeMethod: o.sizeMethod || '', sizeEstimated: !!o.sizeEstimated,
   };
+}
+
+const READY_DELIVERY = 'Ships within 3 to 5 business days after payment';
+const CUSTOM_DELIVERY = 'Within 6 weeks of approval and completed payment or financing';
+
+// Ring options: up to 6 rings for one customer on one link (/rings).
+async function handleOptionsCreate(fields, env, origin, url) {
+  if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
+  const s = (v, n = 200) => String(v || '').trim().slice(0, n);
+  const raw = Array.isArray(fields.options) ? fields.options.slice(0, 6) : [];
+  const okUrl = (u) => /^https:\/\/(ring\.gilbertrenteria\.dev|hiddengemrings\.com)\/[\w\-./]+\.(webp|jpg|jpeg|png)$/i.test(u) ? u : '';
+  const options = raw.map((x) => ({ name: s(x.name, 120), metal: s(x.metal, 60), stone: s(x.stone, 300), price: s(x.price, 40), ready: !!x.ready, noResize: !!x.noResize, image: String(x.image || ''), imageUrl: okUrl(String(x.imageUrl || '')) }))
+    .filter((x) => x.name && parseMoneyCents(x.price));
+  const order = {
+    id: newId(), type: 'options',
+    customerName: s(fields.customerName, 120), customerPhone: s(fields.customerPhone, 40), customerEmail: s(fields.customerEmail, 160),
+    payPref: s(fields.payPref, 40), leadId: s(fields.leadId, 48), notes: s(fields.notes, 800), engraving: s(fields.engraving, 120),
+    createdAt: Date.now(), hasImage: false, ring: '', price: '', metal: '', stone: '', size: '', chosen: null,
+  };
+  // Everything gathered on the form and the call, shown to the customer as
+  // "Built from what you told us" on their Pick Your Ring page.
+  const brief = fields.brief && typeof fields.brief === 'object' ? fields.brief : {};
+  order.brief = Object.keys(brief).slice(0, 16).map((k) => [String(k).slice(0, 40), String(brief[k] || '').slice(0, 160)]).filter((x) => x[1]);
+  if (order.leadId) {
+    const lead = await env.IG_KV.get(`lead:${order.leadId}`, 'json');
+    if (lead) {
+      if (!order.customerEmail && lead.email) order.customerEmail = lead.email;
+      if (!order.customerPhone) order.customerPhone = lead.phone || '';
+      if (!order.payPref) order.payPref = lead.pay || '';
+      lead.orderId = order.id; lead.status = 'link sent'; lead.statusAt = Date.now();
+      stampStage(lead, 'Options sent');
+      await env.IG_KV.put(`lead:${order.leadId}`, JSON.stringify(lead));
+    }
+  }
+  if (!order.customerName) return json({ ok: false, error: 'Customer name is required' }, 400, origin);
+  if (!options.length) return json({ ok: false, error: 'Add at least one ring with a name and a price' }, 400, origin);
+  for (let i = 0; i < options.length; i++) {
+    const img = options[i].image;
+    if (img.startsWith('data:image/')) {
+      if (img.length > 6_000_000) return json({ ok: false, error: `Ring ${i + 1} photo is too large` }, 400, origin);
+      await env.IG_KV.put(`img:${order.id}:${i}`, img);
+      options[i].hasImage = true;
+    }
+    delete options[i].image;
+  }
+  order.options = options;
+  await env.IG_KV.put(`order:${order.id}`, JSON.stringify(order));
+  await addToIndex(env, 'index:orders', order.id);
+  return json({ ok: true, id: order.id, link: `${SITE}/rings?id=${order.id}` }, 200, origin);
+}
+
+// The customer picks a ring and a size. Allowed until the design is signed.
+async function handleOptionsChoose(id, fields, env, origin) {
+  const key = `order:${id}`;
+  const o = await env.IG_KV.get(key, 'json');
+  if (!o || !o.options) return json({ ok: false, error: 'Order not found' }, 404, origin);
+  if (o.approval) return json({ ok: false, error: 'This design is already approved.' }, 400, origin);
+  const i = Number(fields.index);
+  const opt = o.options[i];
+  if (!opt) return json({ ok: false, error: 'Please pick a ring' }, 400, origin);
+  const size = Number(fields.size);
+  if (!isFinite(size) || size < 3 || size > 13) return json({ ok: false, error: 'Please pick a ring size between 3 and 13' }, 400, origin);
+  const method = String(fields.sizeMethod || 'known');
+  if (!['known', 'measured', 'estimate'].includes(method)) return json({ ok: false, error: 'Please choose how you found the size' }, 400, origin);
+  if (method === 'estimate' && opt.noResize) return json({ ok: false, error: 'This ring can\'t be resized, so we need her exact size. Please measure a ring she wears or tell us her size.' }, 400, origin);
+  o.chosen = i;
+  o.ring = opt.name; o.metal = opt.metal; o.stone = opt.stone; o.price = opt.price; o.ready = !!opt.ready;
+  o.sizeMethod = method;
+  o.sizeEstimated = method !== 'known';
+  const detail = String(fields.sizeDetail || '').trim().slice(0, 160);
+  const how = method === 'known' ? 'known size' : method === 'measured' ? `measured from her ring${detail ? ', ' + detail : ''}` : `estimated${detail ? ', ' + detail : ''}`;
+  o.size = `${size} (${how})${o.sizeEstimated && !opt.noResize ? ' · free resize within 1 year, up to 2 sizes' : ''}`;
+  o.imageUrl = opt.imageUrl || '';
+  if (opt.hasImage) {
+    const img = await env.IG_KV.get(`img:${id}:${i}`);
+    if (img) { await env.IG_KV.put(`img:${id}`, img); o.hasImage = true; }
+  } else o.hasImage = false;
+  const photo = String(fields.sizePhoto || '');
+  if (photo.startsWith('data:image/') && photo.length < 6_000_000) { await env.IG_KV.put(`img:${id}:size`, photo); o.hasSizePhoto = true; }
+  await env.IG_KV.put(key, JSON.stringify(o));
+  await markStage(env, o.leadId, 'Ring picked');
+  return json({ ok: true, order: publicOrder(o) }, 200, origin);
+}
+
+async function handleOrderSeen(id, env, origin) {
+  const o = await env.IG_KV.get(`order:${id}`, 'json');
+  if (!o) return json({ ok: false }, 404, origin);
+  if (!o.seenAt) { o.seenAt = Date.now(); await env.IG_KV.put(`order:${id}`, JSON.stringify(o)); await markStage(env, o.leadId, 'Options opened'); }
+  return json({ ok: true }, 200, origin);
+}
+
+async function handleOptionImage(id, i, env) {
+  const data = await env.IG_KV.get(`img:${id}:${i}`);
+  if (!data) return new Response('Not found', { status: 404 });
+  const m = data.match(/^data:(image\/[a-z+]+);base64,(.*)$/);
+  if (!m) return new Response('Bad image', { status: 500 });
+  const bin = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
+  return new Response(bin, { headers: { 'Content-Type': m[1], 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' } });
 }
 
 async function handleOrderCreate(fields, env, origin, url) {
@@ -767,7 +908,7 @@ async function handleOrderCreate(fields, env, origin, url) {
   }
   await env.IG_KV.put(`order:${order.id}`, JSON.stringify(order));
   await addToIndex(env, 'index:orders', order.id);
-  return json({ ok: true, id: order.id, link: `${SITE}/approve.html?id=${order.id}` }, 200, origin);
+  return json({ ok: true, id: order.id, link: `${SITE}/approve?id=${order.id}` }, 200, origin);
 }
 
 async function handleOrderGet(id, env, origin) {
@@ -791,6 +932,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
   if (o.approval && o.approval.emailed) return json({ ok: true, order: publicOrder(o), duplicate: true }, 200, origin);
 
+  if (o.options && o.chosen == null) return json({ ok: false, error: 'Please pick your ring and size first.' }, 400, origin);
   const typed = String(fields.name || '').trim().slice(0, 120);
   const agreed = fields.agree === true || fields.agree === 'true';
   if (!agreed || typed.length < 3) {
@@ -809,13 +951,16 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   const rows = [
     ['Ring', o.ring], ['Metal', o.metal], ['Stone', o.stone], ['Ring size', o.size],
     ['Engraving', o.engraving || 'None'], ['Price', o.price], ['Payment', o.payment || 'n/a'],
-    ['Delivery', 'Within 6 weeks of approval and completed payment or financing'],
+    ['Delivery', o.ready ? READY_DELIVERY : CUSTOM_DELIVERY],
     ['Approved by (typed name)', o.approval.name], ['Approved at', chicagoTime(o.approval.at)],
     ['Agreement', o.approval.terms], ['Order ID', o.id],
   ];
   const table = `<table cellpadding="7" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') + `</table>`;
-  const imgTag = o.hasImage ? `<p><img src="https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image" alt="Approved design" style="max-width:100%;border-radius:12px"></p>` : '';
+  if (o.hasSizePhoto) rows.splice(4, 0, ['Size photo', `https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image/size`]);
+  if (o.payPref) rows.push(['Payment preference (form)', o.payPref]);
+  const imgSrc = o.hasImage ? `https://long-bar-d49d.gilbertrenteria.workers.dev/order/${o.id}/image` : o.imageUrl;
+  const imgTag = imgSrc ? `<p><img src="${imgSrc}" alt="Approved design" style="max-width:100%;border-radius:12px"></p>` : '';
 
   const ownerSent = await sendEmail(env, {
     to: [OWNER_ADDRESS, TO_ADDRESS],
@@ -838,7 +983,101 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   }
   o.approval.emailed = true;
   await env.IG_KV.put(key, JSON.stringify(o));
+  await markStage(env, o.leadId, 'Approved');
   return json({ ok: true, order: publicOrder(o) }, 200, origin);
+}
+
+// === Customer journey ===
+// One timeline per lead so every link knows where the customer is.
+const STAGES = ['Form sent', 'Call booked', 'Called', 'Intro opened', 'Loved rings', 'Options sent', 'Options opened', 'Ring picked', 'Approved', 'Deposit paid', 'Financed', 'Paid in full', 'In production', 'Shipped', 'Delivered', 'Not ready', 'Lost'];
+function stampStage(lead, stage) {
+  if (!lead || !STAGES.includes(stage)) return lead;
+  lead.journey = lead.journey || [];
+  const last = lead.journey[lead.journey.length - 1];
+  if (!last || last.stage !== stage) lead.journey.push({ stage, at: Date.now() });
+  lead.journey = lead.journey.slice(-40);
+  lead.stage = stage; lead.stageAt = Date.now();
+  return lead;
+}
+async function markStage(env, leadId, stage) {
+  if (!leadId) return;
+  const lead = await env.IG_KV.get(`lead:${leadId}`, 'json');
+  if (!lead) return;
+  stampStage(lead, stage);
+  await env.IG_KV.put(`lead:${leadId}`, JSON.stringify(lead));
+}
+
+// === Customer Intro + Call Link ===
+const INTRO_RINGS = ['penelope', 'selah', 'nova', 'allison', 'souline', 'aurora', 'setlla'];
+async function handleIntroHeart(fields, env, origin) {
+  const id = String(fields.lead || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const d = String(fields.design || '');
+  if (!INTRO_RINGS.includes(d) && !/^(round|oval|pear|emerald|cushion|elcushion|marquise|radiant|princess|asscher)-(solitaire|hidden|halo|side|three|five|bezel|toi)$/.test(d)) return json({ ok: false }, 400, origin);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false }, 404, origin);
+  const set = new Set(lead.hearts || []);
+  if (fields.on === true || fields.on === 'true') set.add(d); else set.delete(d);
+  lead.hearts = Array.from(set);
+  lead.heartsAt = Date.now();
+  if (lead.hearts.length) stampStage(lead, 'Loved rings');
+  await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+async function handleIntroSeen(fields, env, origin) {
+  const id = String(fields.lead || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false }, 404, origin);
+  lead.introSeenAt = lead.introSeenAt || Date.now();
+  lead.introLastAt = Date.now();
+  if (!(lead.journey || []).some((j) => j.stage === 'Intro opened')) stampStage(lead, 'Intro opened');
+  await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+async function handleAdminLead(url, env, origin) {
+  const ok = isAdmin(null, url, env) || teamAuth(null, url, env);
+  if (!ok) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(url.searchParams.get('id') || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  return json({ ok: true, lead }, 200, origin);
+}
+async function handleCallSave(fields, url, env, origin) {
+  if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  const call = fields.call && typeof fields.call === 'object' ? fields.call : {};
+  const clean = {};
+  Object.keys(call).slice(0, 40).forEach((k) => { clean[String(k).slice(0, 40)] = String(call[k] == null ? '' : call[k]).slice(0, k === 'inspoLinks' || k === 'notes' || k === 'story' ? 3000 : 600); });
+  lead.call = { ...(lead.call || {}), ...clean, savedAt: Date.now(), rep: String(fields.rep || '').slice(0, 40) };
+  if (fields.status) { lead.status = String(fields.status).slice(0, 30); lead.statusAt = Date.now(); }
+  if (fields.orderId) lead.orderId = String(fields.orderId).slice(0, 40);
+  if (fields.stage) stampStage(lead, String(fields.stage));
+  await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+
+// Inspiration photos the customer texted or emailed, added by the rep on the Call Link.
+async function handleInspoGet(url, env, origin) {
+  if (!(isAdmin(null, url, env) || teamAuth(null, url, env))) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(url.searchParams.get('id') || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const list = (await env.IG_KV.get(`inspo:${id}`, 'json')) || [];
+  return json({ ok: true, pics: list }, 200, origin);
+}
+async function handleInspoSave(fields, url, env, origin) {
+  if (!(isAdmin(fields, url, env) || teamAuth(fields, url, env))) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  if (!(await env.IG_KV.get(`lead:${id}`))) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  let list = (await env.IG_KV.get(`inspo:${id}`, 'json')) || [];
+  if (fields.remove != null) list = list.filter((_, i) => i !== Number(fields.remove));
+  const img = String(fields.image || '');
+  if (img) {
+    if (!/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 400000) return json({ ok: false, error: 'Photo too large' }, 400, origin);
+    if (list.length >= 12) return json({ ok: false, error: 'Up to 12 photos' }, 400, origin);
+    list.push(img);
+  }
+  await env.IG_KV.put(`inspo:${id}`, JSON.stringify(list));
+  return json({ ok: true, pics: list }, 200, origin);
 }
 
 async function handleAdminList(url, env, origin) {
@@ -847,7 +1086,7 @@ async function handleAdminList(url, env, origin) {
   const orderIds = ((await env.IG_KV.get('index:orders', 'json')) || []).slice(0, 50);
   const leads = (await Promise.all(leadIds.map((id) => env.IG_KV.get(`lead:${id}`, 'json')))).filter(Boolean);
   const orders = (await Promise.all(orderIds.map((id) => env.IG_KV.get(`order:${id}`, 'json')))).filter(Boolean)
-    .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/approve.html?id=${o.id}` }));
+    .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/${o.options ? 'rings' : 'approve'}?id=${o.id}` }));
   return json({ ok: true, leads, orders }, 200, origin);
 }
 
@@ -858,6 +1097,7 @@ async function handleLeadStatus(fields, url, env, origin) {
   if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
   lead.status = String(fields.status || 'new').slice(0, 30);
   lead.statusAt = Date.now();
+  if (fields.stage) stampStage(lead, String(fields.stage));
   await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
   return json({ ok: true }, 200, origin);
 }
@@ -877,11 +1117,15 @@ export default {
       if (path === '/instagram/set-token') return handleSetToken(url, env);
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
+      if (path === '/admin/lead') return handleAdminLead(url, env, origin);
+      if (path === '/admin/inspo') return handleInspoGet(url, env, origin);
       if (path === '/team/public') return handlePublicStatus(env, origin);
       if (path === '/team/state') return handleTeamState(url, env, origin);
       if (path === '/book/slots') return handleSlots(env, origin);
       if (path === '/email/check') return handleEmailCheck(url, env, origin);
-      let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
+      let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image\/([0-5]|size)$/);
+      if (m) return handleOptionImage(m[1], m[2], env);
+      m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
       if (m) return handleOrderImage(m[1], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})$/);
       if (m) return handleOrderGet(m[1], env, origin);
@@ -895,6 +1139,7 @@ export default {
     // Stripe posts here directly with a raw body + signature header — must
     // be read before the generic JSON/formData parsing below.
     if (path === '/stripe/webhook') return handleStripeWebhook(request, env);
+    if (path === '/track') return handleTrack(request, env, origin);
 
     let fields;
     try {
@@ -914,11 +1159,20 @@ export default {
     if (path === '/lead/email') return handleLeadEmail(fields, env, origin);
     if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
+    if (path === '/order/create-options') return handleOptionsCreate(fields, env, origin, url);
+    const sm = path.match(/^\/order\/([a-z0-9]{6,32})\/seen$/);
+    if (sm) return handleOrderSeen(sm[1], env, origin);
+    const chm = path.match(/^\/order\/([a-z0-9]{6,32})\/choose$/);
+    if (chm) return handleOptionsChoose(chm[1], fields, env, origin);
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
+    if (path === '/admin/call-save') return handleCallSave(fields, url, env, origin);
+    if (path === '/admin/inspo') return handleInspoSave(fields, url, env, origin);
+    if (path === '/intro/heart') return handleIntroHeart(fields, env, origin);
+    if (path === '/intro/seen') return handleIntroSeen(fields, env, origin);
     const am = path.match(/^\/order\/([a-z0-9]{6,32})\/approve$/);
     if (am) return handleOrderApprove(am[1], fields, request, env, origin);
     const cm = path.match(/^\/order\/([a-z0-9]{6,32})\/checkout$/);
-    if (cm) return handleOrderCheckout(cm[1], env, origin);
+    if (cm) return handleOrderCheckout(cm[1], fields, env, origin);
 
     // honeypot — silently accept so a bot can't tell it was rejected
     if (fields._honey) {
@@ -966,6 +1220,7 @@ export default {
 
   // Cron Trigger: keeps the cached Instagram feed fresh.
   async scheduled(event, env, ctx) {
+    if (event.cron === '0 14 * * *') { await sendDailySummary(env); return; }
     await refreshMediaCache(env);
   },
 };
@@ -990,4 +1245,106 @@ async function sendEmail(env, { to, subject, html, replyTo, from }) {
   } catch (err) {
     return { ok: false, error: String(err && err.message || err) };
   }
+}
+
+
+// ----- Visit alerts and daily summary (track.js on the site) -----
+// Alerts go to the public inbox and the owner inbox. track.js only sends
+// after a real tap, scroll, click or keypress, and crawlers are filtered here
+// too, so link previews never alert.
+const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|meta-externalagent|whatsapp|telegram|discord|slack|skype|headless|lighthouse|python|curl|wget|httpclient|okhttp|go-http/i;
+const TRACK_EVENTS = {
+  view: null,
+  quiz_start: 'Someone started the quiz',
+  quiz_abandon: 'Someone left the quiz before finishing',
+  rings_open: 'opened their Pick Your Ring link',
+  approve_open: 'opened their design approval link',
+  collection_hot: 'Someone is browsing rings (3+ rings looked at)',
+};
+function centralDay(ts) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(ts || new Date());
+}
+function centralTime(ts) {
+  return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(ts || new Date());
+}
+async function handleTrack(request, env, origin) {
+  const ok = () => json({ ok: true }, 200, origin);
+  if (BOT_UA.test(request.headers.get('User-Agent') || '')) return ok();
+  const cf = request.cf || {};
+  // drop crawlers, verified bots and traffic from cloud/data center networks
+  if (cf.botManagement && (cf.botManagement.verifiedBot || (cf.botManagement.score && cf.botManagement.score < 30))) return ok();
+  if (/facebook|meta platforms|instagram|amazon|aws|google cloud|googlebot|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|oracle|alibaba|tencent|cloudflare|fastly|vultr|scaleway|leaseweb|choopa|m247|datacamp|hostinger|contabo/i.test(String(cf.asOrganization || ''))) return ok();
+  if (cf.asn === 32934 || cf.asn === 63293 || cf.asn === 54115) return ok(); // Meta crawler and ad review networks (Prineville, Oregon)
+  // one alert per network address every 6 hours, so repeat hits never flood the inbox
+  const ip = request.headers.get('CF-Connecting-IP') || '';
+  if (ip) {
+    const ik = `ipseen:${ip}`;
+    const n = Number(await env.IG_KV.get(ik) || 0);
+    if (n >= 3) return ok();
+    await env.IG_KV.put(ik, String(n + 1), { expirationTtl: 21600 });
+  }
+  const city = [cf.city, cf.regionCode || cf.region].filter(Boolean).join(', ');
+  const place = city ? `${city}${cf.postalCode ? ' (near ' + cf.postalCode + ')' : ''}${cf.country && cf.country !== 'US' ? ' ' + cf.country : ''}` : 'Unknown';
+  let t;
+  try { t = JSON.parse(await request.text()); } catch (e) { return ok(); }
+  const ev = String(t.ev || '');
+  if (!(ev in TRACK_EVENTS) || !t.sid) return ok();
+  const sid = String(t.sid).replace(/[^a-z0-9]/gi, '').slice(0, 40);
+  const page = String(t.page || '/').slice(0, 60);
+  const src = String(t.src || 'Unknown').slice(0, 60);
+  const data = (t.data && typeof t.data === 'object') ? t.data : {};
+
+  // one alert per visitor per event (12 hours)
+  const dk = `trk:${sid}:${ev}:${ev === 'view' ? page : ''}`;
+  if (await env.IG_KV.get(dk)) return ok();
+  await env.IG_KV.put(dk, '1', { expirationTtl: 43200 });
+
+  // daily counts for the summary email
+  const sk = `stats:${centralDay()}`;
+  const st = (await env.IG_KV.get(sk, 'json')) || { pages: {}, events: {}, sources: {}, visitors: {} };
+  st.events[ev] = (st.events[ev] || 0) + 1;
+  if (ev === 'view' || ev === 'rings_open' || ev === 'approve_open') st.pages[page] = (st.pages[page] || 0) + 1;
+  if (!st.visitors[sid]) { st.visitors[sid] = 1; st.sources[src] = (st.sources[src] || 0) + 1; st.places = st.places || {}; st.places[place] = (st.places[place] || 0) + 1; }
+  await env.IG_KV.put(sk, JSON.stringify(st), { expirationTtl: 86400 * 40 });
+
+  let label = TRACK_EVENTS[ev];
+  if (ev === 'view') {
+    // one "someone is on your site" alert per visitor visit (12 hours)
+    const vk = `vis:${sid}`;
+    if (await env.IG_KV.get(vk)) return ok();
+    await env.IG_KV.put(vk, '1', { expirationTtl: 43200 });
+    label = 'Someone is on your site';
+  }
+  if (!label) return ok();
+
+  let who = '', ring = '';
+  const id = String(t.id || '').replace(/[^a-z0-9]/g, '').slice(0, 32);
+  if (id && (ev === 'rings_open' || ev === 'approve_open')) {
+    const o = await env.IG_KV.get(`order:${id}`, 'json');
+    if (o) { who = o.customerName || ''; ring = o.ring || ''; }
+  }
+  const title = who ? `${who} ${label}` : (label.charAt(0).toUpperCase() + label.slice(1));
+  const rows = [['When', centralTime()], ['Approximate location', place], ['Page', 'hiddengemrings.com' + page], ['Came from', src]];
+  if (ring) rows.push(['Ring', ring]);
+  Object.entries(data).slice(0, 14).forEach(([k, v]) => { if (v) rows.push([k, String(v).slice(0, 200)]); });
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 10px">${escapeHtml(title)}</h2><table cellpadding="6" style="border-collapse:collapse">` +
+    rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') +
+    `</table><p style="color:#777;font-size:12px">Real visitors only. Bots and link previews are filtered out.</p></div>`;
+  await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem: ${title}${city ? ' (' + city + ')' : ''}`, html });
+  return ok();
+}
+async function sendDailySummary(env) {
+  const day = centralDay(new Date(Date.now() - 86400000));
+  const st = await env.IG_KV.get(`stats:${day}`, 'json');
+  const e = (st && st.events) || {};
+  const visitors = st ? Object.keys(st.visitors || {}).length : 0;
+  const list = (obj) => Object.entries(obj || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<li>${escapeHtml(k)}: ${v}</li>`).join('') || '<li>None</li>';
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Hidden Gem daily summary for ${day}</h2>` +
+    `<p><strong>${visitors}</strong> real visitors</p><ul>` +
+    `<li>Quiz started: ${e.quiz_start || 0}</li><li>Quiz left unfinished: ${e.quiz_abandon || 0}</li>` +
+    `<li>Pick Your Ring links opened: ${e.rings_open || 0}</li><li>Design approval links opened: ${e.approve_open || 0}</li>` +
+    `<li>Ring browsers (3+ rings): ${e.collection_hot || 0}</li></ul>` +
+    `<h3>Where visitors came from</h3><ul>${list(st && st.sources)}</ul><h3>Approximate visitor locations</h3><ul>${list(st && st.places)}</ul><h3>Pages viewed</h3><ul>${list(st && st.pages)}</ul>` +
+    `<p style="color:#777;font-size:12px">Finished quizzes are emailed the moment they come in.</p></div>`;
+  await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem daily summary: ${visitors} visitors on ${day}`, html });
 }

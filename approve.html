@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Approve Your Design | Hidden Gem Engagement Rings</title>
+<script src="splash.js" data-tagline="Your Ring, Approved"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -62,6 +63,8 @@
   var id = (params.get('id') || '').replace(/[^a-z0-9]/g, '');
   var card = document.getElementById('card');
   function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function cents(v) { var n = Number(String(v || '').replace(/[^0-9.]/g, '')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; }
+  function money(c) { return '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0, maximumFractionDigits: 2 }); }
   function when(ms) { return new Date(ms).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }); }
   if (!id) { card.innerHTML = '<p class="msg">This approval link is missing its order number. Please use the link Gilbert texted you.</p>'; return; }
 
@@ -83,7 +86,7 @@
   }
 
   function render(o) {
-    var img = o.hasImage ? '<img class="render" src="' + API + '/order/' + o.id + '/image" alt="Your ring design">' : '';
+    var img = o.hasImage ? '<img class="render" src="' + API + '/order/' + o.id + '/image" alt="Your ring design">' : (o.imageUrl ? '<img class="render" src="' + o.imageUrl + '" alt="Your ring design">' : '');
     if (o.approved) { renderApproved(o, img); return; }
     card.innerHTML = img + specs(o) +
       '<label class="agree"><input type="checkbox" id="agree"><span>I approve this design, metal, stone, size and price. I understand this is a custom order made just for me and is <strong>final sale once approved</strong>, as described in the <a href="policies.html" target="_blank">Hidden Gem Policies</a>.</span></label>' +
@@ -115,32 +118,37 @@
 
   function renderApproved(o, img) {
     document.getElementById('intro').textContent = 'Thank you! Your design is approved and we are starting on your ring.';
-    var payBlock;
-    if (o.paid) {
-      payBlock = '<div class="approved" style="margin-top:18px"><span class="badge">Deposit Paid</span><p>Thank you — your deposit has been received.</p></div>';
+    var payBlock, total = cents(o.price), paid = o.amountPaidCents || 0;
+    if (o.paidInFull) {
+      payBlock = '<div class="approved" style="margin-top:18px"><span class="badge">Paid in Full</span><p>Thank you. Your ring is officially in the works.</p></div>';
+    } else if (o.paid) {
+      payBlock = '<div class="approved" style="margin-top:18px"><span class="badge">Deposit Paid</span><p>We received ' + money(paid) + '. The remaining ' + money(total - paid) + ' is due before your ring ships.</p></div>' +
+        '<button class="btn" type="button" data-plan="balance">Pay remaining ' + money(total - paid) + '</button><p class="status" id="payStatus" role="status" aria-live="polite"></p>';
     } else {
-      payBlock = '<button class="btn" id="payBtn" type="button">Pay Your Deposit Now</button>' +
+      payBlock = '<p class="fine" style="font-size:15px;margin-top:22px;color:var(--brown-dark)"><strong>How would you like to pay?</strong></p>' +
+        '<button class="btn" type="button" data-plan="finance">Monthly payments · ' + money(total) + '</button>' +
+        '<button class="btn" type="button" data-plan="full" style="background:#fff;color:var(--brown-dark);border:1.5px solid var(--brown-dark);box-shadow:none;margin-top:12px">Pay in full · ' + money(total) + '</button>' +
+        '<button class="btn" type="button" data-plan="deposit" style="background:#fff;color:var(--brown-dark);border:1.5px solid var(--brown-dark);box-shadow:none;margin-top:12px">50% deposit · ' + money(Math.round(total / 2)) + '</button>' +
         '<p class="status" id="payStatus" role="status" aria-live="polite"></p>' +
-        '<p class="fine">Secure checkout by Stripe. Pay by card, or choose Affirm/Klarna at checkout to split it into payments.</p>';
+        '<p class="fine">Secure checkout by Stripe. Monthly payments are offered by our lending partners and subject to approval. Hidden Gem never asks for your Social Security number, income or bank details.</p>';
     }
     card.innerHTML = '<div class="approved"><span class="badge">Approved</span><p>Signed by <strong>' + esc(o.approval.name) + '</strong></p><p>' + esc(when(o.approval.at)) + '</p></div>' + img + specs(o) + payBlock +
-      '<p class="fine">A copy of this approval was saved and sent to Hidden Gem' + ' and to your email if you gave us one. Your ring will be delivered within 6 weeks.</p>';
-    var payBtn = document.getElementById('payBtn');
-    if (payBtn) {
+      '<p class="fine">A copy of this approval was saved and sent to Hidden Gem and to your email if you gave us one.</p>';
+    card.querySelectorAll('[data-plan]').forEach(function (payBtn) {
       payBtn.addEventListener('click', function () {
         payBtn.disabled = true;
         var st = document.getElementById('payStatus');
         st.className = 'status'; st.textContent = 'Opening secure checkout...';
-        fetch(API + '/order/' + o.id + '/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+        fetch(API + '/order/' + o.id + '/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: payBtn.dataset.plan }) })
           .then(function (r) { return r.json(); })
           .then(function (j) {
             if (j.ok && j.url) { location.href = j.url; return; }
-            if (j.ok && j.alreadyPaid) { st.textContent = 'This deposit was already paid.'; return; }
+            if (j.ok && j.alreadyPaid) { st.textContent = 'This order is already paid.'; return; }
             st.className = 'status err'; st.textContent = j.error || 'Could not start checkout. Please call (832) 743-7657.'; payBtn.disabled = false;
           })
           .catch(function () { st.className = 'status err'; st.textContent = 'Could not start checkout. Please call (832) 743-7657.'; payBtn.disabled = false; });
       });
-    }
+    });
     // Returning from a successful Stripe Checkout: the webhook usually marks
     // the order paid within a second or two, just ahead of this redirect —
     // poll briefly so the "Deposit Paid" badge shows without a manual refresh.
@@ -161,5 +169,6 @@
   fetchOrder(0);
 })();
 </script>
+<script src="track.js" defer></script>
 </body>
 </html>
