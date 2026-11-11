@@ -1,7 +1,22 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+/* v2 draft: quiz above the fold on phones */
+.v2-head{display:flex;align-items:center;justify-content:center;gap:18px;padding:22px 20px 14px!important;text-align:left}
+.v2-ring{width:96px;height:128px;object-fit:cover;border-radius:16px;box-shadow:0 8px 22px rgba(84,69,58,.18);flex:none}
+.v2-head .eyebrow{margin:0 0 6px!important;font-size:11px}
+.v2-head h1{font-size:clamp(26px,6.4vw,40px)!important;line-height:1.08;margin:0}
+.v2-head h1::after{display:none!important}
+.v2-head h1 .script{display:block}
+.v2-line{font-size:13px!important;margin:8px 0 0!important;color:#6B5B4C!important;max-width:none!important}
+.hg-holiday{padding:7px 12px!important;font-size:.82rem!important;margin-bottom:8px!important;border-radius:999px!important}
+.v2-trust{text-align:center;font-size:12px;letter-spacing:.04em;color:#6B5B4C;margin:0 0 10px}
+@media(max-width:520px){.v2-head h1{text-align:left}.v2-head .eyebrow{display:none}.v2-head{text-align:left}.v2-line{text-align:left}.v2-trust{font-size:11px}
+.po-card .po-icon{width:34px!important;height:34px!important;margin-bottom:4px!important}
+.po-step[data-key=shape] .po-chips,.po-step[data-key=budget] .po-chips{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+.po-step[data-key=shape] .po-chips button,.po-step[data-key=budget] .po-chips button{width:100%;padding:14px 8px!important}}
+@media(max-width:520px){.v2-ring{width:78px;height:104px}.v2-head{gap:12px;padding:14px 16px 10px!important}.po-wrap{padding-left:14px;padding-right:14px}}
+</style></head><body>
 <title>Start Your Ring Journey | Hidden Gem Engagement Rings</title>
 <script>(function(){try{var d=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());if(d<='2026-11-27'||/[?&]theme=thanksgiving/.test(location.search))document.documentElement.classList.add('hg-tg');}catch(e){}})();</script>
-<script src="splash.js" data-tagline="Start Your Ring Journey"></script>
 <meta name="description" content="Start your engagement ring journey with Hidden Gem in a few quick taps. Share your budget, timing and style, and a ring specialist will call you.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -320,20 +335,37 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
   </div>
 </header>
 
-<section class="page-head">
-  <p class="eyebrow"><span class="tg-only">Thanksgiving Season &middot; </span>Private Design Consult</p>
-  <h1 class="wave-target">Start Your Ring <span class="script">Journey</span></h1>
-  <p>Answer a few quick taps and book your private design consult with one of our ring specialists. Flexible financing available. This is not a credit application and won't affect your credit.</p>
+<section class="page-head v2-head">
+  <img class="v2-ring" src="ig-penelope-yellow.jpg" alt="The Penelope pear cut engagement ring in yellow gold" width="120" height="160">
+  <div class="v2-copy">
+    <p class="eyebrow"><span class="tg-only">Thanksgiving Season &middot; </span>Private Design Consult</p>
+    <h1 class="wave-target">Love the Penelope? <span class="script">Let's design hers.</span></h1>
+    <p class="v2-line">A few quick taps &middot; Free private consult &middot; Won't affect your credit</p>
+  </div>
 </section>
 
 <div class="po-wrap">
-  <p class="hg-holiday"><span class="tg-off">Planning a holiday proposal? Book your private design consult this week to start your ring in time.</span><span class="tg-only">Thankful for her? Book your private design consult this week and start her ring in time for the holidays.</span></p>
+  <p class="hg-holiday"><span class="tg-off">Planning a holiday proposal? Book your private design consult this week to start your ring in time.</span><span class="tg-only">Thankful for her? Start her ring in time for the holidays.</span></p>
+  <p class="v2-trust">Made in Houston &middot; Lab-grown diamonds &middot; Financing available</p>
   <div class="po-card" id="poCard">
     <div class="po-top">
       <button class="po-back" id="poBack" type="button" aria-label="Go back">&#8249; Back</button>
       <span class="po-count" id="poCount">1 of 6</span>
     </div>
     <div class="po-bar"><span id="poBar"></span></div>
+
+    <div class="po-step" data-key="shape">
+      <img class="po-icon" src="icon-diamond.png" alt="">
+      <h2>Which shape does she love?</h2>
+      <div class="po-chips">
+        <button type="button" data-v="Pear">Pear</button>
+        <button type="button" data-v="Oval">Oval</button>
+        <button type="button" data-v="Round">Round</button>
+        <button type="button" data-v="Emerald">Emerald</button>
+        <button type="button" data-v="Radiant">Radiant</button>
+        <button type="button" data-v="Not sure yet">Not sure yet</button>
+      </div>
+    </div>
 
     <div class="po-step" data-key="budget">
       <img class="po-icon" src="icon-pricing.png" alt="">
@@ -838,7 +870,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     function payload() {
       return {
         id: state.id, name: HGCheck.capName((state.a.name || '').trim()), phone: HGCheck.formatPhone(state.a.phone || ''),
-        budget: state.a.budget || '', pay: state.a.pay || '',
+        shape: state.a.shape || '', budget: state.a.budget || '', pay: state.a.pay || '',
         monthly: skipMonthly() ? '' : (state.a.monthly || ''),
         timeline: state.a.timeline || '', credit: state.a.credit || '', contact: state.a.contactPref || 'Call me',
         slotDate: state.a.contactPref === 'Book a call' ? (state.a.slotDate || '') : '', slotTime: state.a.contactPref === 'Book a call' ? (state.a.slotTime || '') : '',
