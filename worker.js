@@ -1281,7 +1281,8 @@ async function trackDiag(env, reason, cf, ua) {
 }
 async function handleTrackStats(url, env, origin) {
   const day = url.searchParams.get('day') || centralDay();
-  return json({ ok: true, day, ...((await env.IG_KV.get(`trackdiag:${day}`, 'json')) || {}) }, 200, origin);
+  const st = (await env.IG_KV.get(`stats:${day}`, 'json')) || {};
+  return json({ ok: true, day, alerted_visitors: Object.keys(st.visitors || {}).length, sources: st.sources || {}, places: st.places || {}, events: st.events || {}, ...((await env.IG_KV.get(`trackdiag:${day}`, 'json')) || {}) }, 200, origin);
 }
 async function handleTrack(request, env, origin) {
   const ok = () => json({ ok: true }, 200, origin);
