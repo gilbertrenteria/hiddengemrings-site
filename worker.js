@@ -594,6 +594,7 @@ async function resendUnsentLeads(env) {
     const lead = await env.IG_KV.get(`lead:${id}`, 'json');
     if (!lead || lead.emailed || !lead.name || !lead.phone) continue;
     if (Date.now() - (lead.receivedAt || 0) > 3 * 86400000) continue;
+    if ((lead.receivedAt || 0) < 1794436000000) continue; // skip old test leads from before the safety check existed
     const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
     const rows = [['Name', lead.name], ['Phone', lead.phone], ['Prefers', lead.contact || ''], ['Budget', lead.budget || ''], ['Received', chicagoTime(lead.receivedAt)]];
     const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 10px">New lead (resent by the safety check)</h2><table cellpadding="6">` +
