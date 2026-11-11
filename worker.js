@@ -509,7 +509,7 @@ async function handleLead(fields, request, env, origin) {
   const lead = existing || {
     id, name, phone,
     budget: pick('budget'), pay: pick('pay'), monthly: pick('monthly'),
-    timeline: pick('timeline'), credit: pick('credit'), contact: pick('contact'),
+    timeline: pick('timeline'), credit: pick('credit'), contact: pick('contact'), shape: pick('shape'),
     page: pick('page'), receivedAt: Date.now(), status: 'new',
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
@@ -547,7 +547,8 @@ async function handleLead(fields, request, env, origin) {
   const tel = digits(phone).replace(/^1(?=\d{10}$)/, '');
   const rows = [
     ['Name', lead.name],
-    ['Phone', `<a href="tel:+1${tel}">${escapeHtml(fmtPhone(lead.phone))}</a> (tap to call)`],
+    ...(lead.shape ? [['Shape she loves', lead.shape]] : []),
+    ['Phone', `<a="tel:+1${tel}">${escapeHtml(fmtPhone(lead.phone))}</a> (tap to call)`],
     ['Ring budget', lead.budget],
     ['How they want to pay', lead.pay],
     ['Wants to continue by', lead.contact || 'not answered'],
