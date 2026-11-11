@@ -1116,6 +1116,7 @@ export default {
       if (path === '/instagram/callback') return handleInstagramCallback(url, env);
       if (path === '/instagram/set-token') return handleSetToken(url, env);
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
+      if (path === '/track/stats') return handleTrackStats(url, env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
       if (path === '/admin/lead') return handleAdminLead(url, env, origin);
       if (path === '/admin/inspo') return handleInspoGet(url, env, origin);
@@ -1267,22 +1268,39 @@ function centralDay(ts) {
 function centralTime(ts) {
   return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(ts || new Date());
 }
+// Diagnostic counters (no IPs stored): why each /track hit was kept or dropped.
+async function trackDiag(env, reason, cf, ua) {
+  try {
+    const k = `trackdiag:${centralDay()}`;
+    const d = (await env.IG_KV.get(k, 'json')) || { reasons: {}, recent: [] };
+    d.reasons[reason] = (d.reasons[reason] || 0) + 1;
+    d.recent.unshift({ t: centralTime(), reason, org: String(cf.asOrganization || '').slice(0, 40), asn: cf.asn || 0, city: cf.city || '', ua: /Instagram/i.test(ua) ? 'Instagram app' : /FBAN|FBAV/i.test(ua) ? 'Facebook app' : /iPhone|iPad/i.test(ua) ? 'iPhone browser' : /Android/i.test(ua) ? 'Android browser' : 'Computer' });
+    d.recent = d.recent.slice(0, 40);
+    await env.IG_KV.put(k, JSON.stringify(d), { expirationTtl: 86400 * 7 });
+  } catch (e) {}
+}
+async function handleTrackStats(url, env, origin) {
+  const day = url.searchParams.get('day') || centralDay();
+  return json({ ok: true, day, ...((await env.IG_KV.get(`trackdiag:${day}`, 'json')) || {}) }, 200, origin);
+}
 async function handleTrack(request, env, origin) {
   const ok = () => json({ ok: true }, 200, origin);
-  if (BOT_UA.test(request.headers.get('User-Agent') || '')) return ok();
+  const ua = request.headers.get('User-Agent') || '';
   const cf = request.cf || {};
+  if (BOT_UA.test(ua)) { await trackDiag(env, 'bot_ua', cf, ua); return ok(); }
   // drop crawlers, verified bots and traffic from cloud/data center networks
-  if (cf.botManagement && (cf.botManagement.verifiedBot || (cf.botManagement.score && cf.botManagement.score < 30))) return ok();
-  if (/facebook|meta platforms|instagram|amazon|aws|google cloud|googlebot|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|oracle|alibaba|tencent|cloudflare|fastly|vultr|scaleway|leaseweb|choopa|m247|datacamp|hostinger|contabo/i.test(String(cf.asOrganization || ''))) return ok();
-  if (cf.asn === 32934 || cf.asn === 63293 || cf.asn === 54115) return ok(); // Meta crawler and ad review networks (Prineville, Oregon)
+  if (cf.botManagement && (cf.botManagement.verifiedBot || (cf.botManagement.score && cf.botManagement.score < 30))) { await trackDiag(env, 'bot_score', cf, ua); return ok(); }
+  if (/facebook|meta platforms|instagram|amazon|aws|google cloud|googlebot|microsoft|azure|digitalocean|linode|akamai|ovh|hetzner|oracle|alibaba|tencent|cloudflare|fastly|vultr|scaleway|leaseweb|choopa|m247|datacamp|hostinger|contabo/i.test(String(cf.asOrganization || ''))) { await trackDiag(env, 'datacenter_org', cf, ua); return ok(); }
+  if (cf.asn === 32934 || cf.asn === 63293 || cf.asn === 54115) { await trackDiag(env, 'meta_asn', cf, ua); return ok(); } // Meta crawler and ad review networks (Prineville, Oregon)
   // one alert per network address every 6 hours, so repeat hits never flood the inbox
   const ip = request.headers.get('CF-Connecting-IP') || '';
   if (ip) {
     const ik = `ipseen:${ip}`;
     const n = Number(await env.IG_KV.get(ik) || 0);
-    if (n >= 3) return ok();
+    if (n >= 3) { await trackDiag(env, 'ip_cap', cf, ua); return ok(); }
     await env.IG_KV.put(ik, String(n + 1), { expirationTtl: 21600 });
   }
+  await trackDiag(env, 'passed_filters', cf, ua);
   const city = [cf.city, cf.regionCode || cf.region].filter(Boolean).join(', ');
   const place = city ? `${city}${cf.postalCode ? ' (near ' + cf.postalCode + ')' : ''}${cf.country && cf.country !== 'US' ? ' ' + cf.country : ''}` : 'Unknown';
   let t;
