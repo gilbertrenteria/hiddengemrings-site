@@ -39,7 +39,11 @@
   .sizebox{display:flex;align-items:center;justify-content:center;height:96px}
   .hero{display:grid;gap:22px;grid-template-columns:1fr;align-items:center;margin-top:16px}
   @media(min-width:760px){.hero{grid-template-columns:1.1fr 1fr}}
-  .hero img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:22px;background:var(--cream2)}
+  .hero{align-items:start}
+  .blueprint{width:100%;height:auto;display:block;border-radius:22px;border:1.5px solid var(--line);background:#fbf8f2}
+  .stylephoto{display:flex;gap:12px;align-items:center;margin-top:12px}
+  .stylephoto img{width:96px;height:96px;object-fit:cover;border-radius:14px;flex:none}
+  .stylephoto span{font-size:.82rem;color:var(--muted)}
   .sum table{width:100%;border-collapse:collapse;font-size:.95rem}
   .sum td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
   .sum td:first-child{color:var(--muted);width:40%}
@@ -155,10 +159,45 @@
     return '<svg viewBox="0 0 160 96" width="150" height="90" aria-hidden="true">' + band + '<g fill="#fff" stroke="#9aa3ad" stroke-width="1.6">' + path + '</g></svg><small>About ' + d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm</small>';
   }
 
+  // A to-scale drawing of their exact ring: stone size in real millimeters, setting, metal and band.
+  function stonePath(sh, cx, cy, L, W) {
+    if (sh === 'round') return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (W / 2) + '"/>';
+    if (sh === 'pear') return '<path d="M' + cx + ' ' + (cy - L / 2) + ' C ' + (cx + W * .62) + ' ' + (cy - L * .05) + ',' + (cx + W * .55) + ' ' + (cy + L / 2) + ',' + cx + ' ' + (cy + L / 2) + ' C ' + (cx - W * .55) + ' ' + (cy + L / 2) + ',' + (cx - W * .62) + ' ' + (cy - L * .05) + ',' + cx + ' ' + (cy - L / 2) + 'Z"/>';
+    if (sh === 'marquise') return '<path d="M' + cx + ' ' + (cy - L / 2) + ' Q ' + (cx + W * .8) + ' ' + cy + ',' + cx + ' ' + (cy + L / 2) + ' Q ' + (cx - W * .8) + ' ' + cy + ',' + cx + ' ' + (cy - L / 2) + 'Z"/>';
+    if (/emerald|radiant|asscher|princess/.test(sh)) { var c = sh === 'princess' ? 0 : Math.min(W, L) * .16; return '<path d="M' + (cx - W / 2 + c) + ' ' + (cy - L / 2) + 'H' + (cx + W / 2 - c) + 'L' + (cx + W / 2) + ' ' + (cy - L / 2 + c) + 'V' + (cy + L / 2 - c) + 'L' + (cx + W / 2 - c) + ' ' + (cy + L / 2) + 'H' + (cx - W / 2 + c) + 'L' + (cx - W / 2) + ' ' + (cy + L / 2 - c) + 'V' + (cy - L / 2 + c) + 'Z"/>'; }
+    if (/cushion/.test(sh)) return '<rect x="' + (cx - W / 2) + '" y="' + (cy - L / 2) + '" width="' + W + '" height="' + L + '" rx="' + (W * .3) + '"/>';
+    return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + (W / 2) + '" ry="' + (L / 2) + '"/>';
+  }
+  function facets(sh, cx, cy, L, W) {
+    if (/emerald|asscher/.test(sh)) return '<path d="M' + (cx - W * .3) + ' ' + (cy - L * .36) + 'H' + (cx + W * .3) + 'V' + (cy + L * .36) + 'H' + (cx - W * .3) + 'Z M' + (cx - W * .16) + ' ' + (cy - L * .22) + 'H' + (cx + W * .16) + 'V' + (cy + L * .22) + 'H' + (cx - W * .16) + 'Z" fill="none"/>';
+    return '<path d="M' + cx + ' ' + (cy - L * .42) + 'L' + (cx + W * .3) + ' ' + cy + 'L' + cx + ' ' + (cy + L * .42) + 'L' + (cx - W * .3) + ' ' + cy + 'Z M' + (cx - W * .42) + ' ' + cy + 'H' + (cx + W * .42) + ' M' + cx + ' ' + (cy - L * .42) + 'V' + (cy + L * .42) + '" fill="none"/>';
+  }
+  function ringSVG(big) {
+    var sh = shapeId(), st = setId(), mt = val('metal') || 'Yellow gold';
+    var col = { 'Yellow gold': ['#f3d991', '#c79b45'], 'White gold': ['#f6f7f8', '#b9bec4'], 'Rose gold': ['#f6c9b6', '#c98a72'], 'Platinum': ['#eef0f2', '#a9aeb4'] }[mt] || ['#f3d991', '#c79b45'];
+    var ct = { 'Under 1 carat': .75, '1 to 1.5 carats': 1.25, '1.5 to 2 carats': 1.75, '2 to 3 carats': 2.5, '3 carats+': 3.5 }[val('carat')] || 1.5;
+    var k = 13, d = stoneMM(sh, ct), L = d[0] * k, W = d[1] * k, cx = 200, cy = 150;
+    var bw = ({ Dainty: 1.6, Classic: 2, Bold: 2.5 }[val('bandWidth')] || 1.9) * k;
+    var g = '<defs><linearGradient id="mtl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + col[0] + '"/><stop offset="1" stop-color="' + col[1] + '"/></linearGradient>' +
+      '<radialGradient id="gem" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#eef3f8"/><stop offset="1" stop-color="#c9d3de"/></radialGradient></defs>';
+    var band = '<rect x="10" y="' + (cy - bw / 2) + '" width="380" height="' + bw + '" rx="' + (bw / 2) + '" fill="url(#mtl)"/>';
+    if (/Pav/.test(val('band') || '') || st === 'side') { for (var x = 22; x < 380; x += bw * .95) if (Math.abs(x - cx) > W * .7) band += '<circle cx="' + x + '" cy="' + cy + '" r="' + (bw * .32) + '" fill="url(#gem)" stroke="#9aa3ad" stroke-width=".6"/>'; }
+    if (/Twisted/.test(val('band') || '')) band += '<path d="M10 ' + cy + ' ' + Array.apply(null, Array(16)).map(function (_, i) { return 'Q ' + (22 + i * 24) + ' ' + (cy + (i % 2 ? bw * .5 : -bw * .5)) + ' ' + (34 + i * 24) + ' ' + cy; }).join(' ') + '" stroke="' + col[1] + '" stroke-width="1.4" fill="none"/>';
+    var extra = '', main = '<g fill="url(#gem)" stroke="#8d97a3" stroke-width="1.2">' + stonePath(sh, cx, cy, L, W) + '</g><g stroke="#aab4c0" stroke-width=".7">' + facets(sh, cx, cy, L, W) + '</g>';
+    if (st === 'halo' || st === 'hidden') { var n = 22, rx = W / 2 + (st === 'halo' ? 9 : 5), ry = L / 2 + (st === 'halo' ? 9 : 5); for (var i = 0; i < n; i++) { var a = i / n * Math.PI * 2; extra += '<circle cx="' + (cx + Math.cos(a) * rx) + '" cy="' + (cy + Math.sin(a) * ry) + '" r="' + (st === 'halo' ? 4.4 : 2.6) + '" fill="url(#gem)" stroke="#9aa3ad" stroke-width=".6"' + (st === 'hidden' ? ' opacity=".55"' : '') + '/>'; } }
+    if (st === 'bezel') extra += '<g fill="none" stroke="url(#mtl)" stroke-width="7">' + stonePath(sh, cx, cy, L + 6, W + 6) + '</g>';
+    if (st === 'three' || st === 'five') { var sd = stoneMM(sh, ct * .22), sl = sd[0] * k, sw = sd[1] * k; [[1, 1]].concat(st === 'five' ? [[2, .7]] : []).forEach(function (p) { var off = W / 2 + sw * (p[0] === 1 ? .62 : 1.75) + 4 * p[0], f = p[1]; [-1, 1].forEach(function (sg) { extra += '<g fill="url(#gem)" stroke="#8d97a3" stroke-width="1">' + stonePath(sh, cx + sg * off, cy, sl * f, sw * f) + '</g>'; }); }); }
+    if (st === 'toi') { main = '<g fill="url(#gem)" stroke="#8d97a3" stroke-width="1.2">' + stonePath(sh, cx - W * .42, cy + 4, L * .82, W * .82) + stonePath(sh, cx + W * .42, cy - 4, L * .82, W * .82) + '</g>'; }
+    var prong = '';
+    if (st !== 'bezel' && st !== 'toi') { var pr = /Double/.test(val('prongs') || '') ? 2 : 1; [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (q) { for (var j = 0; j < pr; j++) prong += '<circle cx="' + (cx + q[0] * W * (sh === 'round' ? .36 : .42) + j * 4 * q[0]) + '" cy="' + (cy + q[1] * L * (sh === 'round' ? .36 : .42)) + '" r="3.6" fill="url(#mtl)" stroke="' + col[1] + '" stroke-width=".6"/>'; }); }
+    var mm = '<text x="200" y="285" text-anchor="middle" font-family="Work Sans,sans-serif" font-size="12" fill="#776C5C">Drawn to scale · stone about ' + d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm</text>';
+    return '<svg viewBox="0 0 400 300" class="blueprint" role="img" aria-label="Drawing of the ring, to scale">' + g + '<rect width="400" height="300" rx="22" fill="#fbf8f2"/>' + band + extra + main + prong + mm + '</svg>';
+  }
+
   var STEPS = [
     { k: 'shape', lab: 'Shape', q: function () { return 'Which shape does ' + (her() === 'your' ? 'your heart want' : 'she love') + '?'; }, sub: 'Every great ring starts here.',
       opts: function () { return SHAPES.map(function (s) { return { v: s[0], html: ICON[s[0]] ? '<img class="ic" src="shape-' + ICON[s[0]] + '.webp" alt="">' + s[0] : s[0] }; }); } },
-    { k: 'setting', lab: 'Setting', q: function () { return 'Pick the setting that feels like ' + her(); }, sub: 'Photos show the style. You pick the exact stone size next.', wide: true,
+    { k: 'setting', lab: 'Setting', q: function () { return 'Pick the setting that feels like ' + her(); }, sub: 'Photos show the setting style only. You choose the exact stone size next, and we draw it to scale for you.', wide: true,
       opts: function () { var sh = shapeId(), has = HGLIB.HAS[sh] || []; return SETTINGS.filter(function (s) { return has.indexOf(s[1]) > -1; }).map(function (s) { return { v: s[0], photo: photo(sh, s[1], metalId()), html: '<b>' + s[0] + '</b><small>' + s[2] + '</small>' }; }); } },
     { k: 'carat', lab: 'Stone size', q: function () { return 'How big should the center stone be?'; }, sub: 'Shown to scale on a band so you can picture it on ' + 'her hand.', wide: true,
       opts: function () { return CARATS.map(function (c) { return { v: c[0], html: '<div class="sizebox">' + sizeSVG(c[1]) + '</div><b>' + c[0] + '</b>' }; }); } },
@@ -304,7 +343,7 @@
     var rows = STEPS.filter(function (s) { return s.k !== 'inspo' && answered(s.k); }).map(function (s) { var v = val(s.k); if (s.k === 'engraving' && v !== 'No engraving' && val('engravingText')) v = '"' + val('engravingText') + '"'; return '<tr><td>' + s.lab + '</td><td>' + E(Array.isArray(v) ? v.join(', ') : v) + '</td><td class="e"><button type="button" data-edit="' + s.k + '">Edit</button></td></tr>'; }).join('');
     var title = [val('carat') ? val('carat').replace(' carats', ' ct').replace(' carat', ' ct') : '', val('shape'), val('setting')].filter(Boolean).join(' ');
     app.innerHTML = '<section class="pg on"><span class="kick">' + (P.submittedAt ? 'Saved' : 'Almost there') + '</span><h1>' + Her() + ' <span class="script">one of a kind</span> ring</h1>' +
-      '<div class="hero"><div><img class="ctr" src="' + img + '" alt="" crossorigin="anonymous"><p class="note">Style preview. Your stone size and every detail below will be made exactly as you designed.</p></div>' +
+      '<div class="hero"><div>' + ringSVG() + '<p class="note">Your ring drawn to scale: shape, stone size, setting, metal and band exactly as you chose.</p><div class="stylephoto"><img class="ctr" src="' + img + '" alt="" crossorigin="anonymous"><span>Setting style photo. The stone in this photo is not to scale.</span></div></div>' +
       '<div class="card sum"><h3>' + E(title || 'Your design') + '</h3><p class="note" style="margin-top:0">' + E(val('metal') || '') + '</p><table>' + rows + '</table></div></div>' +
       '<div class="card" style="margin-top:16px"><h3>Anything else we should know?</h3><textarea id="notes" placeholder="Little details, questions, ideas">' + E(val('notes') || '') + '</textarea></div>' +
       ((P.inspo || []).length ? '<div class="card" style="margin-top:16px"><h3>Your inspiration</h3><div class="thumbs">' + inspoThumbs() + '</div></div>' : '') +
