@@ -405,8 +405,24 @@ function leadLabel(l) {
 }
 
 function isSurprise(l) { return /^yes/i.test(l.surprise || ''); }
+// Customer picks windows in their own US zone; reps work in Central, so show both.
+const TZ_TO_CENTRAL = { Central: 0, Eastern: -1, Mountain: 1, Pacific: 2, Alaska: 3, Hawaii: 4 };
+function windowsForRep(w) {
+  const m = String(w || '').match(/^(.*) (Central|Eastern|Mountain|Pacific|Alaska|Hawaii)$/);
+  if (!m || m[2] === 'Central') return w || '';
+  const shift = TZ_TO_CENTRAL[m[2]];
+  const to24 = (h, ap) => (h % 12) + (ap === 'PM' ? 12 : 0);
+  const fmt = (h) => { h = ((h % 24) + 24) % 24; return (h % 12 || 12) + (h < 12 ? ' AM' : ' PM'); };
+  const conv = m[1].split(', ').map((r) => {
+    const x = r.match(/^(\d+)(?: (AM|PM))? to (\d+) (AM|PM)$/);
+    if (!x) return r;
+    const a = to24(+x[1], x[2] || x[4]), b = to24(+x[3], x[4]);
+    return `${fmt(a + shift)} to ${fmt(b + shift)}`;
+  }).join(', ');
+  return `${w} (${conv} Central)`;
+}
 function contactLine(l) {
-  if (isSurprise(l) && l.contact !== 'Book a call') return `SURPRISE: keep it private. Reach by ${l.reach || 'text'}${l.windows ? ', only ' + l.windows : ''}. Keep the first line neutral, no ring words.`;
+  if (isSurprise(l) && l.contact !== 'Book a call') return `SURPRISE: keep it private. Reach by ${l.reach || 'text'}${l.windows ? ', only ' + windowsForRep(l.windows) : ''}. Keep the first line neutral, no ring words.`;
   if (l.contact === 'Book a call') return `BOOKED CALL: ${labelDate(l.slotDate)} at ${labelTime(l.slotTime)} (Central). Call them at that time.`;
   if (l.routeMode === 'offline') return `Everyone was offline. ${l.contact === 'Text me' ? 'Text' : 'Call'} them first thing during business hours (9 AM to 9 PM).`;
   if (l.contact === 'Call me') return 'CALL NOW. Text first, then call within 15 minutes.';
@@ -563,6 +579,7 @@ async function handleLead(fields, request, env, origin) {
     budget: pick('budget'), pay: pick('pay'), monthly: pick('monthly'),
     timeline: pick('timeline'), credit: pick('credit'), contact: pick('contact'), shape: pick('shape'),
     surprise: pick('surprise'), reach: pick('reach'), windows: String(fields.windows || '').slice(0, 160),
+    windowsCentral: windowsForRep(String(fields.windows || '').slice(0, 160)),
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(fields.email || '')) ? String(fields.email).slice(0, 160) : '',
     page: pick('page'), receivedAt: Date.now(), status: 'new',
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
@@ -607,7 +624,7 @@ async function handleLead(fields, request, env, origin) {
     ['How they want to pay', lead.pay],
     ...(lead.surprise ? [['Surprise?', lead.surprise]] : []),
     ['Reach by', lead.reach || lead.contact || 'not answered'],
-    ...(lead.windows ? [['Best times (Central)', lead.windows]] : []),
+    ...(lead.windows ? [['Best times', windowsForRep(lead.windows)]] : []),
     ...(lead.email ? [['Email', lead.email]] : []),
     ['Comfortable monthly', lead.monthly || 'n/a'],
     ['Proposing', lead.timeline],

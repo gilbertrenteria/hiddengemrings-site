@@ -230,6 +230,8 @@
   .po-chips-1{grid-template-columns:1fr;}
   .po-chips-2x{grid-template-columns:1fr 1fr;}
   .po-chips .po-span2{grid-column:1 / -1}
+  .po-tz{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 2px;font-family:'Work Sans',sans-serif;font-size:14px;color:var(--taupe-dark)}
+  .po-tz select{font:inherit;font-weight:600;color:var(--brown-dark);background:var(--cream);border:1.5px solid rgba(92,77,64,.25);border-radius:12px;padding:9px 12px;min-width:140px}
   .po-next{margin-top:18px;color:#fff!important;width:100%;display:flex;align-items:center;justify-content:center;text-align:center}
   .po-chips button.selected,.po-chips button.selected:hover{color:#fff!important;background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%)!important}
   .po-next:disabled{opacity:.4}
@@ -464,7 +466,17 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     <div class="po-step" data-key="windows" data-multi="1">
       <img class="po-icon" src="icon-clock.png" alt="">
       <h2>When's a good time to reach you privately?</h2>
-      <p class="po-sub">Pick all that work. We'll only reach out when it's a good time for you. Times are Central.</p>
+      <p class="po-sub">Pick all that work. We'll only reach out when it's a good time for you.</p>
+      <label class="po-tz">Your time zone
+        <select id="poTz">
+          <option value="Central">Central</option>
+          <option value="Eastern">Eastern</option>
+          <option value="Mountain">Mountain</option>
+          <option value="Pacific">Pacific</option>
+          <option value="Alaska">Alaska</option>
+          <option value="Hawaii">Hawaii</option>
+        </select>
+      </label>
       <div class="po-chips po-chips-2x">
         <button type="button" data-v="9 to 11 AM">9 to 11 AM</button>
         <button type="button" data-v="11 AM to 1 PM">11 AM to 1 PM</button>
@@ -877,6 +889,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       if (key === 'reach') document.getElementById('poReachSub').textContent = isSurprise()
         ? 'A ring for a moment this special should stay a secret until you\'re ready. Every message is written to keep your surprise safe. Pick as many as you like.'
         : 'Everyone\'s schedule is different. Pick as many as you like and we\'ll work around you.';
+      if (key === 'windows') { var tz = document.getElementById('poTz'); if (!state.a.tz) { state.a.tz = guessTz(); save(); } tz.value = state.a.tz; }
       if (key === 'contact') { var ew = document.getElementById('poEmail1Wrap'); ew.hidden = !reachHas('Email'); if (!ew.hidden && state.a.email) document.getElementById('poEmail1').value = state.a.email; validate(); }
       if (key === 'contact') {
         validate();
@@ -951,6 +964,20 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       if (emailNeeded() && (email1El.value || '').trim() && document.activeElement !== email1El && !email1Ok()) return 'Please enter a real email address.';
       return '';
     }
+    // Default the time zone to where they are (US zones only, otherwise Central).
+    function guessTz() {
+      try {
+        var z = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        if (z === 'Pacific/Honolulu') return 'Hawaii';
+        if (/^America\/(Anchorage|Juneau|Sitka|Nome|Yakutat|Metlakatla)$/.test(z)) return 'Alaska';
+        if (/^America\//.test(z)) {
+          var off = new Date(new Date().getFullYear(), 0, 1).getTimezoneOffset();
+          return { 300: 'Eastern', 360: 'Central', 420: 'Mountain', 480: 'Pacific' }[off] || 'Central';
+        }
+      } catch (e) {}
+      return 'Central';
+    }
+    document.getElementById('poTz').addEventListener('change', function (e) { state.a.tz = e.target.value; save(); });
     var email1El = document.getElementById('poEmail1');
     function emailNeeded() { return reachHas('Email'); }
     function email1Ok() { return !emailNeeded() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((email1El.value || '').trim()); }
@@ -982,7 +1009,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         shape: state.a.shape || '', budget: state.a.budget || '', pay: state.a.pay || '',
         monthly: skipMonthly() ? '' : (state.a.monthly || ''),
         timeline: state.a.timeline || '', credit: state.a.credit || '', contact: state.a.contactPref || 'Call me',
-        surprise: state.a.surprise || '', reach: reachText(), windows: isSurprise() && state.a.contactPref !== 'Book a call' ? (state.a.windows || []).join(', ') : '',
+        surprise: state.a.surprise || '', reach: reachText(), windows: isSurprise() && state.a.contactPref !== 'Book a call' ? (state.a.windows || []).join(', ') + ((state.a.windows || [])[0] === 'Anytime' ? '' : ' ' + (state.a.tz || 'Central')) : '',
         email: emailNeeded() ? (state.a.email || '') : '',
         slotDate: state.a.contactPref === 'Book a call' ? (state.a.slotDate || '') : '', slotTime: state.a.contactPref === 'Book a call' ? (state.a.slotTime || '') : '',
         page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
@@ -1218,7 +1245,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       else {
         var r = reachList(), how = r.indexOf('All') > -1 ? ['call', 'text', 'email'] : r.map(function (x) { return x.toLowerCase(); });
         var verb = how.length > 1 ? 'reach out by ' + how.slice(0, -1).join(', ') + ' or ' + how[how.length - 1] : (how[0] === 'call' ? 'call you' : how[0] === 'text' ? 'text you' : how[0] === 'email' ? 'email you' : 'reach out');
-        var when = isSurprise() && (state.a.windows || []).length && (state.a.windows || [])[0] !== 'Anytime' ? ' during the times you picked (' + state.a.windows.join(', ') + ')' : ' shortly';
+        var when = isSurprise() && (state.a.windows || []).length && (state.a.windows || [])[0] !== 'Anytime' ? ' during the times you picked (' + state.a.windows.join(', ') + ' ' + (state.a.tz || 'Central') + ')' : ' shortly';
         msg = 'One of our ring specialists will ' + verb + when + '.' + (isSurprise() ? ' Everything stays private.' : '');
       }
       document.getElementById('poDoneLead').innerHTML = msg;
