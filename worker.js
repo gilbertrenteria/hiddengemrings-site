@@ -1196,7 +1196,6 @@ export default {
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/track/stats') return handleTrackStats(url, env, origin);
       if (path === '/email/log') return handleEmailLog(url, env, origin);
-      if (path.startsWith('/asset/shape-')) { const h = await env.IG_KV.get('asset:' + path.slice(7)); return new Response(h || '', { status: h ? 200 : 404, headers: { 'Content-Type': 'text/plain' } }); }
       if (path === '/admin/list') return handleAdminList(url, env, origin);
       if (path === '/admin/lead') return handleAdminLead(url, env, origin);
       if (path === '/admin/inspo') return handleInspoGet(url, env, origin);
@@ -1238,13 +1237,6 @@ export default {
     if (path === '/lead') return handleLead(fields, request, env, origin);
     if (path === '/lead/design') return handleDesign(fields, env, origin);
     if (path === '/lead/about') return handleAbout(fields, env, origin);
-    if (path === '/asset/upload') { // one-time icon hand-off, expires 1794465601000
-      if (fields.token !== '984e84eb401d03ee0b225860' || Date.now() > 1794465601000) return json({ ok: false }, 403, origin);
-      const name = String(fields.name || '').replace(/[^a-z0-9.-]/g, '').slice(0, 40);
-      if (!/^shape-[a-z-]+\.webp$/.test(name)) return json({ ok: false }, 400, origin);
-      await env.IG_KV.put('asset:' + name, String(fields.hex || '').slice(0, 60000), { expirationTtl: 86400 });
-      return json({ ok: true }, 200, origin);
-    }
     if (path === '/lead/email') return handleLeadEmail(fields, env, origin);
     if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);

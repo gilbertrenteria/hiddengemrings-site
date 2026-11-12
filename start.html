@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+<!doctype html><html><head>
 /* v2 draft: quiz above the fold on phones */
 .v2-head{display:flex;align-items:center;justify-content:center;gap:18px;padding:22px 20px 14px!important;text-align:left}
 .v2-ring{width:96px;height:128px;object-fit:cover;border-radius:16px;box-shadow:0 8px 22px rgba(84,69,58,.18);flex:none}
@@ -212,6 +212,9 @@
   .po-sub{font-family:'Work Sans',sans-serif;font-size:14px;color:var(--taupe-dark);margin:0 0 6px;}
   .po-chips{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px;}
   .po-chips button{font-family:'Work Sans',sans-serif;font-size:15px;font-weight:500;color:var(--brown-dark);background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:16px;padding:17px 12px;cursor:pointer;transition:all .2s ease;min-height:58px;}
+  .po-chips button.shp{display:flex;align-items:center;justify-content:center;gap:10px}
+  .po-chips button.shp img{width:28px;height:28px;flex:0 0 28px;object-fit:contain}
+  .po-chips button.shp.selected img{filter:brightness(0) invert(1)}
   .po-chips button:hover{border-color:var(--gold);background:#fff;transform:translateY(-1px);}
   .po-chips button.selected{background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(33,26,20,.25);}
   .po-chips button:focus-visible,.po-field input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
@@ -358,12 +361,12 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       <img class="po-icon" src="icon-diamond.png" alt="">
       <h2>Which shape does she love?</h2>
       <div class="po-chips">
-        <button type="button" data-v="Pear">Pear</button>
-        <button type="button" data-v="Oval">Oval</button>
-        <button type="button" data-v="Round">Round</button>
-        <button type="button" data-v="Emerald">Emerald</button>
-        <button type="button" data-v="Radiant">Radiant</button>
-        <button type="button" data-v="Not sure yet">Not sure yet</button>
+        <button type="button" data-v="Pear" class="shp"><img src="shape-pear.webp" alt="" width="28" height="28">Pear</button>
+        <button type="button" data-v="Oval" class="shp"><img src="shape-oval.webp" alt="" width="28" height="28">Oval</button>
+        <button type="button" data-v="Round" class="shp"><img src="shape-round.webp" alt="" width="28" height="28">Round</button>
+        <button type="button" data-v="Emerald" class="shp"><img src="shape-emerald.webp" alt="" width="28" height="28">Emerald</button>
+        <button type="button" data-v="Radiant" class="shp"><img src="shape-radiant.webp" alt="" width="28" height="28">Radiant</button>
+        <button type="button" data-v="Not sure yet" class="shp"><img src="shape-notsure.webp" alt="" width="28" height="28">Not sure yet</button>
       </div>
     </div>
 
@@ -475,8 +478,45 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     </div>
 
     <div class="po-design" id="poDesign" hidden>
+    <div class="po-step po-dstep po-astep" data-dkey="buyer">
+      <img class="po-icon" src="icon-personal.png" alt="">
+      <p class="po-kicker">You're all set! 4 quick taps so we can prepare for your call</p>
+      <h2>Which one sounds like you?</h2>
+      <div class="po-chips po-chips-1">
+        <button type="button" data-v="Planning to propose">I'm planning to propose</button>
+        <button type="button" data-v="Hoping to be proposed to">I'm hoping to be proposed to</button>
+        <button type="button" data-v="Shopping together">We're shopping together</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep po-astep" data-dkey="surprise">
+      <img class="po-icon" src="icon-gift.png" alt="">
+      <h2 data-h-propose="Is it a surprise?" data-h-hoping="Does your partner know you're shopping?">Is it a surprise?</h2>
+      <div class="po-chips po-chips-1">
+        <button type="button" data-v="It's a surprise" data-l-hoping="No, I'm dropping hints" data-v-hoping="No, dropping hints">It's a surprise</button>
+        <button type="button" data-v="She knows it's coming" data-l-hoping="Yes, we talk about it" data-v-hoping="Yes, partner knows">She knows it's coming</button>
+        <button type="button" data-v="Picking it together" data-l-hoping="We're picking it together" data-v-hoping="Picking it together">We're picking it together</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep po-astep" data-dkey="decides">
+      <img class="po-icon" src="icon-family.png" alt="">
+      <h2>Who's helping make the decision?</h2>
+      <div class="po-chips po-chips-1">
+        <button type="button" data-v="Just me">Just me</button>
+        <button type="button" data-v="Me and my partner">Me and my partner</button>
+        <button type="button" data-v="Family or a friend is helping">Family or a friend is helping</button>
+      </div>
+    </div>
+    <div class="po-step po-dstep po-astep" data-dkey="shopped">
+      <img class="po-icon" src="icon-search.png" alt="">
+      <h2>Have you shopped anywhere else yet?</h2>
+      <div class="po-chips po-chips-1">
+        <button type="button" data-v="Not yet">Not yet, you're my first stop</button>
+        <button type="button" data-v="Still looking around">Still looking around</button>
+        <button type="button" data-v="Found one but want better">Found one but want something better</button>
+      </div>
+    </div>
     <div class="po-step po-dstep" data-dkey="style">
-      <p class="po-kicker">Almost done! Want us to send rings that match your style?</p>
+      <p class="po-kicker">Last part! Want us to send rings that match your style?</p>
       <h2>Pick a ring style you love</h2>
       <p class="po-sub">Tap the closest one. A few quick taps and we'll send you matching designs.</p>
       <div class="po-chips po-pics">
@@ -488,21 +528,6 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         <button type="button" class="pic" data-v="The Souline"><img src="design-souline-yellow.jpg" alt="" loading="lazy"><span>The Souline</span></button>
         <button type="button" class="pic" data-v="The Setlla"><img src="design-setlla-yellow.jpg" alt="" loading="lazy"><span>The Setlla</span></button>
         <button type="button" class="pic" data-v="Something custom"><img src="sketch-ring.jpg" alt="" loading="lazy"><span>Something custom</span></button>
-      </div>
-    </div>
-    <div class="po-step po-dstep" data-dkey="shape">
-      <img class="po-icon" src="icon-diamond.png" alt="">
-      <h2>What stone shape?</h2>
-      <div class="po-chips ">
-        <button type="button" data-v="Round">Round</button>
-        <button type="button" data-v="Oval">Oval</button>
-        <button type="button" data-v="Pear">Pear</button>
-        <button type="button" data-v="Emerald">Emerald</button>
-        <button type="button" data-v="Cushion">Cushion</button>
-        <button type="button" data-v="Radiant">Radiant</button>
-        <button type="button" data-v="Princess">Princess</button>
-        <button type="button" data-v="Marquise">Marquise</button>
-        <button type="button" data-v="Not sure yet">Not sure yet</button>
       </div>
     </div>
     <div class="po-step po-dstep" data-dkey="carat">
@@ -687,6 +712,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     if (!card) return;
     var steps = Array.prototype.slice.call(card.querySelectorAll('.po-step:not(.po-dstep)'));
     var dsteps = Array.prototype.slice.call(card.querySelectorAll('.po-dstep'));
+    var aCount = card.querySelectorAll('.po-astep').length;
     var mode = 'lead';
     var backBtn = document.getElementById('poBack');
     var countEl = document.getElementById('poCount');
@@ -933,7 +959,9 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       mode = 'design';
       steps.forEach(function (s) { s.classList.remove('active'); });
       designEl.hidden = false;
+      if (state.d && state.aPending && !state.aSent) submitAbout();
       if (state.dPending && !state.dSent) { showSendArea(); submitDesign(); return; }
+      applyBuyer();
       dshow(state.dstep || 0);
     }
     function dshow(i) {
@@ -942,8 +970,9 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       dSendWrap.hidden = true; document.getElementById('poSkip').hidden = false;
       dsteps.forEach(function (s) { s.classList.remove('active'); });
       dsteps[i].classList.add('active');
-      countEl.textContent = 'Style ' + (i + 1) + ' of ' + dsteps.length;
-      barEl.style.width = Math.round(((i + 1) / dsteps.length) * 100) + '%';
+      var inAbout = i < aCount, n = inAbout ? aCount : dsteps.length - aCount, k = inAbout ? i + 1 : i - aCount + 1;
+      countEl.textContent = (inAbout ? 'About you ' : (state.d.buyer === 'Hoping to be proposed to' ? 'Your style ' : 'Her style ')) + k + ' of ' + n;
+      barEl.style.width = Math.round((k / n) * 100) + '%';
       backBtn.classList.toggle('show', i > 0);
       var key = dsteps[i].dataset.dkey;
       dsteps[i].querySelectorAll('.po-chips button').forEach(function (b) { b.classList.toggle('selected', state.d[key] === b.dataset.v); });
@@ -952,15 +981,45 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       s.querySelectorAll('.po-chips button').forEach(function (b) {
         b.addEventListener('click', function () {
           state.d[s.dataset.dkey] = b.dataset.v; save();
+          if (s.dataset.dkey === 'buyer') applyBuyer();
           s.querySelectorAll('.po-chips button').forEach(function (x) { x.classList.remove('selected'); });
           b.classList.add('selected');
+          if (idx === aCount - 1) submitAbout(); // last About you answer: send it right away
           setTimeout(function () {
-            if (idx < dsteps.length - 1) { dshow(idx + 1); window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' }); }
+            var nx = idx + 1;
+            if (dsteps[nx] && dsteps[nx].dataset.dkey === 'surprise' && state.d.buyer === 'Shopping together') { state.d.surprise = 'Picking it together'; save(); nx++; }
+            if (nx < dsteps.length) { dshow(nx); window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' }); }
             else { showSendArea(); submitDesign(); } // last design answer: send automatically
           }, 260);
         });
       });
     });
+    // Words change for someone hoping to be proposed to; values stay clear for the team.
+    function applyBuyer() {
+      var hoping = state.d && state.d.buyer === 'Hoping to be proposed to';
+      var sq = card.querySelector('.po-dstep[data-dkey=surprise]');
+      if (!sq) return;
+      var h = sq.querySelector('h2'); h.textContent = hoping ? h.dataset.hHoping : h.dataset.hPropose;
+      sq.querySelectorAll('.po-chips button').forEach(function (b) {
+        if (!b.dataset.vPropose) { b.dataset.vPropose = b.dataset.v; b.dataset.lPropose = b.textContent; }
+        b.dataset.v = hoping ? b.dataset.vHoping : b.dataset.vPropose;
+        b.textContent = hoping ? b.dataset.lHoping : b.dataset.lPropose;
+      });
+    }
+    var aSending = false;
+    function submitAbout() {
+      if (aSending || state.aSent) return;
+      aSending = true; state.aPending = true; save();
+      var body = { id: state.id, buyer: state.d.buyer || '', surprise: state.d.surprise || '', decides: state.d.decides || '', shopped: state.d.shopped || '' };
+      var attempt = 0;
+      (function tryOnce() {
+        fetch(API + '/lead/about', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true })
+          .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
+          .then(function (res) { if (res.r.ok && res.j.ok) { aSending = false; state.aSent = true; state.aPending = false; save(); } else retry(); })
+          .catch(retry);
+        function retry() { attempt++; if (attempt < delays.length) setTimeout(tryOnce, delays[attempt]); else aSending = false; }
+      })();
+    }
     function showSendArea() {
       dsteps.forEach(function (s) { s.classList.remove('active'); });
       dSendWrap.hidden = false; backBtn.classList.add('show'); document.getElementById('poSkip').hidden = true;
@@ -1047,7 +1106,10 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         }
       })();
     }
-    document.getElementById('poSkip').addEventListener('click', function () { state.dSkipped = true; save(); finishAll(); });
+    document.getElementById('poSkip').addEventListener('click', function () {
+      if ((state.dstep || 0) < aCount) { state.aSkipped = true; if (state.d.buyer && !state.aSent) submitAbout(); save(); dshow(aCount); return; }
+      state.dSkipped = true; save(); finishAll();
+    });
     function renderDesignDone() {
       designEl.hidden = true;
       document.querySelector('.po-top').style.display = 'none';
@@ -1093,6 +1155,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     phoneEl.value = state.a.phone || '';
     applyStatus();
     if (state.sent) {
+      if (state.d && state.aPending && !state.aSent) submitAbout();
       if (state.dSent || state.dSkipped) finishAll(); else startDesign();
     }
     else {
