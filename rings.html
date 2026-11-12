@@ -128,8 +128,35 @@
   function first() { return (o.customerName || '').split(' ')[0]; }
   function img(i) { var x = o.options[i]; return x && x.imageUrl && !x.hasImage ? x.imageUrl : API + '/order/' + o.id + '/image/' + i; }
   function pick() { return o.options[st.pick]; }
-  var trust = '<div class="trust"><span><img src="icon-diamond.png" alt="">Certified diamonds</span><span><img src="icon-warranty.png" alt="">One year warranty</span><span><img src="icon-resize.png" alt="">Free first resize</span><span><img src="icon-shipping.png" alt="">Insured delivery</span><span><img src="icon-payment.png" alt="">Secure checkout</span></div>';
+  var trust = '<div class="trust"><span><img src="icon-diamond.png" alt="">Certified stones</span><span><img src="icon-warranty.png" alt="">One year warranty</span><span><img src="icon-resize.png" alt="">Free first resize</span><span><img src="icon-shipping.png" alt="">Insured delivery</span><span><img src="icon-payment.png" alt="">Secure checkout</span></div>';
 
+  // Keep every ring centered in its photo frame. Wide library photos are
+  // cropped to a square, so find where the ring sits and center the crop on it.
+  var centerCache = {};
+  function centerRings() {
+    app.querySelectorAll('.ph img, .chosen img').forEach(function (img) {
+      function go() {
+        var w = img.naturalWidth, hgt = img.naturalHeight;
+        if (!w || !hgt || w < hgt * 1.08) return;
+        var src = img.currentSrc || img.src;
+        if (centerCache[src] != null) { img.style.objectPosition = centerCache[src] + '% 50%'; return; }
+        fetch(src, { mode: 'cors' }).then(function (r) { return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm) {
+          var c = document.createElement('canvas'), sc = Math.min(1, 320 / bm.width);
+          c.width = Math.round(bm.width * sc); c.height = Math.round(bm.height * sc);
+          var x = c.getContext('2d'); x.drawImage(bm, 0, 0, c.width, c.height);
+          var d = x.getImageData(0, 0, c.width, c.height).data, sx = 0, n = 0;
+          for (var yy = 0; yy < c.height; yy++) for (var xx = 0; xx < c.width * 0.88; xx++) {
+            var i = (yy * c.width + xx) * 4; if ((d[i] + d[i + 1] + d[i + 2]) / 3 > 150) { sx += xx; n++; }
+          }
+          if (!n) return;
+          var cx = sx / n / c.width, side = c.height / c.width, left = Math.min(Math.max(cx - side / 2, 0), 1 - side);
+          var pos = Math.round(left / (1 - side) * 100);
+          centerCache[src] = pos; img.style.objectPosition = pos + '% 50%';
+        }).catch(function () {});
+      }
+      if (img.complete) go(); else img.addEventListener('load', go, { once: true });
+    });
+  }
   function render() {
     chrome();
     var html = '';
@@ -138,6 +165,7 @@
     if (step === 2) html = pageReview();
     if (step === 3) html = pagePay();
     app.innerHTML = '<section class="pg on">' + html + '</section>';
+    centerRings();
     if (step === 0) bindPick();
     if (step === 1) bindSize();
     if (step === 2) bindReview();
