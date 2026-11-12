@@ -78,7 +78,7 @@ button{font:inherit;color:inherit}
 .save{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:0 16px;cursor:pointer;font:600 12.5px 'Work Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--brown-dark);white-space:nowrap}
 .save.on{background:var(--goldsoft);border-color:var(--gold)}
 .dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translate(-50%,140%);transition:transform .35s ease;z-index:30;width:min(560px,calc(100% - 24px));background:var(--brown-dark);color:#fff;border-radius:999px;padding:8px 8px 8px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 14px 36px rgba(0,0,0,.25)}
-.dock.show{transform:translate(-50%,0)}
+.dock{visibility:hidden}.dock.show{transform:translate(-50%,0);visibility:visible}
 .dock span{flex:1;font-size:14px}
 .dock button{background:#fff;color:var(--brown-dark);border:0;border-radius:999px;padding:11px 18px;font:700 12px 'Work Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .none{text-align:center;margin:34px auto 0;max-width:520px}
