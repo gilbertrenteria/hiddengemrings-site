@@ -29,6 +29,13 @@
   .opt img.ic{width:44px;height:44px;object-fit:contain}
   .opt img.ph{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:var(--cream2)}
   .opt.photo{padding:8px 8px 12px}
+  .opt .blueprint{border:0;border-radius:14px}
+  .opts.sizes{grid-template-columns:repeat(2,1fr)}
+  @media(min-width:760px){.opts.sizes{grid-template-columns:repeat(3,1fr)}}
+  .opts.sizes .opt{padding:8px 8px 12px;gap:4px}
+  .opts.sizes .opt b{font-size:.92rem}
+  main.wrap{padding-bottom:90px}
+  .foot{display:flex;justify-content:space-between;gap:6px 16px;flex-wrap:wrap;padding:24px 0;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
   .sw{width:40px;height:40px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--line)}
   .note{font-size:.86rem;color:var(--muted);margin-top:10px}
   .nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:10px}
@@ -178,10 +185,10 @@
     if (/emerald|asscher/.test(sh)) return '<path d="M' + (cx - W * .3) + ' ' + (cy - L * .36) + 'H' + (cx + W * .3) + 'V' + (cy + L * .36) + 'H' + (cx - W * .3) + 'Z M' + (cx - W * .16) + ' ' + (cy - L * .22) + 'H' + (cx + W * .16) + 'V' + (cy + L * .22) + 'H' + (cx - W * .16) + 'Z" fill="none"/>';
     return '<path d="M' + cx + ' ' + (cy - L * .42) + 'L' + (cx + W * .3) + ' ' + cy + 'L' + cx + ' ' + (cy + L * .42) + 'L' + (cx - W * .3) + ' ' + cy + 'Z M' + (cx - W * .42) + ' ' + cy + 'H' + (cx + W * .42) + ' M' + cx + ' ' + (cy - L * .42) + 'V' + (cy + L * .42) + '" fill="none"/>';
   }
-  function ringSVG(big) {
+  function ringSVG(ctOverride, compact) {
     var sh = shapeId(), st = setId(), mt = val('metal') || 'Yellow gold';
     var col = { 'Yellow gold': ['#f3d991', '#c79b45'], 'White gold': ['#f6f7f8', '#b9bec4'], 'Rose gold': ['#f6c9b6', '#c98a72'], 'Platinum': ['#eef0f2', '#a9aeb4'] }[mt] || ['#f3d991', '#c79b45'];
-    var ct = { 'Under 1 carat': .75, '1 to 1.5 carats': 1.25, '1.5 to 2 carats': 1.75, '2 to 3 carats': 2.5, '3 carats+': 3.5 }[val('carat')] || 1.5;
+    var ct = ctOverride || { 'Under 1 carat': .75, '1 to 1.5 carats': 1.25, '1.5 to 2 carats': 1.75, '2 to 3 carats': 2.5, '3 carats+': 3.5 }[val('carat')] || 1.5;
     var k = 13, d = stoneMM(sh, ct), L = d[0] * k, W = d[1] * k, cx = 200, cy = 150;
     var bw = ({ Dainty: 1.6, Classic: 2, Bold: 2.5 }[val('bandWidth')] || 1.9) * k;
     var g = '<defs><linearGradient id="mtl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + col[0] + '"/><stop offset="1" stop-color="' + col[1] + '"/></linearGradient>' +
@@ -197,6 +204,7 @@
     var prong = '';
     if (st !== 'bezel' && st !== 'toi') { var pr = /Double/.test(val('prongs') || '') ? 2 : 1; [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (q) { for (var j = 0; j < pr; j++) prong += '<circle cx="' + (cx + q[0] * W * (sh === 'round' ? .36 : .42) + j * 4 * q[0]) + '" cy="' + (cy + q[1] * L * (sh === 'round' ? .36 : .42)) + '" r="3.6" fill="url(#mtl)" stroke="' + col[1] + '" stroke-width=".6"/>'; }); }
     var mm = '<text x="200" y="285" text-anchor="middle" font-family="Work Sans,sans-serif" font-size="12" fill="#776C5C">Drawn to scale · stone about ' + d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm</text>';
+    if (compact) return '<svg viewBox="70 52 260 196" class="blueprint" role="img" aria-label="Drawing of the ring, to scale">' + g + '<rect x="70" y="52" width="260" height="196" fill="#fbf8f2"/>' + band + extra + main + prong + '</svg><small>' + d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm</small>';
     return '<svg viewBox="0 0 400 300" class="blueprint" role="img" aria-label="Drawing of the ring, to scale">' + g + '<rect width="400" height="300" rx="22" fill="#fbf8f2"/>' + band + extra + main + prong + mm + '</svg>';
   }
 
@@ -205,8 +213,8 @@
       opts: function () { return SHAPES.map(function (s) { return { v: s[0], html: ICON[s[0]] ? '<img class="ic" src="shape-' + ICON[s[0]] + '.webp" alt="">' + s[0] : s[0] }; }); } },
     { k: 'setting', lab: 'Setting', q: function () { return 'Pick the setting that feels like ' + her(); }, sub: 'Photos show the setting style only. You choose the exact stone size next, and we draw it to scale for you.', wide: true,
       opts: function () { var sh = shapeId(), has = HGLIB.HAS[sh] || []; return SETTINGS.filter(function (s) { return has.indexOf(s[1]) > -1; }).map(function (s) { return { v: s[0], photo: photo(sh, s[1], metalId()), html: '<b>' + s[0] + '</b><small>' + s[2] + '</small>' }; }); } },
-    { k: 'carat', lab: 'Stone size', q: function () { return 'How big should the center stone be?'; }, sub: 'Shown to scale on a band so you can picture it on ' + 'her hand.', wide: true,
-      opts: function () { return CARATS.map(function (c) { return { v: c[0], html: '<div class="sizebox">' + sizeSVG(c[1]) + '</div><b>' + c[0] + '</b>' }; }); } },
+    { k: 'carat', lab: 'Stone size', cls: 'sizes', q: function () { return 'How big should the center stone be?'; }, sub: 'Each one is ' + 'her ring drawn to true scale, so you can see the real difference.', wide: true,
+      opts: function () { return CARATS.map(function (c) { return { v: c[0], html: ringSVG(c[1], true) + '<b>' + c[0] + '</b>' }; }); } },
     { k: 'stoneType', lab: 'Stone', q: function () { return 'Which kind of stone?'; }, sub: 'All three look stunning. Here is the difference.', one: true,
       opts: function () { return [['Lab-grown diamond', 'A real diamond grown in a lab. Same sparkle, certified, and far more size for the money.'], ['Moissanite', 'Even more fire and sparkle, extremely durable, and the most size for the money.'], ['Natural diamond', 'Mined from the earth. Classic and rare.']].map(function (x) { return { v: x[0], html: '<b>' + x[0] + '</b><small>' + x[1] + '</small>' }; }); } },
     { k: 'metal', lab: 'Metal', q: function () { return 'Which metal?'; }, sub: 'Think about the jewelry ' + 'she already wears every day.',
@@ -287,7 +295,7 @@
         '<div style="display:flex;gap:8px;margin-top:12px"><input type="url" id="inspoLink" placeholder="Paste a link"><button class="btn" type="button" id="inspoAdd" style="min-height:48px">Add</button></div>' +
         '<div class="thumbs" id="thumbs">' + inspoThumbs() + '</div>';
     } else {
-      var opts = s.opts(), cls = s.one ? ' one' : s.wide ? ' wide' : '';
+      var opts = s.opts(), cls = s.cls ? ' ' + s.cls : s.one ? ' one' : s.wide ? ' wide' : '';
       h += '<div class="opts' + cls + '">' + opts.map(function (o) {
         var sel = Array.isArray(cur) ? cur.indexOf(o.v) > -1 : cur === o.v;
         return '<div class="opt' + (o.photo ? ' photo' : '') + (sel ? ' sel' : '') + '" data-v="' + E(o.v) + '"' + (o.full ? ' style="grid-column:1/-1"' : '') + '>' + (o.photo ? '<img class="ph ctr" src="' + o.photo + '" alt="" crossorigin="anonymous">' : '') + o.html + '</div>';
