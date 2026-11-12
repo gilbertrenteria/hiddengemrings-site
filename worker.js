@@ -1615,6 +1615,7 @@ async function handleLeadStatus(fields, url, env, origin) {
   if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
   lead.status = String(fields.status || 'new').slice(0, 30);
   lead.statusAt = Date.now();
+  if (fields.called) lead.calledAt = Date.now(); // a Call tap on the dashboard clears call now and calls today
   if (fields.stage) stampStage(lead, String(fields.stage));
   await env.IG_KV.put(`lead:${id}`, JSON.stringify(lead));
   return json({ ok: true }, 200, origin);

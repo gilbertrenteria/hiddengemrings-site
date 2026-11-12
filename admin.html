@@ -197,14 +197,14 @@
     var now = Date.now(), dayLbl = new Date().toLocaleDateString('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric' }), dayIso = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
     var g = { now: [], calls: [], mock: [], fresh: [] };
     data.leads.filter(function (l) { return !isTest(l); }).forEach(function (l) {
-      var touched = l.statusAt || 0, cr = l.callReq;
-      if (cr && cr.type === 'now' && touched < cr.at && now - cr.at < 864e5) {
+      var called = l.calledAt || 0, cr = l.callReq;
+      if (cr && cr.type === 'now' && called < cr.at && now - cr.at < 864e5) {
         var due = cr.at + 45 * 60000; g.now.push({ l: l, sort: due, why: 'Tapped Talk now ' + ago(cr.at), time: left(due) || 'Past the 45 minutes', late: !left(due) });
       }
-      if (l.slotDate === dayIso && l.slotTime) g.calls.push({ l: l, sort: +String(l.slotTime).replace(':', ''), why: 'Booked on the form', time: l.slotTime });
-      if (cr && cr.type === 'schedule' && touched < cr.at && String(cr.central || '').indexOf(dayLbl) === 0) g.calls.push({ l: l, sort: 9999, why: 'Asked in the Ring Portal', time: String(cr.central).slice(dayLbl.length).trim() + ' Central' });
-      var asked = lastAt(l, /^(Picked in portal|Wants new designs|Mockup changes)$/), sent = lastAt(l, /^Mockup sent$/);
-      if (asked && asked > sent) { var d24 = asked + 864e5; g.mock.push({ l: l, sort: d24, mock: 1, why: (/new designs/i.test(l.stage) ? 'Wants new designs' : /changes/i.test(l.stage) ? 'Wants mockup changes' : 'Picked a ring') + ' ' + ago(asked), time: left(d24) || 'Past 24 hours', late: !left(d24), soon: d24 - now < 6 * 36e5 }); }
+      if (l.slotDate === dayIso && l.slotTime && !called) g.calls.push({ l: l, sort: +String(l.slotTime).replace(':', ''), why: 'Booked on the form', time: l.slotTime });
+      if (cr && cr.type === 'schedule' && called < cr.at && String(cr.central || '').indexOf(dayLbl) === 0) g.calls.push({ l: l, sort: 9999, why: 'Asked in the Ring Portal', time: String(cr.central).slice(dayLbl.length).trim() + ' Central' });
+      var askJ = (l.journey || []).filter(function (x) { return /^(Picked in portal|Wants new designs|Mockup changes)$/.test(x.stage); }).pop(), asked = askJ ? askJ.at : 0, sent = lastAt(l, /^Mockup sent$/);
+      if (asked && asked > sent) { var d24 = asked + 864e5; g.mock.push({ l: l, sort: d24, mock: 1, why: (/new designs/i.test(askJ.stage) ? 'Wants new designs' : /changes/i.test(askJ.stage) ? 'Wants mockup changes' : 'Picked a ring') + ' ' + ago(asked), time: left(d24) || 'Past 24 hours', late: !left(d24), soon: d24 - now < 6 * 36e5 }); }
       if ((l.status || 'new') === 'new') {
         var opened = lastAt(l, /^Ring Portal opened$/);
         g.fresh.push({ l: l, sort: l.receivedAt || 0, why: 'New ' + ago(l.receivedAt) + ' · ' + (opened ? 'portal opened ' + ago(opened) : 'portal not opened yet'), late: now - (l.receivedAt || now) > 36e5 });
@@ -218,7 +218,7 @@
     var l = x.l, id = esc(l.id), t = telOf(l), call = 'call.html?lead=' + encodeURIComponent(l.id) + '&rep=gilbert';
     var btns = x.mock
       ? '<a class="main" href="' + call + '">Open</a><button type="button" data-mark="Mockup sent" data-id="' + id + '">Mark sent</button>'
-      : '<a class="main" data-touch="' + id + '" href="tel:+1' + t + '">Call</a><a data-touch="' + id + '" href="sms:+1' + t + '?&body=' + encodeURIComponent(textFor(l)) + '">Text</a><a href="' + call + '">Details</a>';
+      : '<a class="main" data-touch="' + id + '" data-call="1" href="tel:+1' + t + '">Call</a><a data-touch="' + id + '" href="sms:+1' + t + '?&body=' + encodeURIComponent(textFor(l)) + '">Text</a><a href="' + call + '">Details</a>';
     var time = x.why === 'Booked on the form' ? slotLabel(x.time) : x.time;
     return '<div class="trow"><div><b>' + esc(l.name) + '</b>' + (/^yes/i.test(l.surprise || '') ? ' <span class="tag t-WARM">SURPRISE</span>' : '') +
       '<small>' + esc(x.why) + '</small>' + (time ? '<small class="' + (x.late ? 'late' : x.soon ? 'soon' : '') + '">' + esc(time) + '</small>' : x.late ? '<small class="late">Waiting over an hour</small>' : '') +
@@ -239,8 +239,8 @@
     if (a) {
       var l = data.leads.find(function (x) { return x.id === a.dataset.touch; }); if (!l) return;
       var st = (l.status || 'new') === 'new' ? 'called' : l.status;
-      l.status = st; l.statusAt = Date.now();
-      fetch(API + '/admin/lead-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: l.id, status: st }) }).then(function () { setTimeout(refresh, 800); });
+      l.status = st; l.statusAt = Date.now(); if (a.dataset.call) l.calledAt = Date.now();
+      fetch(API + '/admin/lead-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: l.id, status: st, called: !!a.dataset.call }) }).then(function () { setTimeout(refresh, 800); });
       setTimeout(function () { drawToday(); drawLeads(); }, 300);
       return;
     }
