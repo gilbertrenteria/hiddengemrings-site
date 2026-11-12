@@ -100,7 +100,8 @@
       if (!j.ok || !j.order.options) { app.innerHTML = '<p class="msg">We could not find your ring options. Please call or text (832) 743-7657.</p>'; return; }
       o = j.order;
       if (o.chosen != null && st.pick == null) st.pick = o.chosen;
-      if (!tries) fetch(API + '/order/' + id + '/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', keepalive: true }).catch(function () {});
+      // ?preview=1 lets the team check a link without sending an "opened" alert.
+      if (!tries && !/[?&]preview=1/.test(location.search)) fetch(API + '/order/' + id + '/seen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', keepalive: true }).catch(function () {});
       step = o.approved ? 3 : (st.step || 0);
       if (step > 0 && st.pick == null) step = 0;
       if (step > 1 && !st.size) step = 1;
