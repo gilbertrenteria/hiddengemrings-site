@@ -152,7 +152,7 @@
         for (var ry = 0; ry < rh; ry++) {
           var ri = (ry * RW) * 4, R = rd[ri], G = rd[ri + 1], B = rd[ri + 2];
           for (var rx = 4; rx < RW; rx++) { var q = (ry * RW + rx) * 4;
-            if (Math.max(Math.abs(rd[q] - R), Math.abs(rd[q + 1] - G), Math.abs(rd[q + 2] - B)) > 22) { rd[q] = R; rd[q + 1] = G; rd[q + 2] = B; }
+            if (Math.max(Math.abs(rd[q] - R), Math.abs(rd[q + 1] - G), Math.abs(rd[q + 2] - B)) > 12) { rd[q] = R; rd[q + 1] = G; rd[q + 2] = B; }
             else { R = rd[q]; G = rd[q + 1]; B = rd[q + 2]; } }
         }
         fx.putImageData(reg, x0 - 4, y0);
@@ -183,9 +183,22 @@
         var ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high';
         ox.fillStyle = 'rgb(' + Math.round(br) + ',' + Math.round(bgc) + ',' + Math.round(bb) + ')'; ox.fillRect(0, 0, OUT, OUT);
         // never crop past the photo's edges (no bands or logo showing); keep the ring as centered as the photo allows
-        side = Math.min(side, bm.width, bm.height);
-        var left = Math.min(Math.max(cx - side / 2, 0), bm.width - side), top = Math.min(Math.max(cy - side / 2, 0), bm.height - side);
-        ox.drawImage(bm, left, top, side, side, 0, 0, OUT, OUT);
+        // center exactly; where the crop runs past the photo, stretch the photo's own edge so the background continues smoothly
+        side = Math.min(side, Math.max(bm.width, bm.height) * 1.1);
+        var left = cx - side / 2, top = cy - side / 2;
+        var pad = Math.ceil(Math.max(0, -left, -top, left + side - bm.width, top + side - bm.height));
+        var src = bm;
+        if (pad > 0) {
+          var P = document.createElement('canvas'), PW = bm.width + pad * 2, PH = bm.height + pad * 2; P.width = PW; P.height = PH;
+          var pc = P.getContext('2d');
+          pc.drawImage(bm, pad, pad);
+          pc.drawImage(bm, 0, 0, 2, bm.height, 0, pad, pad, bm.height);
+          pc.drawImage(bm, bm.width - 2, 0, 2, bm.height, pad + bm.width, pad, pad, bm.height);
+          pc.drawImage(P, 0, pad, PW, 2, 0, 0, PW, pad);
+          pc.drawImage(P, 0, pad + bm.height - 2, PW, 2, 0, pad + bm.height, PW, pad);
+          src = P; left += pad; top += pad;
+        }
+        ox.drawImage(src, left, top, side, side, 0, 0, OUT, OUT);
         var url = o.toDataURL('image/jpeg', 0.92);
         centerCache[src0] = url; img.src = url; img.style.opacity = '';
       }).catch(function () { img.style.opacity = ''; });
