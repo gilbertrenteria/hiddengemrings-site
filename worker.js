@@ -1789,8 +1789,8 @@ function customerHowNext(lead) {
   if (surprise) {
     const how = r.length ? ' by ' + joinOr(words) : '';
     const w = String(lead.windows || '');
-    if (w && !/^Anytime/i.test(w)) return `We'll reach out privately${how} during the times you picked (${escapeHtml(w)}).`;
-    return `We'll reach out privately${how}${lead.routeMode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon'}.`;
+    if (w && !/^Anytime/i.test(w)) return `We'll reach out${how} during the times you picked (${escapeHtml(w)}).`;
+    return `We'll reach out${how}${lead.routeMode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon'}.`;
   }
   if (lead.routeMode === 'offline') return `Our ring specialists are away right now. We'll ${byWords} during business hours (Mon to Sat, 9 AM to 9 PM Central).`;
   return `One of our ring specialists will ${byWords} shortly.`;

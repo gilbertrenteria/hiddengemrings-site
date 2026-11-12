@@ -499,7 +499,7 @@ body.po-compact .po-wrap{padding-top:10px}
 
     <div class="po-step" data-key="windows" data-multi="1">
       <img class="po-icon" src="icon-clock.png" alt="">
-      <h2>When's a good time to reach you privately?</h2>
+      <h2>When's a good time to reach you?</h2>
       <p class="po-sub">Pick all that work. We'll only reach out when it's a good time for you.</p>
       <label class="po-tz">Your time zone
         <select id="poTz">
@@ -885,8 +885,8 @@ body.po-compact .po-wrap{padding-top:10px}
       if (state.a.contactPref === 'Book a call' && state.a.slotDate) return 'Your 30 minute call is booked for <strong>' + slotLocal() + '</strong>. ' + (isSurprise() ? 'We\'ll call you then.' : 'One of our ring specialists will call you then.');
       if (isSurprise()) {
         var how = h.length ? ' by ' + joinOr(h.map(function (x) { return x === 'call' ? 'a call' : x; })) : '';
-        if (w.length && w[0] !== 'Anytime') return 'We\'ll reach out privately' + how + ' during the times you picked (' + w.join(', ') + ' ' + tz + ').';
-        return 'We\'ll reach out privately' + how + (state.mode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon') + '.';
+        if (w.length && w[0] !== 'Anytime') return 'We\'ll reach out' + how + ' during the times you picked (' + w.join(', ') + ' ' + tz + ').';
+        return 'We\'ll reach out' + how + (state.mode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon') + '.';
       }
       if (state.mode === 'offline') return 'Our ring specialists are away right now. We\'ll ' + byWords(h) + ' during business hours (Mon to Sat, 9 AM to 9 PM Central).';
       return 'One of our ring specialists will ' + byWords(h) + ' shortly.';
