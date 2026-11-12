@@ -91,7 +91,7 @@ button{font:inherit;color:inherit}
 .notq p{color:#6B5B4C;margin:8px 0 0}
 .nopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;text-align:left}
 @media(min-width:700px){.nopts{grid-template-columns:1fr 1fr 1fr}}
-.nopt{display:flex;align-items:center;gap:10px;background:var(--cream);border:1.5px solid rgba(92,77,64,.16);border-radius:16px;padding:13px 12px;cursor:pointer;font-size:14.5px;font-weight:500;color:var(--brown-dark);min-height:58px;transition:all .2s}
+.nopt{display:flex;align-items:center;gap:10px;background:var(--cream);border:1.5px solid rgba(92,77,64,.16);border-radius:16px;padding:13px 12px;cursor:pointer;font-size:14.5px;font-weight:500;color:var(--brown-dark);min-height:58px;transition:all .2s;text-align:left;line-height:1.3}
 .nopt svg{flex:none;width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .nopt.sel{background:linear-gradient(135deg,var(--brown),var(--brown-dark));color:#fff;border-color:transparent}
 .nopt.sel svg{stroke:#e9d7a8}
@@ -436,7 +436,7 @@ textarea{min-height:96px;resize:vertical}
   function noneCard() {
     return '<section class="notq"><p class="kick" style="margin:0 0 8px">Not quite right?</p><h2>Tell us what to <em>change.</em></h2><p>Tap everything that fits. We will create new designs for you within 24 hours.</p>' +
       '<div class="nopts">' + NOPTS.map(function (o) { var lab = o[1].replace('her style', you() ? 'my style' : 'her style'); return '<button type="button" class="nopt' + (K.why.indexOf(o[0]) > -1 ? ' sel' : '') + '" data-w="' + E(o[0]) + '"><svg viewBox="0 0 26 26" aria-hidden="true">' + o[2] + '</svg>' + E(lab) + '</button>'; }).join('') + '</div>' +
-      '<button class="btn mt" id="noneGo">Create new designs for me</button></section>';
+      '<button class="btn mt" id="noneGo">Create new designs</button></section>';
   }
   function bindNone() {
     app.querySelectorAll('.nopt').forEach(function (b) { b.onclick = function () { var w = b.dataset.w, i = K.why.indexOf(w); if (i > -1) K.why.splice(i, 1); else K.why.push(w); b.classList.toggle('sel'); save(); }; });
