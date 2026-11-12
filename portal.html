@@ -82,6 +82,12 @@
   .path{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .path span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:.84rem;color:var(--deep)}
   .path span.done{background:var(--goldsoft);border-color:transparent;color:#7a6334}
+  .herohero{position:relative;border-radius:26px;overflow:hidden;margin:18px 0 6px;box-shadow:0 18px 50px rgba(66,53,41,.14)}
+  .herohero img{display:block;width:100%;aspect-ratio:16/8;object-fit:cover;animation:heroIn 1.4s cubic-bezier(.22,.8,.3,1) both}
+  .herohero:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 70%);transform:translateX(-100%);animation:shine 2.6s 1s ease-out both}
+  @keyframes heroIn{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+  @keyframes shine{to{transform:translateX(100%)}}
+  @media (prefers-reduced-motion:reduce){.herohero img,.herohero:after{animation:none}}
   .msg{padding:40px 0;text-align:center;color:var(--muted)}
   .confetti{font-size:2.4rem}
 </style>
@@ -240,6 +246,7 @@
     bar(0, 1, 'Welcome');
     var name = first() ? E(first()) + ', ' : '';
     app.innerHTML = '<section class="pg on"><span class="kick">Your private Ring Portal</span><h1>' + name + 'let\'s create <span class="script">' + her() + ' ring</span></h1>' +
+      '<div class="herohero"><img src="portal-hero.jpg" alt="A ring sketch becoming a finished diamond ring"></div>' +
       '<p class="lead">This is your space to design a ring as one of a kind as ' + (her() === 'your' ? 'your love story' : 'she is') + '. Tap through at your own pace, add ideas, and message ' + E(P.rep) + ' anytime. No pressure, no payment, just the fun part.</p>' +
       (P.surprise ? '<div class="promise">&#128274;<span>Everything here stays private. We only reach out the way you asked.</span></div>' : '') +
       '<h3 style="margin-top:28px">How it works</h3><div class="how">' +
