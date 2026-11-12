@@ -24,6 +24,7 @@ const OWNER_ADDRESS = 'gilbertrenteria@yahoo.com';
 const FROM_ADDRESS = 'Hidden Gem Website <forms@mail.gilbertrenteria.dev>';
 const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.dev>';
 // Surprise leads: sender name with no ring words (the inbox may be shared).
+const HG_FROM = 'Hidden Gem <hello@hiddengemrings.com>';
 const CUSTOMER_FROM_PRIVATE = 'Hidden Gem <team@mail.gilbertrenteria.dev>';
 const SITE = 'https://hiddengemrings.com';
 
@@ -1818,7 +1819,7 @@ function emailType(subject) {
     [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
     [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
     [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RING PORTAL OPENED/i, 'Ring Portal opened'], [/RING PORTAL STARTED/i, 'Ring Portal started'], [/RING PORTAL PAUSED/i, 'Ring Portal left partway'], [/RING PORTAL MESSAGE/i, 'Ring Portal message'], [/DESIGN (CREATED|UPDATED)/i, 'Ring Portal design'], [/update from Hidden Gem/i, 'Portal update to customer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
-    [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'],
+    [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'], [/Your Hidden Gem request/i, 'Recap sent to customer (private)'],
     [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
   ];
   for (const [re, label] of map) if (re.test(s)) return label;
@@ -1856,16 +1857,23 @@ async function sendEmail(env, { to, subject, html, replyTo, from }) {
   if (payload.to.some((x) => x === OWNER_ADDRESS || x === PUBLIC_EMAIL)) payload.bcc = [CLAUDE_COPY];
   if (replyTo) payload.reply_to = replyTo;
   let result = { ok: false, error: 'not sent' };
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  // Hidden Gem's own Resend account sends from hello@hiddengemrings.com once its
+  // key is saved (RESEND_HG_KEY). If that send fails for any reason (for example
+  // the domain is not verified yet), the old sender is used so nothing is lost.
+  const routes = [];
+  if (env.RESEND_HG_KEY) routes.push([env.RESEND_HG_KEY, Object.assign({}, payload, { from: HG_FROM, reply_to: payload.reply_to || PUBLIC_EMAIL })]);
+  routes.push([env.RESEND_API_KEY, payload]);
+  for (let attempt = 1; attempt <= routes.length + 1; attempt++) {
+    const [key, body0] = routes[Math.min(attempt - 1, routes.length - 1)];
     try {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body0),
       });
       if (res.ok) {
         const b = await res.json().catch(() => ({}));
-        result = { ok: true, id: b.id || '' };
+        result = { ok: true, id: b.id || '', via: body0.from };
         break;
       }
       const body = await res.text().catch(() => '');
@@ -1877,7 +1885,7 @@ async function sendEmail(env, { to, subject, html, replyTo, from }) {
   const etype = emailType(subject);
   const toCustomer = /to customer/i.test(etype);
   const inboxes = (Array.isArray(payload.to) ? payload.to : [payload.to]).map((a) => toCustomer ? 'customer (' + (String(a).split('@')[1] || '') + ')' : String(a));
-  await logEmail(env, { time: centralTime(), at: Date.now(), type: etype, to: inboxes, ok: result.ok, resendId: result.id || '', error: result.ok ? '' : String(result.error || '').slice(0, 160) });
+  await logEmail(env, { time: centralTime(), at: Date.now(), type: etype, to: inboxes, ok: result.ok, resendId: result.id || '', from: result.via || '', error: result.ok ? '' : String(result.error || '').slice(0, 160) });
   return result;
 }
 
