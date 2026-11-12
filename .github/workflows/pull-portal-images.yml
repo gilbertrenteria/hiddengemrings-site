@@ -1,0 +1,16 @@
+name: Pull portal images
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          for n in portal-hero; do
+            curl -sSf "https://long-bar-d49d.gilbertrenteria.workers.dev/asset/$n.jpg" | xxd -r -p > "$n.jpg"
+            file "$n.jpg"
+          done
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git add portal-*.jpg && git commit -m "Add Canva portal hero" && git push
