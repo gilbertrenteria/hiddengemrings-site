@@ -988,7 +988,8 @@ async function handleOrderApprove(id, fields, request, env, origin) {
     html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Design approved by ${escapeHtml(o.customerName)}</h2>${imgTag}${table}<p style="color:#777;font-size:12px">IP ${escapeHtml(o.approval.ip)} · ${escapeHtml(o.approval.ua)}</p></div>`,
     replyTo: o.customerEmail || undefined,
   });
-  if (o.customerEmail && o.customerEmail.includes('@') && !o.approval.customerEmailed) {
+  const isTestApproval = /^\s*test\b/i.test(o.approval.name || '');
+  if (!isTestApproval && o.customerEmail && o.customerEmail.includes('@') && !o.approval.customerEmailed) {
     const c = await sendEmail(env, {
       to: [o.customerEmail],
       subject: 'Your Hidden Gem design approval',
