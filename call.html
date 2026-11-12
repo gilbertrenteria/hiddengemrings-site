@@ -208,6 +208,8 @@
       <div id="portalThread" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;margin:10px 0"></div>
       <textarea id="portalReply" placeholder="Reply, or describe a design update" style="width:100%;min-height:80px"></textarea>
       <div class="btns"><label class="btn ghost" style="cursor:pointer">Add design photo<input type="file" accept="image/*" id="portalFile" hidden></label><button class="btn" type="button" id="portalSend">Send to their portal</button></div>
+      <label class="ck"><input type="checkbox" id="portalMockup"><b>This photo is their full mockup</b> (shows it front and center with a This is my ring button)</label>
+      <div class="btns" id="mockTextWrap" hidden><a class="btn gold" id="mockText" href="#">Text them: your mockup is ready</a></div>
       <label class="ck"><input type="checkbox" id="portalNotify">Also email them "You have an update" (only if they gave an email)</label>
       <p class="status" id="portalSendMsg"></p>
     </div>
@@ -572,12 +574,15 @@
   }
   function pickDraw(p) {
     var k = p.pick, c = p.contact;
-    if (!k && !c) { $('pickCard').hidden = true; return; }
+    if (!k && !c && !p.verdict && !(p.mockups || []).length) { $('pickCard').hidden = true; return; }
     $('pickCard').hidden = false;
     var R = p.rings || [], lab = function (n) { var r = R[n - 1]; return r ? 'Ring ' + n + ': ' + [r.shape, r.style, r.carat, r.metal].filter(Boolean).join(' ') : 'Ring ' + n; };
     var h = '';
     if (k) h += '<p><b>' + (k.mode === 'one' ? 'Picked ' + E(lab(k.ring)) : k.mode === 'favs' ? 'Favorites: ' + k.favs.map(lab).map(E).join(' / ') : 'None of these. Why: ' + E((k.why || []).join(', '))) + '</b></p>' +
       (k.build && Object.keys(k.build).length ? '<p>Wants: ' + E(Object.keys(k.build).map(function (x) { return k.build[x]; }).join(' · ')) + '</p>' : '') + (k.notes ? '<p>Notes: ' + E(k.notes) + '</p>' : '') + '<p class="status">Sent ' + when(k.sentAt) + '. Promised full mockup within 24 hours.</p>';
+    var v = p.verdict;
+    if ((p.mockups || []).length) h += '<p>Full mockup sent ' + when(p.mockups[p.mockups.length - 1].at) + '</p>';
+    if (v) h += v.choice === 'love' ? '<p style="background:#eaf6ec;border:1px solid #9fd0aa;border-radius:10px;padding:8px 10px"><b>READY TO CLOSE: they said This is my ring!</b> Send their checkout link now (Orders on the admin page) and call or text while they are excited.</p>' : '<p><b>Wants changes to the mockup:</b> ' + E((v.tweaks || []).join(', ')) + (v.notes ? ' · ' + E(v.notes) : '') + '</p>';
     if (c) h += '<p><b>' + (c.type === 'now' ? 'TALK NOW: call within 45 minutes of ' + when(c.at) : c.type === 'schedule' ? 'Call scheduled: ' + E(c.day + ' ' + c.window) : 'Tapped Text us ' + when(c.at)) + '</b></p>';
     $('pickOut').innerHTML = h;
   }
@@ -613,9 +618,11 @@
   $('portalSend').addEventListener('click', function () {
     var text = $('portalReply').value.trim(); if (!text && !portalImg) return;
     $('portalSendMsg').className = 'status'; $('portalSendMsg').textContent = 'Sending...';
-    fetch(API + '/portal/team-msg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, leadId: leadId, text: text, image: portalImg, rep: rep === 'kim' ? 'Kim' : 'Gilbert', notify: $('portalNotify').checked }) }).then(function (r) { return r.json(); }).then(function (j) {
+    fetch(API + '/portal/team-msg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, leadId: leadId, text: text, image: portalImg, rep: rep === 'kim' ? 'Kim' : 'Gilbert', notify: $('portalNotify').checked, mockup: $('portalMockup').checked }) }).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.ok) { $('portalSendMsg').className = 'status err'; $('portalSendMsg').textContent = j.error || 'Could not send.'; return; }
-      $('portalReply').value = ''; portalImg = ''; $('portalSendMsg').className = 'status ok'; $('portalSendMsg').textContent = 'Sent. They will see it in their portal.'; portalDraw(j.portal);
+      var wasMock = $('portalMockup').checked && portalImg;
+      $('portalReply').value = ''; portalImg = ''; $('portalMockup').checked = false; $('portalSendMsg').className = 'status ok'; $('portalSendMsg').textContent = wasMock ? 'Mockup sent. It is front and center in their portal. Now text them below.' : 'Sent. They will see it in their portal.'; portalDraw(j.portal);
+      if (wasMock) { var surprise = /^yes/i.test(lead.surprise || ''); $('mockTextWrap').hidden = false; $('mockText').href = sms(lead.phone, surprise ? 'Hi ' + first() + ' this is Hidden Gem. Your update is ready whenever you have a quiet minute ' + j.link : 'Hi ' + first() + ' your ring is ready to see. We brought it to life just for you and we cannot wait to hear what you think ' + j.link); }
     }).catch(function () { $('portalSendMsg').className = 'status err'; $('portalSendMsg').textContent = 'Could not reach the server.'; });
   });
 

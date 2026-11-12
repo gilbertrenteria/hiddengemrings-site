@@ -1273,6 +1273,7 @@ function portalView(p, lead, online) {
     inspo: (p.inspo || []).map((x) => (x.img ? { img: `/portal/${p.t}/img/${x.img}` } : { link: x.link })),
     rings: ringsFor(p, lead).map((r, i) => ({ n: i + 1, img: r.img ? (/^https:/.test(r.img) ? r.img : `/portal/${p.t}/img/${r.img}`) : '', shape: r.shape || '', style: r.style || '', carat: r.carat || '', metal: r.metal || '', title: r.title || '' })),
     pick: p.pick || null, contact: (p.contact || []).slice(-1)[0] || null, online: !!online,
+    mockups: (p.mockups || []).map((m) => ({ img: `/portal/${p.t}/img/${m.img}`, text: m.text || '', at: m.at })), verdict: p.verdict || null,
     tz: lead.tz || '', budget: lead.budget || '',
   };
 }
@@ -1425,6 +1426,13 @@ async function handlePortalTeamMsg(fields, url, env, origin) {
   if (!text && !img) return json({ ok: false, error: 'Type a message or add a photo' }, 400, origin);
   p.msgs = p.msgs || [];
   p.msgs.push({ from: 'team', name: String(fields.rep || (lead.routedNames || [])[0] || 'Kim').slice(0, 30), text, img, at: Date.now() });
+  if (fields.mockup && img) {
+    // their full mockup: shown front and center in the portal with This is my ring
+    p.mockups = (p.mockups || []).concat([{ img, text, at: Date.now() }]).slice(-6);
+    p.verdict = null;
+    stampStage(lead, 'Mockup sent');
+    await env.IG_KV.put(`lead:${leadId}`, JSON.stringify(lead));
+  }
   await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
   if (lead.email && fields.notify) {
     await sendEmail(env, { to: [lead.email], from: CUSTOMER_FROM, replyTo: PUBLIC_EMAIL, subject: 'You have an update from Hidden Gem',
@@ -1498,6 +1506,27 @@ async function handlePortalTeamRings(fields, url, env, origin) {
   await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
   await env.IG_KV.put(`lead:${leadId}`, JSON.stringify(lead));
   return json({ ok: true, count: out.length, link: portalLink(t), portal: portalView(p, lead, false) }, 200, origin);
+}
+
+// customer answers their full mockup: love it (ready to close) or change something
+async function handlePortalVerdict(t, fields, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false }, 404, origin);
+  const choice = fields.choice === 'love' ? 'love' : fields.choice === 'change' ? 'change' : '';
+  if (!choice || !(p.mockups || []).length) return json({ ok: false }, 400, origin);
+  const tweaks = Array.isArray(fields.tweaks) ? fields.tweaks.slice(0, 10).map((x) => String(x).slice(0, 60)) : [];
+  const notes = String(fields.notes || '').slice(0, 2000);
+  p.verdict = { choice, tweaks, notes, at: Date.now() };
+  stampStage(lead, choice === 'love' ? 'Loves the mockup' : 'Mockup changes');
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
+  const sur = /^yes/i.test(lead.surprise || '') ? ' (SURPRISE)' : '';
+  const subject = choice === 'love' ? `READY TO CLOSE: ${lead.name} said This is my ring${sur}` : `MOCKUP CHANGES: ${lead.name}${sur}`;
+  const intro = choice === 'love' ? `<b>They love it. Send their private checkout link now (financing or pay in full) and call or text while they are excited.</b> Budget: ${escapeHtml(lead.budget || 'n/a')} · Pay: ${escapeHtml(lead.pay || 'n/a')}${lead.monthly ? ' · Monthly: ' + escapeHtml(lead.monthly) : ''}.` : 'They want changes to the mockup. Make them and send the new mockup from their call page.';
+  const rows = [['Changes', tweaks.join(', ')], ['Notes', notes]].filter((r) => r[1]);
+  const last = p.mockups[p.mockups.length - 1];
+  const sent = await sendEmail(env, { to: leadRecipients(lead), subject, html: portalEmail(lead, subject, intro, rows, p, `<img src="https://long-bar-d49d.gilbertrenteria.workers.dev/portal/${t}/img/${last.img}" width="240" style="border-radius:12px;margin-top:8px">`) });
+  return json({ ok: !!sent.ok, saved: true }, sent.ok ? 200 : 502, origin);
 }
 
 // customer sends their pick, their favorites, or "none of these" with why and ideas
@@ -1656,7 +1685,8 @@ const app = {
     if (path === '/portal/create') return handlePortalCreate(fields, url, env, origin);
     if (path === '/portal/team-msg') return handlePortalTeamMsg(fields, url, env, origin);
     if (path === '/portal/team-rings') return handlePortalTeamRings(fields, url, env, origin);
-    const pm = path.match(/^\/portal\/([a-z0-9]{10,32})\/(event|save|msg|pick|contact)$/);
+    const pm = path.match(/^\/portal\/([a-z0-9]{10,32})\/(event|save|msg|pick|contact|verdict)$/);
+    if (pm && pm[2] === 'verdict') return handlePortalVerdict(pm[1], fields, env, origin);
     if (pm && pm[2] === 'pick') return handlePortalPick(pm[1], fields, env, origin);
     if (pm && pm[2] === 'contact') return handlePortalContact(pm[1], fields, env, origin);
     if (pm) return pm[2] === 'event' ? handlePortalEvent(pm[1], fields, env, origin) : pm[2] === 'save' ? handlePortalSave(pm[1], fields, env, origin) : handlePortalMsg(pm[1], fields, env, origin);

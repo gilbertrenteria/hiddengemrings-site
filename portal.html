@@ -146,6 +146,12 @@ textarea{min-height:96px;resize:vertical}
 .foot a{color:var(--taupe-dark)}
 @media(max-width:520px){.hero{max-height:44vh}.card{padding:20px 18px 26px;border-radius:22px}.lead{font-size:16px}.said li{font-size:19px}}
 
+.mock{display:grid;gap:12px;margin-top:18px}
+.mock img{width:100%;border-radius:20px;display:block;background:#2e2722;animation:imgIn 1.2s ease both}
+.mocknote{background:var(--cream);border-radius:16px;padding:14px 16px;color:#5d5045;font-style:italic;font-family:'Newsreader',serif;font-size:18px;margin-top:14px;text-align:left}
+.spark{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.spark i{position:absolute;top:-20px;width:8px;height:8px;background:var(--gold);transform:rotate(45deg);opacity:.85;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(405deg);opacity:0}}
 /* motion: soft, layered, never flashy */
 .st{opacity:0;transform:translateY(16px);filter:blur(6px);animation:stIn 1s cubic-bezier(.2,.7,.2,1) forwards}
 @keyframes stIn{to{opacity:1;transform:none;filter:blur(0)}}
@@ -545,9 +551,58 @@ textarea{min-height:96px;resize:vertical}
     bindTalk();
   }
 
+  /* ---------- their full mockup: This is my ring ---------- */
+  function mockupPage() {
+    view = 'mockup'; hideDock();
+    app.className = 'wrap';
+    var M = (P.mockups || []).slice().reverse(), last = M[0];
+    app.innerHTML = '<div class="card pg center"><p class="kick">Your ring, brought to life</p><h1 class="big">' + (first() ? E(first()) + ', ' : '') + 'here is <em>' + (you() ? 'your' : 'her') + ' ring.</em></h1>' +
+      '<div class="mock">' + M.slice(0, 4).map(function (m) { return '<img src="' + API + m.img + '" alt="Your full ring mockup">'; }).join('') + '</div>' +
+      (last && last.text ? '<div class="mocknote">' + E(last.text) + '</div>' : '') +
+      '<p class="lead">Take it in. Picture ' + (you() ? 'it on your hand' : 'it on her hand') + '. When it feels right, you will know.</p>' +
+      '<button class="btn gold mt" id="love">This is my ring!</button><button class="btn ghost mt2" id="chg">Almost. Change something</button></div>' + foot();
+    window.scrollTo(0, 0); animIn();
+    $('love').onclick = function () { verdict('love'); };
+    $('chg').onclick = changePage;
+  }
+  function changePage() {
+    view = 'change'; K.tweaks = [];
+    app.innerHTML = '<div class="card pg"><div class="head"><button class="back show" id="bk">&lsaquo; Back</button><span class="count">Almost there</span></div><div class="bar"><span style="width:90%"></span></div><div class="center"><p class="kick">So close</p><h1 class="big">What should <em>we change?</em></h1><p class="lead">Tap anything. We will send the updated mockup within 24 hours.</p></div>' +
+      '<label class="fl">Tap any</label>' + tweakChips() + '<label class="fl" for="notes">Or tell us in your words (optional)</label><textarea id="notes"></textarea><button class="btn gold mt" id="send">Send my changes</button></div>' + foot();
+    window.scrollTo(0, 0); animIn(); bindTweaks();
+    $('bk').onclick = mockupPage;
+    $('send').onclick = function () { verdict('change'); };
+  }
+  function verdict(choice) {
+    var body = { choice: choice, tweaks: choice === 'change' ? K.tweaks : [], notes: choice === 'change' ? (($('notes') || {}).value || '') : '' };
+    var b = choice === 'love' ? $('love') : $('send'); if (b) { b.disabled = true; b.textContent = 'One moment...'; }
+    var done = function () { P.verdict = { choice: choice, at: Date.now() }; choice === 'love' ? lovePage() : changedPage(); };
+    if (PREVIEW) return done();
+    post('/portal/' + T + '/verdict', body).then(function (j) { if (j.ok || j.saved) done(); else { if (b) { b.disabled = false; b.textContent = 'Try again'; } toast('Could not send. Try again.'); } }).catch(function () { if (b) { b.disabled = false; b.textContent = 'Try again'; } toast('No connection. Try again.'); });
+  }
+  function sparkle() {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var w = document.createElement('div'); w.className = 'spark';
+    for (var i = 0; i < 40; i++) { var x = document.createElement('i'); x.style.left = Math.random() * 100 + '%'; x.style.animationDuration = 2.4 + Math.random() * 2.2 + 's'; x.style.animationDelay = Math.random() * .8 + 's'; x.style.width = x.style.height = 5 + Math.random() * 6 + 'px'; if (i % 3 === 0) x.style.background = '#fff'; w.appendChild(x); }
+    document.body.appendChild(w); setTimeout(function () { w.remove(); }, 5500);
+  }
+  function lovePage() {
+    view = 'love'; hideDock();
+    var last = (P.mockups || []).slice(-1)[0];
+    app.innerHTML = '<div class="card pg center"><p class="kick">Congratulations</p><h1 class="big">' + (first() ? E(first()) + ', ' : '') + 'this is <em>the one.</em></h1>' +
+      (last ? '<div class="pickimg" style="max-width:320px"><img src="' + API + last.img + '" alt=""></div>' : '') +
+      '<p class="lead">We are honored to create it. Next we will send your private checkout, with easy monthly options or pay in full. No surprises, and we will walk you through every step.</p>' + talkCard('love') + '</div>' + foot();
+    window.scrollTo(0, 0); animIn(); bindTalk(); sparkle();
+  }
+  function changedPage() {
+    view = 'changed';
+    app.innerHTML = '<div class="card pg center"><p class="kick">Received</p><h1 class="big">We are <em>on it.</em></h1><p class="lead">Your updated mockup arrives within 24 hours. We will text you the moment it is ready.</p>' + talkCard('sent') + '</div>' + foot();
+    window.scrollTo(0, 0); animIn(); bindTalk();
+  }
+
   /* ---------- talk with us: text, schedule, talk now ---------- */
   function talkCard(where) {
-    var h = where === 'sent' ? 'Want to talk it through now?' : where === 'wait' ? 'Questions while you wait?' : 'Talk with your ring specialist';
+    var h = where === 'love' ? 'Want to talk about next steps?' : where === 'sent' ? 'Want to talk it through now?' : where === 'wait' ? 'Questions while you wait?' : 'Talk with your ring specialist';
     var last = P.contact;
     var doneNow = last && last.type === 'now' && Date.now() - last.at < 3 * 3600e3;
     var doneSch = last && last.type === 'schedule';
@@ -622,7 +677,7 @@ textarea{min-height:96px;resize:vertical}
     }
     draw();
   }
-  function rerender() { if (view === 'rings') rings(); else if (view === 'sent') sentPage(K.mode); else if (view === 'intro') intro(ii); }
+  function rerender() { if (view === 'love') return lovePage(); if (view === 'rings') rings(); else if (view === 'sent') sentPage(K.mode); else if (view === 'intro') intro(ii); }
 
   /* ---------- messages ---------- */
   function chat() {
@@ -657,7 +712,8 @@ textarea{min-height:96px;resize:vertical}
       $('dot').classList.toggle('on', !!P.online);
       if (K.pending && !PREVIEW) post('/portal/' + T + '/pick', K.pending).then(function (x) { if (x.ok) { K.pending = null; save(); } }).catch(function () {});
       var picked = P.pick && P.pick.sentAt;
-      if (picked) { K.mode = P.pick.mode; K.ring = P.pick.ring || K.ring; sent = true; sentPage(P.pick.mode); }
+      if ((P.mockups || []).length) { if (P.verdict && P.verdict.choice === 'love') lovePage(); else if (P.verdict && P.verdict.choice === 'change') changedPage(); else mockupPage(); }
+      else if (picked) { K.mode = P.pick.mode; K.ring = P.pick.ring || K.ring; sent = true; sentPage(P.pick.mode); }
       else if (started || /[?&]rings=1/.test(location.search)) rings();
       else intro(0);
     }).catch(function () { app.innerHTML = '<div class="card center"><h2>One moment.</h2><p class="lead">We could not connect. Check your signal and refresh.</p></div>'; });

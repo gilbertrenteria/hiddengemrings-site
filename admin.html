@@ -154,6 +154,18 @@
     Object.keys(l).forEach(function (k) { if (!skip[k]) add(k, l[k]); });
     return '<table style="font-size:.9rem;margin-top:8px;border-collapse:collapse">' + rows.join('') + '</table>';
   }
+  function nextStep(l) {
+    var s = l.stage || 'Form sent', age = Date.now() - (l.stageAt || l.receivedAt || 0), H = 3600e3;
+    if (/Loves the mockup/i.test(s)) return 'READY TO CLOSE: send their checkout link and call now';
+    if (/call now/i.test(s)) return 'Call them within 45 minutes';
+    if (/scheduled/i.test(s)) return 'Call at the time they picked';
+    if (/Texting/i.test(s)) return 'Watch for their text and reply fast';
+    if (/Picked|new designs|Mockup changes/i.test(s)) return age > 20 * H ? 'Mockup is due now (promised within 24 hours)' : 'Send the full mockup within 24 hours';
+    if (/Mockup sent/i.test(s)) return age > 24 * H ? 'No answer on the mockup yet: text them' : 'Wait for their answer on the mockup';
+    if (/Ring Portal opened|Designing/i.test(s)) return age > 48 * H ? 'Opened but no pick in 2 days: text a nudge' : '';
+    if (/Form sent|Rings loaded|Ring Portal sent/i.test(s)) return age > 24 * H ? 'Not opened in a day: text a nudge with their link' : 'Text their Ring Portal link from the call page';
+    return '';
+  }
   function drawLeads() {
     var L = data.leads;
     var c = function (s) { return L.filter(function (l) { return (l.status || 'new') === s; }).length; };
@@ -167,7 +179,7 @@
         '<p><a href="tel:+1' + tel + '">' + esc(l.phone) + '</a> · ' + esc(when(l.receivedAt)) + '</p>' +
         '<p>Budget: ' + esc(l.budget) + ' · Pay: ' + esc(l.pay) + (l.monthly ? ' · Monthly: ' + esc(l.monthly) : '') + '</p>' +
         '<p>Proposing: ' + esc(l.timeline) + ' · Credit: ' + esc(l.credit || 'n/a') + '</p>' +
-        (/call now|Picked|new designs|scheduled|Texting/i.test(l.stage || '') ? '<p style="background:#fbf3df;border:1px solid #e3cf9a;border-radius:10px;padding:6px 10px;font-weight:600">Next: ' + esc(/call now/i.test(l.stage) ? 'Call them within 45 minutes' : /scheduled/i.test(l.stage) ? 'Call at the time they picked' : /Texting/i.test(l.stage) ? 'Watch for their text' : 'Send the full mockup within 24 hours') + '</p>' : '') +
+        (nextStep(l) ? '<p style="background:' + (/CLOSE/.test(nextStep(l)) ? '#eaf6ec;border:1px solid #9fd0aa' : '#fbf3df;border:1px solid #e3cf9a') + ';border-radius:10px;padding:6px 10px;font-weight:600">Next: ' + esc(nextStep(l)) + '</p>' : '') +
         (l.portalToken ? '<p>Ring Portal: <a href="portal?t=' + encodeURIComponent(l.portalToken) + '&preview=1" target="_blank">preview</a> · <span style="user-select:all">https://hiddengemrings.com/portal?t=' + esc(l.portalToken) + '</span></p>' : '') +
         '<p><b style="color:var(--brown-dark)">Stage: ' + esc(l.stage || 'Form sent') + '</b>' + (l.stageAt ? ' · ' + esc(when(l.stageAt)) : '') + (l.hearts && l.hearts.length ? ' · Loved ' + l.hearts.length : '') + '</p>' +
         '<div class="row" style="margin-top:8px"><a class="btn" style="padding:11px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=gilbert">Call (Gilbert)</a><a class="btn ghost" style="padding:10px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=kim">Call (Kim)</a></div>' +
