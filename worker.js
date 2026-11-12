@@ -1858,7 +1858,6 @@ async function sendEmail(env, { to, subject, html, replyTo, from }) {
   // Every team alert (visits, form fills, portal, approvals, payments) goes to one inbox only: hello@.
   if (payload.to.some((x) => x === OWNER_ADDRESS || x === PUBLIC_EMAIL)) payload.to = [PUBLIC_EMAIL];
   // Team alerts are also copied to the inbox Claude can read, so every form and pick is on record.
-  if (payload.to.some((x) => x === OWNER_ADDRESS || x === PUBLIC_EMAIL)) payload.bcc = [CLAUDE_COPY];
   if (replyTo) payload.reply_to = replyTo;
   let result = { ok: false, error: 'not sent' };
   // Hidden Gem's own Resend account sends from hello@hiddengemrings.com once its
