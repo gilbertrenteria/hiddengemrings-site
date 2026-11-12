@@ -144,12 +144,18 @@
           var c = document.createElement('canvas'), sc = Math.min(1, 320 / bm.width);
           c.width = Math.round(bm.width * sc); c.height = Math.round(bm.height * sc);
           var x = c.getContext('2d'); x.drawImage(bm, 0, 0, c.width, c.height);
-          var d = x.getImageData(0, 0, c.width, c.height).data, sx = 0, n = 0;
-          for (var yy = 0; yy < c.height; yy++) for (var xx = 0; xx < c.width * 0.88; xx++) {
-            var i = (yy * c.width + xx) * 4; if ((d[i] + d[i + 1] + d[i + 2]) / 3 > 150) { sx += xx; n++; }
+          var W = c.width, H = c.height, d = x.getImageData(0, 0, W, H).data, bg = 0, bn = 0, col = [], n = 0;
+          for (var yy = 0; yy < Math.max(2, H * 0.03); yy++) for (var xx = 0; xx < W; xx += 2) { var j = (yy * W + xx) * 4; bg += (d[j] + d[j + 1] + d[j + 2]) / 3; bn++; }
+          bg /= bn;
+          for (var xx2 = 0; xx2 < W; xx2++) col[xx2] = 0;
+          for (var y2 = 0; y2 < H; y2++) for (var x2 = 0; x2 < W; x2++) {
+            if (x2 > W * 0.82 && y2 > H * 0.62) continue; // skip the logo corner
+            var i = (y2 * W + x2) * 4; if ((d[i] + d[i + 1] + d[i + 2]) / 3 > bg + 45) col[x2]++;
           }
-          if (!n) return;
-          var cx = sx / n / c.width, side = c.height / c.width, left = Math.min(Math.max(cx - side / 2, 0), 1 - side);
+          var minx = -1, maxx = -1, need = Math.max(2, H * 0.01);
+          for (var x3 = 0; x3 < W; x3++) if (col[x3] > need) { if (minx < 0) minx = x3; maxx = x3; }
+          if (minx < 0) return; n = 1; var sx = (minx + maxx) / 2 * c.width / W;
+          var cx = sx / c.width, side = c.height / c.width, left = Math.min(Math.max(cx - side / 2, 0), 1 - side);
           var pos = Math.round(left / (1 - side) * 100);
           centerCache[src] = pos; img.style.objectPosition = pos + '% 50%';
         }).catch(function () {});
