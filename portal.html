@@ -342,7 +342,9 @@ textarea{min-height:96px;resize:vertical}
     if (a.stoneType) out.push(a.stoneType + ', chosen with care.');
     if (a.band) out.push('A band that is ' + a.band.toLowerCase() + '.');
     if (a.when) out.push(/asap/i.test(a.when) ? 'And you are ready soon.' : 'Ready for the moment, ' + a.when.toLowerCase().replace(/(\d)\s*-\s*(\d)/, '$1 to $2') + ' away.');
-    return out.slice(0, 5);
+    out = out.slice(0, 5);
+    if (P.budget) out.push('Every design made with your budget in mind.');
+    return out;
   }
   var INTRO = [
     function () { return { img: 'portal-intro-1.jpg', html: '<p class="kick">Made only for ' + E(first() || 'you') + '</p><h1 class="big">Every forever begins with <em>a single moment.</em></h1><p class="lead">' + (first() ? E(first()) + ', this' : 'This') + ' one is yours. Take a breath. What you are about to see was created with one person in mind.</p>' }; },
