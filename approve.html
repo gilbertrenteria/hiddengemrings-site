@@ -66,7 +66,7 @@
   function cents(v) { var n = Number(String(v || '').replace(/[^0-9.]/g, '')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; }
   function money(c) { return '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0, maximumFractionDigits: 2 }); }
   function when(ms) { return new Date(ms).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }); }
-  if (!id) { card.innerHTML = '<p class="msg">This approval link is missing its order number. Please use the link Gilbert texted you.</p>'; return; }
+  if (!id) { card.innerHTML = '<p class="msg">This approval link is missing its order number. Please use the link your ring specialist sent you.</p>'; return; }
 
   function fetchOrder(tries) {
     fetch(API + '/order/' + id).then(function (r) { return r.json(); }).then(function (j) {

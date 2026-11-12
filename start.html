@@ -321,6 +321,40 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
 .po-inspo-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .po-inspo-btns .btn{flex:1 1 140px;text-align:center;justify-content:center}
 .po-inspo .ghost-btn{background:transparent!important;color:var(--brown-dark)!important;border:1.5px solid var(--brown-dark)!important;box-shadow:none!important}
+
+/* Pinned card (after the first tap): banner hidden, question card at the top, fits IG in-app view */
+.po-trust{display:none;text-align:center;font-family:'Work Sans',sans-serif;font-size:12.5px;letter-spacing:.03em;color:#6B5B4C;margin:10px 0 0}
+body.po-inlead .po-trust{display:block}
+body.po-compact .v2-head,body.po-compact .hg-holiday,body.po-compact .v2-trust{display:none!important}
+body.po-compact .po-wrap{padding-top:10px}
+.po-bar span{transition:width .35s ease}
+@media(max-width:600px){
+  body.po-compact .nav-row{padding-top:10px;padding-bottom:10px}
+  .po-step[data-key=monthly] .po-chips{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px) and (max-height:820px){
+  .po-card{padding:12px 16px 16px}
+  .po-card .po-icon{width:26px!important;height:26px!important;margin-bottom:0!important}
+  .po-card h2{font-size:22px;margin:2px 0 4px}
+  .po-sub{font-size:12.5px;line-height:1.4;margin:0 0 4px}
+  .po-top{min-height:24px}
+  .po-bar{margin:6px 0 10px}
+  .po-chips{gap:8px;margin-top:12px}
+  .po-chips button{min-height:44px;padding:10px 10px}
+  .po-step[data-key=shape] .po-chips button,.po-step[data-key=budget] .po-chips button,.po-step[data-multi] .po-chips button{padding:10px 8px!important;min-height:44px}
+  .po-step[data-key=shape] .po-chips,.po-step[data-key=budget] .po-chips{gap:8px!important}
+  .po-tz{margin:6px 0 0}
+  .po-tz select{padding:6px 10px}
+  .po-field{margin:8px 0 0}
+  .po-send{margin-top:12px}
+  .po-card .po-fine{margin:8px 0 0;font-size:11.5px}
+  .po-step[data-key=contact] .po-status{margin:6px 0 0}
+  .po-chips.po-pics{grid-template-columns:repeat(4,1fr)!important;gap:6px!important}
+  .po-pics button.pic{padding:4px 4px 6px!important;gap:4px!important;min-height:0!important;border-radius:12px}
+  .po-pics button.pic img{border-radius:8px}
+  .po-pics button.pic span{font-size:11px;line-height:1.2}
+  .po-dstep .po-kicker{font-size:10.5px;margin:0 0 2px}
+}
 </style>
 <header>
   <div class="nav-row">
@@ -710,6 +744,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       <button type="button" class="po-restart" id="poRestart">Start over</button>
     </div>
   </div>
+  <p class="po-trust" id="poTrust">Free private consult &middot; Won't affect your credit</p>
   <p class="po-note">Business hours: Mon to Sat, 9 AM to 9 PM.</p>
 <div class="hg-inspo">
   <strong>Have ring inspiration?</strong>
@@ -752,7 +787,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
   });
 
   // ===== PAYMENT OPTIONS FORM =====
-  // Answers are sent to Gilbert's own Worker the moment the last answer is in.
+  // Answers are sent to our own Worker the moment the last answer is in.
   // Never silently fails: automatic retries with backoff, a pending copy is
   // kept on this device and resent when the page is reopened or the
   // connection comes back, and the Send button is always there as a backup.
@@ -774,6 +809,19 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     var statusEl = document.getElementById('poStatus');
     var doneEl = document.getElementById('poDone');
     var autoTimer = null, sending = false;
+    var lastPct = 0, lastI = -1;
+    // After the first answer: hide the top banner and keep the question card
+    // pinned right under the header so every answer fits without scrolling.
+    function compact() { document.body.classList.add('po-compact'); }
+    function inLead(on) { document.body.classList.toggle('po-inlead', !!on); }
+    function pin() {
+      if (!document.body.classList.contains('po-compact')) return;
+      requestAnimationFrame(function () {
+        var h = document.querySelector('header'), hh = h ? h.getBoundingClientRect().height : 0;
+        var y = card.getBoundingClientRect().top + window.scrollY - hh - 8;
+        window.scrollTo(0, Math.max(0, y));
+      });
+    }
 
     function load() { try { return JSON.parse(localStorage.getItem(STORE)) || null; } catch (e) { return null; } }
     function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
@@ -808,6 +856,41 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     function reachHas(v) { return reachList().indexOf(v) > -1 || reachList().indexOf('All') > -1; }
     function isSurprise() { return /^Yes/.test(state.a.surprise || ''); }
     function reachText() { var r = reachList(); return r.indexOf('All') > -1 ? 'Call, Text, Email' : r.join(', '); }
+    // Customer wording always comes from what they picked (reach + windows), never the internal contact field.
+    function howList() { var r = reachList(); return r.indexOf('All') > -1 ? ['call', 'text', 'email'] : r.map(function (x) { return x.toLowerCase(); }); }
+    function joinOr(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' or ' + a[a.length - 1] : (a[0] || ''); }
+    function byWords(h) {
+      if (h.length === 1) return h[0] === 'call' ? 'call you' : h[0] === 'text' ? 'text you' : h[0] === 'email' ? 'email you' : 'reach out';
+      return h.length ? 'reach out by ' + joinOr(h.map(function (x) { return x === 'call' ? 'a call' : x; })) : 'reach out';
+    }
+    function zoneWord(z) { return { EST: 'Eastern', EDT: 'Eastern', CST: 'Central', CDT: 'Central', MST: 'Mountain', MDT: 'Mountain', PST: 'Pacific', PDT: 'Pacific', AKST: 'Alaska', AKDT: 'Alaska', HST: 'Hawaii' }[z] || z; }
+    // Booked call time in their own time zone (slots are saved in Central).
+    function slotLocal() {
+      var d = state.a.slotDate, t = state.a.slotTime;
+      if (!d || !t) return (state.a.slotLabel || '') + ' Central';
+      try {
+        var p = d.split('-').map(Number), q = t.split(':').map(Number);
+        var ms = Date.UTC(p[0], p[1] - 1, p[2], q[0] + 6, q[1]);
+        var ch = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hourCycle: 'h23' }).format(new Date(ms)));
+        var diff = q[0] - ch; if (diff > 12) diff -= 24; if (diff < -12) diff += 24; ms += diff * 3600000;
+        var dt = new Date(ms), o = { weekday: 'long', month: 'short', day: 'numeric' }, tm = { hour: 'numeric', minute: '2-digit' };
+        var mineZ = zoneWord((dt.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop()));
+        var mine = dt.toLocaleDateString('en-US', o) + ' at ' + dt.toLocaleTimeString('en-US', tm);
+        var cen = dt.toLocaleTimeString('en-US', Object.assign({ timeZone: 'America/Chicago' }, tm));
+        return mineZ === 'Central' ? mine + ' Central' : mine + ' ' + mineZ + ' (' + cen + ' Central)';
+      } catch (e) { return (state.a.slotLabel || '') + ' Central'; }
+    }
+    function howNext() {
+      var h = howList(), w = state.a.windows || [], tz = state.a.tz || 'Central';
+      if (state.a.contactPref === 'Book a call' && state.a.slotDate) return 'Your 30 minute call is booked for <strong>' + slotLocal() + '</strong>. ' + (isSurprise() ? 'We\'ll call you then. Everything stays private.' : 'One of our ring specialists will call you then.');
+      if (isSurprise()) {
+        var how = h.length ? ' by ' + joinOr(h.map(function (x) { return x === 'call' ? 'a call' : x; })) : '';
+        if (w.length && w[0] !== 'Anytime') return 'We\'ll reach out privately' + how + ' during the times you picked (' + w.join(', ') + ' ' + tz + '). Everything stays private.';
+        return 'We\'ll reach out privately' + how + (state.mode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon') + '. Everything stays private.';
+      }
+      if (state.mode === 'offline') return 'Our ring specialists are away right now. We\'ll ' + byWords(h) + ' during business hours (Mon to Sat, 9 AM to 9 PM Central).';
+      return 'One of our ring specialists will ' + byWords(h) + ' shortly.';
+    }
     function skipMonthly() { return state.a.pay === '50% deposit' || state.a.pay === 'Pay in full'; }
     function visibleSteps() {
       return steps.filter(function (s) {
@@ -878,8 +961,14 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       steps.forEach(function (s) { s.classList.remove('active'); });
       vis[i].classList.add('active');
       countEl.textContent = (i + 1) + ' of ' + vis.length;
-      barEl.style.width = Math.round(((i + 1) / vis.length) * 100) + '%';
+      // The bar never slides backward when a question is added (surprise adds the time question).
+      var pct = Math.round(((i + 1) / vis.length) * 100);
+      if (i >= lastI && pct < lastPct) pct = lastPct;
+      lastPct = pct; lastI = i;
+      barEl.style.width = pct + '%';
       backBtn.classList.toggle('show', i > 0);
+      inLead(true);
+      if (i > 0) { compact(); pin(); }
       var key = vis[i].dataset.key;
       vis[i].querySelectorAll('.po-chips button').forEach(function (b) {
         var cur = state.a[key];
@@ -894,7 +983,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       if (key === 'contact') {
         validate();
         var sub = document.getElementById('poContactSub');
-        if (state.a.contactPref === 'Book a call' && state.a.slotLabel) sub.textContent = 'Your call: ' + state.a.slotLabel + '. Where should we call you?';
+        if (state.a.contactPref === 'Book a call' && state.a.slotDate) sub.textContent = 'Your call: ' + slotLocal() + '. Where should we call you?';
         else if (teamOnline === false) sub.textContent = 'Our ring specialists are away right now. We\'ll reach out during business hours.' + (isSurprise() ? ' Everything stays private.' : '');
         else sub.textContent = 'We\'ll reach out by ' + (reachText() || 'phone').toLowerCase().replace(/, ([^,]*)$/, ' or $1') + ' to talk through your options.' + (isSurprise() ? ' Everything stays private.' : ' No spam, ever.');
       }
@@ -1012,6 +1101,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         surprise: state.a.surprise || '', reach: reachText(), windows: isSurprise() && state.a.contactPref !== 'Book a call' ? (state.a.windows || []).join(', ') + ((state.a.windows || [])[0] === 'Anytime' ? '' : ' ' + (state.a.tz || 'Central')) : '',
         email: emailNeeded() ? (state.a.email || '') : '',
         slotDate: state.a.contactPref === 'Book a call' ? (state.a.slotDate || '') : '', slotTime: state.a.contactPref === 'Book a call' ? (state.a.slotTime || '') : '',
+        tzName: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } })(),
         page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
       };
     }
@@ -1052,7 +1142,9 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       sending = false; state.sent = true; state.pending = false;
       state.mode = (j && j.mode) || (teamOnline === false ? 'offline' : 'online');
       if (j && j.slot) state.a.slotLabel = j.slot.label;
+      if (emailNeeded() && state.a.email && !state.eSent) { state.eAuto = true; state.email = state.a.email; }
       save();
+      if (state.eAuto && !state.eSent) sendRecap();
       startDesign();
     }
     function slotTaken() {
@@ -1069,6 +1161,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     var dSending = false;
     function startDesign() {
       mode = 'design';
+      inLead(false); compact(); pin();
       steps.forEach(function (s) { s.classList.remove('active'); });
       designEl.hidden = false;
       if (state.d && state.aPending && !state.aSent) submitAbout();
@@ -1084,6 +1177,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       dSendWrap.hidden = true; document.getElementById('poSkip').hidden = false;
       dsteps.forEach(function (s) { s.classList.remove('active'); });
       dsteps[i].classList.add('active');
+      inLead(false); compact(); pin();
       var inAbout = i < aCount, n = inAbout ? aCount - first : dsteps.length - aCount, k = inAbout ? i + 1 - first : i - aCount + 1;
       countEl.textContent = (inAbout ? 'About you ' : (state.d.buyer === 'Hoping to be proposed to' ? 'Your style ' : 'Her style ')) + k + ' of ' + n;
       barEl.style.width = Math.round((k / n) * 100) + '%';
@@ -1102,7 +1196,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
           setTimeout(function () {
             var nx = idx + 1;
             if (dsteps[nx] && dsteps[nx].dataset.dkey === 'surprise' && state.d.buyer === 'Shopping together') { state.d.surprise = 'Picking it together'; save(); nx++; }
-            if (nx < dsteps.length) { dshow(nx); window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' }); }
+            if (nx < dsteps.length) dshow(nx);
             else { showSendArea(); submitDesign(); } // last design answer: send automatically
           }, 260);
         });
@@ -1160,7 +1254,24 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     }
     function finishAll() {
       designEl.hidden = true; mode = 'lead';
-      if (!state.eSent && !state.eSkipped) showEmailStep(); else renderDone();
+      if (!state.eSent && !state.eSkipped && !state.eAuto) showEmailStep(); else renderDone();
+    }
+    // Recap for an email they already gave in step 1. Retries, and resends when the page is reopened.
+    var rSending = false;
+    function sendRecap() {
+      if (rSending || state.eSent || !state.email) return;
+      rSending = true;
+      var attempt = 0;
+      (function tryOnce() {
+        fetch(API + '/lead/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: state.id, email: state.email }), keepalive: true })
+          .then(function (r) { return r.json().catch(function () { return { ok: false }; }).then(function (j) { return { r: r, j: j }; }); })
+          .then(function (res) {
+            if (res.r.ok && res.j.ok) { rSending = false; state.eSent = true; save(); var de = document.getElementById('poDoneEmail'); if (!doneEl.hidden && de) { de.hidden = false; de.textContent = 'We emailed a copy to ' + state.email + '.'; } return; }
+            if (res.r.status === 400) { rSending = false; state.eAuto = false; save(); return; } // bad address: they get the email screen at the end with the fix
+            retry();
+          }).catch(retry);
+        function retry() { attempt++; if (attempt < delays.length) setTimeout(tryOnce, delays[attempt]); else rSending = false; }
+      })();
     }
     // ----- optional email recap -----
     var eStep = document.getElementById('poEmailStep'), eInput = document.getElementById('poEmail'), eBtn = document.getElementById('poEmailBtn'), eStatus = document.getElementById('poEStatus'), eSending = false;
@@ -1188,6 +1299,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       }
     }
     function showEmailStep() {
+      inLead(false); compact(); pin();
       steps.forEach(function (s) { s.classList.remove('active'); });
       document.querySelector('.po-top').style.display = 'none';
       document.querySelector('.po-bar').style.display = 'none';
@@ -1225,6 +1337,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       state.dSkipped = true; save(); finishAll();
     });
     function renderDesignDone() {
+      inLead(false); compact(); pin();
       designEl.hidden = true;
       document.querySelector('.po-top').style.display = 'none';
       document.querySelector('.po-bar').style.display = 'none';
@@ -1234,24 +1347,18 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       document.getElementById('poDesignDone').hidden = false;
     }
     function renderDone() {
+      inLead(false); compact(); pin();
       steps.forEach(function (s) { s.classList.remove('active'); });
       document.querySelector('.po-top').style.display = 'none';
       document.querySelector('.po-bar').style.display = 'none';
       var first = (state.a.name || '').trim().split(/\s+/)[0];
       document.getElementById('poFirst').textContent = first ? ', ' + first : '';
-      var msg;
-      if (state.a.contactPref === 'Book a call' && state.a.slotLabel) msg = 'Your 30 minute call is booked for <strong>' + state.a.slotLabel + '</strong> (Central). One of our ring specialists will call you then.';
-      else if (state.mode === 'offline') msg = 'Our ring specialists are away right now. We\'ll ' + (reachHas('Call') ? 'reach out' : 'reach out by ' + reachText().toLowerCase()) + ' during business hours (Mon to Sat, 9 AM to 9 PM).';
-      else {
-        var r = reachList(), how = r.indexOf('All') > -1 ? ['call', 'text', 'email'] : r.map(function (x) { return x.toLowerCase(); });
-        var verb = how.length > 1 ? 'reach out by ' + how.slice(0, -1).join(', ') + ' or ' + how[how.length - 1] : (how[0] === 'call' ? 'call you' : how[0] === 'text' ? 'text you' : how[0] === 'email' ? 'email you' : 'reach out');
-        var when = isSurprise() && (state.a.windows || []).length && (state.a.windows || [])[0] !== 'Anytime' ? ' during the times you picked (' + state.a.windows.join(', ') + ' ' + (state.a.tz || 'Central') + ')' : ' shortly';
-        msg = 'One of our ring specialists will ' + verb + when + '.' + (isSurprise() ? ' Everything stays private.' : '');
-      }
-      document.getElementById('poDoneLead').innerHTML = msg;
+      document.getElementById('poDoneLead').innerHTML = howNext();
       try { var fn = (state.a.name || '').trim().split(' ')[0]; if (fn) { document.querySelectorAll('[data-inspo=text]').forEach(function (x) { x.href = 'sms:+18327437657?&body=' + encodeURIComponent('Hi this is ' + fn + '. Here is some ring inspiration '); }); document.querySelectorAll('[data-inspo=mail]').forEach(function (x) { x.href = 'mailto:hello@hiddengemrings.com?subject=' + encodeURIComponent('Ring inspiration from ' + fn); }); } } catch (e) {}
       var de = document.getElementById('poDoneEmail');
-      if (state.eSent && state.email) { de.hidden = false; de.textContent = 'We emailed a copy of your picks to ' + state.email + '.'; } else de.hidden = true;
+      if (state.eSent && state.email) { de.hidden = false; de.textContent = 'We emailed a copy to ' + state.email + '.'; }
+      else if (state.eAuto && state.email) { de.hidden = false; de.textContent = 'We\'re emailing a copy to ' + state.email + '.'; }
+      else de.hidden = true;
       eStep.hidden = true;
       doneEl.hidden = false;
     }
@@ -1263,7 +1370,8 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       document.querySelector('.po-top').style.display = '';
       document.querySelector('.po-bar').style.display = '';
       nameEl.value = ''; phoneEl.value = ''; statusEl.textContent = '';
-      show(0);
+      lastPct = 0; lastI = -1; document.body.classList.remove('po-compact');
+      show(0); window.scrollTo(0, 0);
     }
     document.getElementById('poRestart').addEventListener('click', restart);
     document.getElementById('poRestart2').addEventListener('click', restart);
@@ -1273,6 +1381,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     phoneEl.value = state.a.phone || '';
     applyStatus();
     if (state.sent) {
+      if (state.eAuto && !state.eSent) sendRecap();
       if (state.d && state.aPending && !state.aSent) submitAbout();
       if (state.dSent || state.dSkipped) finishAll(); else startDesign();
     }
@@ -1289,7 +1398,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         if (j && j.ok) { teamOnline = !!j.online; applyStatus(); if (!state.sent && mode === 'lead' && doneEl.hidden) show(Math.min(state.step || 0, visibleSteps().length - 1)); }
       }).catch(function () { clearTimeout(tm); });
     })();
-    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); if (state.dPending && !state.dSent) submitDesign(); if (state.ePending && !state.eSent) submitEmail(); });
+    window.addEventListener('online', function () { if (state.pending && !state.sent) submit(); if (state.dPending && !state.dSent) submitDesign(); if (state.ePending && !state.eSent) submitEmail(); if (state.eAuto && !state.eSent) sendRecap(); });
   })();
 
   // ===== WAVE HEADING REVEAL (same base as the rest of the site) =====

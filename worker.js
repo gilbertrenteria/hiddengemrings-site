@@ -23,6 +23,8 @@ const PUBLIC_TEL = '+18327437657';
 const OWNER_ADDRESS = 'gilbertrenteria@yahoo.com';
 const FROM_ADDRESS = 'Hidden Gem Website <forms@mail.gilbertrenteria.dev>';
 const CUSTOMER_FROM = 'Hidden Gem Engagement Rings <rings@mail.gilbertrenteria.dev>';
+// Surprise leads: sender name with no ring words (the inbox may be shared).
+const CUSTOMER_FROM_PRIVATE = 'Hidden Gem <team@mail.gilbertrenteria.dev>';
 const SITE = 'https://hiddengemrings.com';
 
 // Stripe — deposit is charged at checkout once the customer approves their
@@ -536,16 +538,17 @@ async function handleLeadEmail(fields, env, origin) {
   await env.IG_KV.put(key, JSON.stringify(lead));
 
   const first = escapeHtml(lead.name.split(' ')[0]);
-  let howNext;
-  if (lead.contact === 'Book a call') howNext = `Your 30 minute call is booked for <strong>${labelDate(lead.slotDate)} at ${labelTime(lead.slotTime)}</strong> (Central). One of our ring specialists will call you then.`;
-  else if (lead.routeMode === 'offline') howNext = `Our ring specialists are away right now. We will ${lead.contact === 'Text me' ? 'text' : 'call'} you during business hours (Mon to Sat, 9 AM to 9 PM).`;
-  else if (lead.contact === 'Call me') howNext = 'One of our ring specialists will be calling you shortly.';
-  else howNext = 'One of our ring specialists will be texting you shortly.';
+  const surprise = isSurprise(lead);
+  const howNext = customerHowNext(lead);
   const picks = [['Ring budget', lead.budget], ['How you want to pay', lead.pay], ['Proposing', lead.timeline === 'ASAP' ? 'As soon as possible' : lead.timeline]]
     .concat(lead.design ? DESIGN_FIELDS.filter(([k]) => lead.design[k]).map(([k, l]) => [l, lead.design[k]]) : [])
     .filter(([, v]) => v);
-  const html = `<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F3EC;padding:28px;border-radius:18px;color:#453E37">` +
-    `<p style="font-family:Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#B99C5F;margin:0 0 8px">Hidden Gem Engagement Rings</p>` +
+  // Surprise: the inbox may be shared, so the sender name, subject, top line and
+  // preview text say nothing about rings or proposing, and there are no photos.
+  const preview = surprise ? 'Thanks for reaching out. Here is what happens next.' : 'Your picks and what happens next.';
+  const html = `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${preview}</div>` +
+    `<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F3EC;padding:28px;border-radius:18px;color:#453E37">` +
+    `<p style="font-family:Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#B99C5F;margin:0 0 8px">${surprise ? 'Hidden Gem' : 'Hidden Gem Engagement Rings'}</p>` +
     `<h1 style="font-weight:500;color:#423529;margin:0 0 12px">You're all set, ${first}!</h1>` +
     `<p style="font-size:17px;line-height:1.55">${howNext}</p>` +
     `<h3 style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#776C5C;margin:22px 0 8px">Your picks</h3>` +
@@ -556,7 +559,8 @@ async function handleLeadEmail(fields, env, origin) {
     `<ol style="font-size:16px;line-height:1.55;padding-left:20px"><li>We send ring designs that match your style and budget.</li><li>You get a secure link to check your payment options with our lending partner, right on your phone.</li><li>You approve your final design and we start making your ring. Delivered within 6 weeks.</li></ol>` +
     `<p style="margin:24px 0"><a href="${SITE}/collection" style="background:#54453A;color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-family:Arial,sans-serif;font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase">Browse the collection</a></p>` +
     `<p style="font-family:Arial,sans-serif;font-size:12.5px;color:#776C5C;line-height:1.55">Questions? Call or text <a href="tel:${PUBLIC_TEL}" style="color:#776C5C">${PUBLIC_PHONE}</a> or just reply to this email. Financing is offered through our approved lending partners and is subject to their credit approval. Hidden Gem never asks for your Social Security number, income or bank details. <a href="${SITE}/policies" style="color:#776C5C">Our policies</a></p></div>`;
-  const sent = await sendEmail(env, { to: [email], subject: `Your Hidden Gem ring picks, ${lead.name.split(' ')[0]}`, html, replyTo: PUBLIC_EMAIL, from: CUSTOMER_FROM });
+  const subject = surprise ? 'Your Hidden Gem request' : `Your Hidden Gem ring picks, ${lead.name.split(' ')[0]}`;
+  const sent = await sendEmail(env, { to: [email], subject, html, replyTo: PUBLIC_EMAIL, from: surprise ? CUSTOMER_FROM_PRIVATE : CUSTOMER_FROM });
   if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
   lead.recapSent = true;
   await env.IG_KV.put(key, JSON.stringify(lead));
@@ -582,6 +586,7 @@ async function handleLead(fields, request, env, origin) {
     surprise: pick('surprise'), reach: pick('reach'), windows: String(fields.windows || '').slice(0, 160),
     windowsCentral: windowsForRep(String(fields.windows || '').slice(0, 160)),
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(fields.email || '')) ? String(fields.email).slice(0, 160) : '',
+    tzName: /^[A-Za-z_]+\/[A-Za-z_\/-]+$/.test(String(fields.tzName || '')) ? String(fields.tzName).slice(0, 40) : '',
     page: pick('page'), receivedAt: Date.now(), status: 'new',
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
@@ -1079,7 +1084,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   if (!isTestApproval && o.customerEmail && o.customerEmail.includes('@') && !o.approval.customerEmailed) {
     const c = await sendEmail(env, {
       to: [o.customerEmail],
-      subject: 'Your Hidden Gem design approval',
+      subject: 'Your Hidden Gem design approval', from: CUSTOMER_FROM,
       html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2>Thank you, ${escapeHtml(o.customerName.split(' ')[0])}!</h2><p>Here is a copy of the design you approved. We'll keep you updated while your ring is being made.</p>${imgTag}${table}<p>Questions? Call or text ${PUBLIC_PHONE}, or reply to this email.</p></div>`,
       replyTo: TO_ADDRESS,
     });
@@ -1539,7 +1544,7 @@ async function handleLeadStatus(fields, url, env, origin) {
   return json({ ok: true }, 200, origin);
 }
 
-export default {
+const app = {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
     const url = new URL(request.url);
@@ -1555,6 +1560,7 @@ export default {
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/track/stats') return handleTrackStats(url, env, origin);
       if (path === '/email/log') return handleEmailLog(url, env, origin);
+      if (path === '/activity') return handleActivity(url, env, origin);
       if (path === '/admin/list') return handleAdminList(url, env, origin);
       if (path === '/admin/lead') return handleAdminLead(url, env, origin);
       if (path === '/admin/inspo') return handleInspoGet(url, env, origin);
@@ -1677,6 +1683,90 @@ export default {
     await refreshMediaCache(env);
   },
 };
+
+
+// ===== Customer wording: always from what they picked (reach + windows) =====
+// The internal "contact" field stays for routing and booking only.
+function zoneWordFor(tz) {
+  try {
+    const z = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' }).formatToParts(new Date()).find((x) => x.type === 'timeZoneName').value;
+    return { EST: 'Eastern', EDT: 'Eastern', CST: 'Central', CDT: 'Central', MST: 'Mountain', MDT: 'Mountain', PST: 'Pacific', PDT: 'Pacific', AKST: 'Alaska', AKDT: 'Alaska', HST: 'Hawaii' }[z] || z;
+  } catch (e) { return 'Central'; }
+}
+function slotForCustomer(lead) {
+  const d = lead.slotDate, t = lead.slotTime;
+  if (!d || !t) return '';
+  const [y, m, dd] = d.split('-').map(Number), [hh, mm] = t.split(':').map(Number);
+  let ms = Date.UTC(y, m - 1, dd, hh + 6, mm);
+  const ch = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hourCycle: 'h23' }).format(new Date(ms)));
+  let diff = hh - ch; if (diff > 12) diff -= 24; if (diff < -12) diff += 24; ms += diff * 3600000;
+  const tz = lead.tzName || 'America/Chicago', dt = new Date(ms);
+  const day = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'long', month: 'short', day: 'numeric' }).format(dt);
+  const tm = (z) => new Intl.DateTimeFormat('en-US', { timeZone: z, hour: 'numeric', minute: '2-digit' }).format(dt);
+  const zw = zoneWordFor(tz);
+  return zw === 'Central' ? `${day} at ${tm(tz)} Central` : `${day} at ${tm(tz)} ${zw} (${tm('America/Chicago')} Central)`;
+}
+function customerHowNext(lead) {
+  const r = String(lead.reach || '').toLowerCase().split(/,\s*/).filter(Boolean);
+  const words = r.map((x) => (x === 'call' ? 'a call' : x));
+  const joinOr = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' or ' + a[a.length - 1] : a[0] || '');
+  const byWords = r.length === 1 ? (r[0] === 'call' ? 'call you' : r[0] === 'text' ? 'text you' : 'email you') : r.length ? 'reach out by ' + joinOr(words) : 'reach out';
+  const surprise = isSurprise(lead);
+  if (lead.contact === 'Book a call' && lead.slotDate) return `Your 30 minute call is booked for <strong>${escapeHtml(slotForCustomer(lead))}</strong>. ${surprise ? "We'll call you then. Everything stays private." : 'One of our ring specialists will call you then.'}`;
+  if (surprise) {
+    const how = r.length ? ' by ' + joinOr(words) : '';
+    const w = String(lead.windows || '');
+    if (w && !/^Anytime/i.test(w)) return `We'll reach out privately${how} during the times you picked (${escapeHtml(w)}). Everything stays private.`;
+    return `We'll reach out privately${how}${lead.routeMode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon'}. Everything stays private.`;
+  }
+  if (lead.routeMode === 'offline') return `Our ring specialists are away right now. We'll ${byWords} during business hours (Mon to Sat, 9 AM to 9 PM Central).`;
+  return `One of our ring specialists will ${byWords} shortly.`;
+}
+
+// ===== Activity log: every customer submission from every form, in one list =====
+// Open /activity (or ?format=json, &day=YYYY-MM-DD). Kept 60 days.
+const ACTIVITY_ROUTES = [
+  [/^\/lead$/, 'Start form: lead (step 1)'], [/^\/lead\/about$/, 'Start form: About you'], [/^\/lead\/design$/, 'Start form: Ring style'],
+  [/^\/lead\/email$/, 'Start form: recap email'], [/^\/portal\/[a-z0-9]+\/save$/, 'Ring Portal: design saved'], [/^\/portal\/[a-z0-9]+\/msg$/, 'Ring Portal: customer message or inspiration'],
+  [/^\/order\/[a-z0-9]+\/choose$/, 'Ring picks: ring chosen'], [/^\/order\/[a-z0-9]+\/approve$/, 'Approval: design approved'], [/^\/order\/[a-z0-9]+\/checkout$/, 'Approval: payment started'],
+  [/^\/$/, 'Website form'],
+];
+async function logActivity(env, path, fields, resBody) {
+  try {
+    let type = null; for (const [re, label] of ACTIVITY_ROUTES) if (re.test(path)) { type = label; break; }
+    if (!type || !resBody || !resBody.ok || resBody.duplicate) return;
+    if (fields && fields._honey) return;
+    const f = fields || {};
+    let leadId = String(f.id || f.leadId || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48), name = String(f.name || f.Name || '').slice(0, 80), orderId = '';
+    const pm = path.match(/^\/portal\/([a-z0-9]+)\//);
+    if (pm) { const p = await env.IG_KV.get(`portal:${pm[1]}`, 'json'); if (p) leadId = p.leadId || leadId; }
+    const om = path.match(/^\/order\/([a-z0-9]+)\//);
+    if (om) { orderId = om[1]; const o = await env.IG_KV.get(`order:${orderId}`, 'json'); if (o) { name = name || o.customerName || ''; leadId = o.leadId || ''; } }
+    let lead = null;
+    if (leadId && !om) { lead = await env.IG_KV.get(`lead:${leadId}`, 'json'); if (lead && !name) name = lead.name || ''; }
+    if (type === 'Website form') type = f.Form === 'Newsletter Signup' ? 'Website: newsletter signup' : 'Website: consultation form';
+    const skip = new Set(['id', 'leadId', '_honey', 'page', 'Form', 'image', 'img', 'signature', 'tzName']);
+    const detail = Object.entries(f).filter(([k, v]) => !skip.has(k) && v !== '' && v != null && (typeof v !== 'object' || (Array.isArray(v) && v.length)))
+      .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`.slice(0, 160)).join(' | ').slice(0, 1200);
+    const entry = { at: Date.now(), time: centralTime(), type, name, leadId, orderId, test: /^\s*test\b/i.test(name), detail };
+    const k = `activity:${centralDay()}`;
+    const list = (await env.IG_KV.get(k, 'json')) || [];
+    list.unshift(entry);
+    await env.IG_KV.put(k, JSON.stringify(list.slice(0, 500)), { expirationTtl: 86400 * 60 });
+  } catch (e) {}
+}
+async function handleActivity(url, env, origin) {
+  const day = url.searchParams.get('day') || centralDay();
+  const list = (await env.IG_KV.get(`activity:${day}`, 'json')) || [];
+  if (url.searchParams.get('format') === 'json') return json({ ok: true, day, count: list.length, activity: list }, 200, origin);
+  const prev = new Date(new Date(day + 'T12:00:00Z').getTime() - 86400000).toISOString().slice(0, 10);
+  const row = (x) => `<tr${x.test ? ' style="opacity:.55"' : ''}><td>${escapeHtml(x.time.replace(/^\w+, /, ''))}</td><td><b>${escapeHtml(x.type)}</b>${x.test ? ' (test)' : ''}</td><td>${escapeHtml(x.name || '')}${x.leadId ? `<br><a href="${SITE}/call?lead=${encodeURIComponent(x.leadId)}">call page</a>` : ''}</td><td style="font-size:12.5px;color:#5c4d40">${escapeHtml(x.detail || '')}</td></tr>`;
+  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Hidden Gem activity</title>` +
+    `<style>body{font-family:-apple-system,Arial,sans-serif;background:#F2EEE6;color:#3b322a;margin:0;padding:18px}h1{font-size:22px;margin:0 0 4px}p{margin:4px 0 14px;color:#6B5B4C}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:14px}td,th{padding:9px 10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}th{background:#8A7F6E;color:#fff}a{color:#8a5a00}</style></head><body>` +
+    `<h1>Hidden Gem customer activity</h1><p>${escapeHtml(day)} · Central time · ${list.length} submissions · refresh to update · <a href="?day=${prev}">previous day</a></p>` +
+    `<table><tr><th>Time</th><th>What</th><th>Customer</th><th>Answers</th></tr>${list.map(row).join('') || '<tr><td colspan="4">Nothing yet today</td></tr>'}</table></body></html>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+}
 
 // Every email the site sends is logged (time, type, which inboxes, delivered or not)
 // so delivery can be checked. Names, phones and amounts are never stored in the log.
@@ -1874,3 +1964,25 @@ async function sendDailySummary(env) {
     `<p style="color:#777;font-size:12px">Finished quizzes are emailed the moment they come in.</p></div>`;
   await sendEmail(env, { to: [PUBLIC_EMAIL, OWNER_ADDRESS], subject: `Hidden Gem daily summary: ${visitors} visitors on ${day}`, html });
 }
+
+// Every request goes through the app; successful customer form posts are also
+// written to the activity log (after the response, so nothing slows down).
+export default {
+  async fetch(request, env, ctx) {
+    const path = new URL(request.url).pathname;
+    const watch = request.method === 'POST' && ACTIVITY_ROUTES.some(([re]) => re.test(path));
+    const copy = watch ? request.clone() : null;
+    const res = await app.fetch(request, env);
+    if (watch && res && res.ok) {
+      const task = (async () => {
+        let fields = {};
+        try { const ct = copy.headers.get('Content-Type') || ''; fields = ct.includes('application/json') ? await copy.json() : Object.fromEntries((await copy.formData()).entries()); } catch (e) {}
+        let body = null; try { body = await res.clone().json(); } catch (e) {}
+        await logActivity(env, path, fields, body);
+      })();
+      if (ctx && ctx.waitUntil) ctx.waitUntil(task); else await task;
+    }
+    return res;
+  },
+  scheduled(event, env, ctx) { return app.scheduled(event, env, ctx); },
+};
