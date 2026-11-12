@@ -796,6 +796,27 @@ body.po-compact .po-wrap{padding-top:10px}
     var STORE = 'hg_payopts_v1';
     var card = document.getElementById('poCard');
     if (!card) return;
+    var QS = new URLSearchParams(location.search);
+    // Bio visitors (hiddengemrings.com/start?src=bio) get a general headline; the ad keeps the Penelope one.
+    var fromBio = QS.get('src') === 'bio';
+    try { if (fromBio) sessionStorage.setItem('hg_src', 'bio'); else if (sessionStorage.getItem('hg_src') === 'bio' && !QS.get('fbclid')) fromBio = true; } catch (e) {}
+    // keep the address bar clean: drop ?src=bio after reading it (other params like fbclid stay for Meta)
+    if (QS.get('src') && history.replaceState) { try { var u = new URL(location.href); u.searchParams.delete('src'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) {} }
+    if (fromBio) { var h1 = document.querySelector('.v2-head h1'); if (h1) h1.innerHTML = 'Let\'s design <span class="script">her ring.</span>'; }
+    // Name and phone come right after the budget question, so a lead who leaves
+    // partway still leaves a way to reach them. The full lead is sent at the end of step 1.
+    (function () {
+      var contact = card.querySelector('.po-step[data-key=contact]'), budget = card.querySelector('.po-step[data-key=budget]');
+      if (!contact || !budget) return;
+      var np = document.createElement('div'); np.className = 'po-step'; np.dataset.key = 'namephone';
+      np.innerHTML = '<img class="po-icon" src="icon-personal.png" alt=""><h2>Who should we send your options to?</h2><p class="po-sub">Just your name and mobile number. No spam, ever.</p>';
+      np.appendChild(document.getElementById('poName').closest('label'));
+      np.appendChild(document.getElementById('poPhone').closest('label'));
+      var nb = document.createElement('button'); nb.type = 'button'; nb.className = 'btn po-send'; nb.id = 'poNpNext'; nb.disabled = true; nb.textContent = 'Continue'; np.appendChild(nb);
+      var ns = document.createElement('p'); ns.className = 'po-status'; ns.id = 'poNpStatus'; ns.setAttribute('aria-live', 'polite'); np.appendChild(ns);
+      var fine = contact.querySelector('.po-fine'); if (fine) np.appendChild(fine);
+      budget.parentNode.insertBefore(np, budget.nextSibling);
+    })();
     var steps = Array.prototype.slice.call(card.querySelectorAll('.po-step:not(.po-dstep)'));
     var dsteps = Array.prototype.slice.call(card.querySelectorAll('.po-dstep'));
     var aCount = card.querySelectorAll('.po-astep').length;
@@ -809,6 +830,7 @@ body.po-compact .po-wrap{padding-top:10px}
     var statusEl = document.getElementById('poStatus');
     var doneEl = document.getElementById('poDone');
     var autoTimer = null, sending = false;
+    var delays = [0, 2000, 5000, 10000, 20000, 40000];
     var lastPct = 0, lastI = -1;
     // After the first answer: hide the top banner and keep the question card
     // pinned right under the header so every answer fits without scrolling.
@@ -950,7 +972,7 @@ body.po-compact .po-wrap{padding-top:10px}
       slotMsg.textContent = '';
       Array.prototype.forEach.call(timesEl.children, function (x) { x.classList.toggle('selected', x === b); });
       var vis = visibleSteps(), idx = vis.indexOf(card.querySelector('.po-step[data-key=slot]'));
-      setTimeout(function () { show(idx + 1); nameEl.focus({ preventScroll: true }); }, 260);
+      setTimeout(function () { show(idx + 1); }, 260);
     });
 
     function show(i) {
@@ -979,7 +1001,11 @@ body.po-compact .po-wrap{padding-top:10px}
         ? 'A ring for a moment this special should stay a secret until you\'re ready. Every message is written to keep your surprise safe. Pick as many as you like.'
         : 'Everyone\'s schedule is different. Pick as many as you like and we\'ll work around you.';
       if (key === 'windows') { var tz = document.getElementById('poTz'); if (!state.a.tz) { state.a.tz = guessTz(); save(); } tz.value = state.a.tz; }
-      if (key === 'contact') { var ew = document.getElementById('poEmail1Wrap'); ew.hidden = !reachHas('Email'); if (!ew.hidden && state.a.email) document.getElementById('poEmail1').value = state.a.email; validate(); }
+      if (key === 'namephone') { npCheck(); setTimeout(function () { if (!nameEl.value) nameEl.focus({ preventScroll: true }); }, 300); }
+      if (key === 'contact') { var ew = document.getElementById('poEmail1Wrap'); ew.hidden = !reachHas('Email');
+        vis[i].querySelector('h2').textContent = reachHas('Email') ? 'Last thing: your email' : 'Sending your answers';
+        if (!reachHas('Email')) setTimeout(function () { if (!state.sent && validate()) submit(); }, 700);
+        else setTimeout(function () { email1El.focus({ preventScroll: true }); }, 300); if (!ew.hidden && state.a.email) document.getElementById('poEmail1').value = state.a.email; validate(); }
       if (key === 'contact') {
         validate();
         var sub = document.getElementById('poContactSub');
@@ -1021,7 +1047,7 @@ body.po-compact .po-wrap{padding-top:10px}
         if (key === 'reach') applyStatus();
         if (window.HGTrack && !state.sent) HGTrack('quiz_start', { 'First answer': key + ': ' + (state.a[key] || []).join(', ') });
         var vis = visibleSteps(), idx = vis.indexOf(s);
-        show(idx + 1); if (vis[idx + 1] && vis[idx + 1].dataset.key === 'contact') nameEl.focus({ preventScroll: true });
+        show(idx + 1); 
       });
     });
     steps.forEach(function (s) {
@@ -1034,7 +1060,7 @@ body.po-compact .po-wrap{padding-top:10px}
           b.classList.add('selected');
           var vis = visibleSteps();
           var idx = vis.indexOf(s);
-          setTimeout(function () { show(idx + 1); if (vis[idx + 1] && vis[idx + 1].dataset.key === 'contact') nameEl.focus({ preventScroll: true }); }, 260);
+          setTimeout(function () { show(idx + 1);  }, 260);
         });
       });
     });
@@ -1075,9 +1101,35 @@ body.po-compact .po-wrap{padding-top:10px}
       sendBtn.disabled = !ok || sending;
       return ok;
     }
+    var npBtn = document.getElementById('poNpNext'), npStatus = document.getElementById('poNpStatus');
+    function onLast() { var a = card.querySelector('.po-step.active'); return a && a.dataset.key === 'contact'; }
+    function npCheck() {
+      var ok = nameOk() && phoneOk();
+      if (npBtn) npBtn.disabled = !ok;
+      if (npStatus) { var h = ok ? '' : hint(); npStatus.className = 'po-status' + (h ? ' err' : ''); npStatus.textContent = h; }
+      return ok;
+    }
+    var partialSent = false;
+    function sendPartial() {
+      if (partialSent || state.sent) return; partialSent = true;
+      var body = { id: state.id, name: HGCheck.capName((state.a.name || '').trim()), phone: HGCheck.formatPhone(state.a.phone || ''), shape: state.a.shape || '', budget: state.a.budget || '', page: location.pathname + location.search + (fromBio ? (location.search ? '&' : '?') + 'src=bio' : ''), _honey: (document.getElementById('poHoney') || {}).value || '' };
+      var attempt = 0;
+      (function tryOnce() {
+        fetch(API + '/lead/partial', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true })
+          .then(function (r) { if (!r.ok) throw 0; }).catch(function () { attempt++; if (attempt < 4) setTimeout(tryOnce, delays[attempt]); else partialSent = false; });
+      })();
+    }
+    if (npBtn) npBtn.addEventListener('click', function () {
+      if (!npCheck()) return;
+      onTypeSave(); sendPartial();
+      var vis = visibleSteps(), idx = vis.indexOf(card.querySelector('.po-step[data-key=namephone]'));
+      nameEl.blur(); phoneEl.blur(); show(idx + 1);
+    });
+    function onTypeSave() { state.a.name = HGCheck.capName(nameEl.value.replace(/\s+/g, ' ').trim()); state.a.phone = phoneEl.value; save(); }
     function onType() {
-      state.a.name = HGCheck.capName(nameEl.value.replace(/\s+/g, ' ').trim()); state.a.phone = phoneEl.value; save();
+      onTypeSave();
       clearTimeout(autoTimer);
+      if (!onLast()) { npCheck(); return; }
       if (validate()) {
         statusEl.className = 'po-status'; statusEl.textContent = 'Sending your answers...';
         autoTimer = setTimeout(submit, 2000); // last answer is in: send automatically
@@ -1089,7 +1141,7 @@ body.po-compact .po-wrap{padding-top:10px}
     phoneEl.addEventListener('input', function () { formatPhone(); onType(); });
     email1El.addEventListener('input', function () { state.a.email = email1El.value.trim(); save(); onType(); });
     email1El.addEventListener('blur', onType);
-    phoneEl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && validate()) { clearTimeout(autoTimer); submit(); } });
+    phoneEl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && npBtn && !npBtn.disabled) npBtn.click(); });
     sendBtn.addEventListener('click', function () { clearTimeout(autoTimer); submit(); });
 
     function payload() {
@@ -1102,12 +1154,11 @@ body.po-compact .po-wrap{padding-top:10px}
         email: emailNeeded() ? (state.a.email || '') : '',
         slotDate: state.a.contactPref === 'Book a call' ? (state.a.slotDate || '') : '', slotTime: state.a.contactPref === 'Book a call' ? (state.a.slotTime || '') : '',
         tzName: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } })(),
-        page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
+        page: location.pathname + location.search + (fromBio ? (location.search ? '&' : '?') + 'src=bio' : ''), _honey: (document.getElementById('poHoney') || {}).value || ''
       };
     }
 
-    var delays = [0, 2000, 5000, 10000, 20000, 40000];
-    function submit() {
+        function submit() {
       if (sending || state.sent) return;
       if (!(HGCheck.nameOk(state.a.name) && HGCheck.phoneOk(state.a.phone) && email1Ok())) return;
       sending = true; state.pending = true; save(); validate();

@@ -592,6 +592,7 @@ async function handleLead(fields, request, env, origin) {
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
   lead.label = leadLabel(lead);
+  try { await env.IG_KV.delete(`partial:${id}`); } catch (e) {}
   if (!lead.journey) stampStage(lead, 'Form sent');
 
   // Book the call slot (first time only).
@@ -1679,6 +1680,7 @@ const app = {
     if (path === '/lead/design') return handleDesign(fields, env, origin);
     if (path === '/lead/about') return handleAbout(fields, env, origin);
     if (path === '/lead/email') return handleLeadEmail(fields, env, origin);
+    if (path === '/lead/partial') return handleLeadPartial(fields, env, origin);
     if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
     if (path === '/order/create-options') return handleOptionsCreate(fields, env, origin, url);
@@ -1751,7 +1753,7 @@ const app = {
 
   // Cron Trigger: keeps the cached Instagram feed fresh.
   async scheduled(event, env, ctx) {
-    if (event.cron === '*/10 * * * *') { await resendUnsentLeads(env); return; }
+    if (event.cron === '*/10 * * * *') { await resendUnsentLeads(env); await alertPartials(env); return; }
     if (event.cron === '0 14 * * *') { await sendDailySummary(env); return; }
     await refreshMediaCache(env);
   },
@@ -1800,7 +1802,7 @@ function customerHowNext(lead) {
 // Open /activity (or ?format=json, &day=YYYY-MM-DD). Kept 60 days.
 const ACTIVITY_ROUTES = [
   [/^\/lead$/, 'Start form: lead (step 1)'], [/^\/lead\/about$/, 'Start form: About you'], [/^\/lead\/design$/, 'Start form: Ring style'],
-  [/^\/lead\/email$/, 'Start form: recap email'], [/^\/portal\/[a-z0-9]+\/save$/, 'Ring Portal: design saved'], [/^\/portal\/[a-z0-9]+\/msg$/, 'Ring Portal: customer message or inspiration'],
+  [/^\/lead\/email$/, 'Start form: recap email'], [/^\/lead\/partial$/, 'Start form: name and phone (partway)'], [/^\/portal\/[a-z0-9]+\/save$/, 'Ring Portal: design saved'], [/^\/portal\/[a-z0-9]+\/msg$/, 'Ring Portal: customer message or inspiration'],
   [/^\/order\/[a-z0-9]+\/choose$/, 'Ring picks: ring chosen'], [/^\/order\/[a-z0-9]+\/approve$/, 'Approval: design approved'], [/^\/order\/[a-z0-9]+\/checkout$/, 'Approval: payment started'],
   [/^\/$/, 'Website form'],
 ];
@@ -1850,7 +1852,7 @@ function emailType(subject) {
   const map = [
     [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
     [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
-    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RING PORTAL OPENED/i, 'Ring Portal opened'], [/RING PORTAL STARTED/i, 'Ring Portal started'], [/RING PORTAL PAUSED/i, 'Ring Portal left partway'], [/RING PORTAL MESSAGE/i, 'Ring Portal message'], [/DESIGN (CREATED|UPDATED)/i, 'Ring Portal design'], [/update from Hidden Gem/i, 'Portal update to customer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
+    [/daily summary/i, 'Daily summary'], [/LEFT PARTWAY/i, 'Left partway (has phone)'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RING PORTAL OPENED/i, 'Ring Portal opened'], [/RING PORTAL STARTED/i, 'Ring Portal started'], [/RING PORTAL PAUSED/i, 'Ring Portal left partway'], [/RING PORTAL MESSAGE/i, 'Ring Portal message'], [/DESIGN (CREATED|UPDATED)/i, 'Ring Portal design'], [/update from Hidden Gem/i, 'Portal update to customer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
     [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'], [/Your Hidden Gem request/i, 'Recap sent to customer (private)'],
     [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
   ];
@@ -2070,3 +2072,34 @@ export default {
   },
   scheduled(event, env, ctx) { return app.scheduled(event, env, ctx); },
 };
+
+
+// ===== Name and phone given partway through the start form =====
+// Saved quietly (no "call now" alert, since surprise and timing are not known yet).
+// If the full lead never arrives within 20 minutes, one alert goes to hello@.
+async function handleLeadPartial(fields, env, origin) {
+  if (fields._honey) return json({ ok: true }, 200, origin);
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const name = capName(fields.name).slice(0, 120), phone = fmtPhone(String(fields.phone || '').trim().slice(0, 40));
+  if (!id || name.length < 2 || !phoneOkServer(phone)) return json({ ok: false, error: 'Please check your name and phone.' }, 400, origin);
+  if (await env.IG_KV.get(`lead:${id}`)) return json({ ok: true, duplicate: true }, 200, origin);
+  const p = { id, name, phone, shape: String(fields.shape || '').slice(0, 40), budget: String(fields.budget || '').slice(0, 40), page: String(fields.page || '').slice(0, 120), at: Date.now() };
+  await env.IG_KV.put(`partial:${id}`, JSON.stringify(p), { expirationTtl: 86400 * 3 });
+  return json({ ok: true }, 200, origin);
+}
+async function alertPartials(env) {
+  try {
+    const r = await env.IG_KV.list({ prefix: 'partial:' });
+    for (const k of r.keys) {
+      const p = await env.IG_KV.get(k.name, 'json');
+      if (!p || p.alerted || Date.now() - p.at < 20 * 60000) continue;
+      if (await env.IG_KV.get(`lead:${p.id}`)) { await env.IG_KV.delete(k.name); continue; }
+      const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 6px">${escapeHtml(p.name)} left the form partway</h2>` +
+        `<p style="font-size:18px;margin:0 0 10px"><a href="tel:${escapeHtml(p.phone.replace(/\D/g, ''))}">${escapeHtml(p.phone)}</a></p>` +
+        `<p>Shape: ${escapeHtml(p.shape || 'n/a')} · Budget: ${escapeHtml(p.budget || 'n/a')} · Came from: ${escapeHtml(p.page || '/start')}</p>` +
+        `<p><b>They did not say if it is a surprise or when to reach them.</b> Text first and keep the first line neutral, no ring words.</p></div>`;
+      const sent = await sendEmail(env, { to: [PUBLIC_EMAIL], subject: `LEFT PARTWAY (has phone): ${p.name}`, html });
+      if (sent.ok) { p.alerted = Date.now(); await env.IG_KV.put(k.name, JSON.stringify(p), { expirationTtl: 86400 * 3 }); }
+    }
+  } catch (e) {}
+}

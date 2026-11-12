@@ -9,6 +9,9 @@
 
   var q = new URLSearchParams(location.search);
   var source = 'Direct or bookmark';
+  var fromBio = q.get('src') === 'bio'; try { fromBio = fromBio || sessionStorage.getItem('hg_src') === 'bio'; } catch (e) {}
+  if (fromBio) source = 'Instagram bio';
+  else
   if (q.get('fbclid') || /facebook|instagram/i.test(q.get('utm_source') || '')) source = 'Facebook or Instagram';
   else if (q.get('utm_source')) source = q.get('utm_source');
   else if (document.referrer) { try { var h = new URL(document.referrer).hostname.replace(/^www\./, ''); if (h !== location.hostname.replace(/^www\./, '')) source = /instagram|facebook|fb\.|l\.instagram/i.test(h) ? 'Facebook or Instagram' : /google/i.test(h) ? 'Google' : h; else source = 'Inside the site'; } catch (e) {} }
