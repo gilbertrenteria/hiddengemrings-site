@@ -886,11 +886,11 @@ function publicOrder(o) {
 const READY_DELIVERY = 'Ships within 3 to 5 business days after payment';
 const CUSTOM_DELIVERY = 'Within 6 weeks of approval and completed payment or financing';
 
-// Ring options: up to 6 rings for one customer on one link (/rings).
+// Ring options: up to 10 rings for one customer on one link (/rings).
 async function handleOptionsCreate(fields, env, origin, url) {
   if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
   const s = (v, n = 200) => String(v || '').trim().slice(0, n);
-  const raw = Array.isArray(fields.options) ? fields.options.slice(0, 6) : [];
+  const raw = Array.isArray(fields.options) ? fields.options.slice(0, 10) : [];
   const okUrl = (u) => /^https:\/\/(ring\.gilbertrenteria\.dev|hiddengemrings\.com)\/[\w\-./]+\.(webp|jpg|jpeg|png)$/i.test(u) ? u : '';
   const options = raw.map((x) => ({ name: s(x.name, 120), metal: s(x.metal, 60), stone: s(x.stone, 300), price: s(x.price, 40), ready: !!x.ready, noResize: !!x.noResize, image: String(x.image || ''), imageUrl: okUrl(String(x.imageUrl || '')) }))
     .filter((x) => x.name && parseMoneyCents(x.price));
