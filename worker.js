@@ -404,7 +404,9 @@ function leadLabel(l) {
   return 'NEW';
 }
 
+function isSurprise(l) { return /^yes/i.test(l.surprise || ''); }
 function contactLine(l) {
+  if (isSurprise(l) && l.contact !== 'Book a call') return `SURPRISE: keep it private. Reach by ${l.reach || 'text'}${l.windows ? ', only ' + l.windows : ''}. Keep the first line neutral, no ring words.`;
   if (l.contact === 'Book a call') return `BOOKED CALL: ${labelDate(l.slotDate)} at ${labelTime(l.slotTime)} (Central). Call them at that time.`;
   if (l.routeMode === 'offline') return `Everyone was offline. ${l.contact === 'Text me' ? 'Text' : 'Call'} them first thing during business hours (9 AM to 9 PM).`;
   if (l.contact === 'Call me') return 'CALL NOW. Text first, then call within 15 minutes.';
@@ -412,7 +414,10 @@ function contactLine(l) {
   return 'Reach out within 15 minutes.';
 }
 function contactShort(l) {
-  if (l.contact === 'Book a call') return 'BOOKED CALL';
+  if (l.contact === 'Book a call') return isSurprise(l) ? 'SURPRISE BOOKED CALL' : 'BOOKED CALL';
+  const r = String(l.reach || '');
+  if (isSurprise(l)) return 'SURPRISE ' + (r ? r.toUpperCase().replace(/, /g, ' + ') : 'TEXT');
+  if (r && !/call/i.test(r)) return l.routeMode === 'offline' ? r.toUpperCase().replace(/, /g, ' + ') + ' AT OPENING' : r.toUpperCase().replace(/, /g, ' + ') + ' NOW';
   if (l.routeMode === 'offline') return l.contact === 'Text me' ? 'TEXT AT OPENING' : 'CALL AT OPENING';
   return l.contact === 'Call me' ? 'CALL NOW' : l.contact === 'Text me' ? 'TEXT NOW' : 'ANY';
 }
@@ -433,7 +438,7 @@ function aboutTips(a) {
   const t = [];
   if (a.buyer === 'Hoping to be proposed to') t.push('She is shopping for herself. Help her pick and offer to send the options to her partner.');
   if (a.buyer === 'Shopping together') t.push('They are choosing together. Talk to both and keep it fun.');
-  if (/surprise/i.test(a.surprise || '')) t.push('Surprise proposal. Keep texts discreet and help with her ring size.');
+  if (/surprise|^yes/i.test(a.surprise || '')) t.push('Surprise proposal. Keep texts discreet and help with her ring size.');
   if (/dropping hints/i.test(a.surprise || '')) t.push('Partner does not know yet. Ask if she wants us to share options with him.');
   if (/family|friend/i.test(a.decides || '')) t.push('Someone else is helping decide. Offer to send photos they can share.');
   if (a.shopped === 'Found one but want better') t.push('HOT: already found a ring elsewhere. Ask what she liked and beat it on design and price.');
@@ -448,6 +453,8 @@ async function handleAbout(fields, env, origin) {
   if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
   if (lead.about && lead.aboutEmailed) return json({ ok: true, duplicate: true }, 200, origin);
   lead.about = Object.fromEntries(ABOUT_FIELDS.map(([k]) => [k, String(fields[k] || '').slice(0, 120)]));
+  if (!lead.about.surprise && lead.surprise) lead.about.surprise = lead.surprise;
+  if (!lead.about.buyer && /together/i.test(lead.surprise || '')) lead.about.buyer = 'Shopping together';
   lead.aboutAt = Date.now();
   await env.IG_KV.put(key, JSON.stringify(lead));
   const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
@@ -555,6 +562,8 @@ async function handleLead(fields, request, env, origin) {
     id, name, phone,
     budget: pick('budget'), pay: pick('pay'), monthly: pick('monthly'),
     timeline: pick('timeline'), credit: pick('credit'), contact: pick('contact'), shape: pick('shape'),
+    surprise: pick('surprise'), reach: pick('reach'), windows: String(fields.windows || '').slice(0, 160),
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(fields.email || '')) ? String(fields.email).slice(0, 160) : '',
     page: pick('page'), receivedAt: Date.now(), status: 'new',
     ua: (request.headers.get('User-Agent') || '').slice(0, 200),
   };
@@ -596,7 +605,10 @@ async function handleLead(fields, request, env, origin) {
     ['Phone', `<a="tel:+1${tel}">${escapeHtml(fmtPhone(lead.phone))}</a> (tap to call)`],
     ['Ring budget', lead.budget],
     ['How they want to pay', lead.pay],
-    ['Wants to continue by', lead.contact || 'not answered'],
+    ...(lead.surprise ? [['Surprise?', lead.surprise]] : []),
+    ['Reach by', lead.reach || lead.contact || 'not answered'],
+    ...(lead.windows ? [['Best times (Central)', lead.windows]] : []),
+    ...(lead.email ? [['Email', lead.email]] : []),
     ['Comfortable monthly', lead.monthly || 'n/a'],
     ['Proposing', lead.timeline],
     ['Credit (self reported)', lead.credit || 'not answered'],

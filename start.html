@@ -228,6 +228,13 @@
   .po-status.err{color:#9a3b2e;}
   .po-consent{font-family:'Work Sans',sans-serif;font-size:11.5px;line-height:1.5;color:var(--taupe-dark);margin:10px 0 0;}
   .po-chips-1{grid-template-columns:1fr;}
+  .po-chips-2x{grid-template-columns:1fr 1fr;}
+  .po-chips .po-span2{grid-column:1 / -1}
+  .po-next{margin-top:18px;color:#fff!important;width:100%;display:flex;align-items:center;justify-content:center;text-align:center}
+  .po-chips button.selected,.po-chips button.selected:hover{color:#fff!important;background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%)!important}
+  .po-next:disabled{opacity:.4}
+  .po-step[data-multi] .po-chips.po-chips-2x{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+  .po-step[data-multi] .po-chips button{width:100%;padding:14px 8px!important;min-height:52px}
   .po-chips.po-pics{grid-template-columns:1fr 1fr;}
   .po-pics button.pic{padding:8px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;}
   .po-pics button.pic img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px;display:block;background:#fff;}
@@ -431,6 +438,45 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       </div>
     </div>
 
+    <div class="po-step" data-key="surprise">
+      <img class="po-icon" src="icon-gift.png" alt="">
+      <h2>Is this a surprise?</h2>
+      <div class="po-chips po-chips-1">
+        <button type="button" data-v="Yes, keep it private">Yes, keep it private</button>
+        <button type="button" data-v="No, we've talked about it">No, we've talked about it</button>
+        <button type="button" data-v="We're shopping together">We're shopping together</button>
+      </div>
+    </div>
+
+    <div class="po-step" data-key="reach" data-multi="1">
+      <img class="po-icon" src="icon-conversation.png" alt="">
+      <h2>How should we reach you?</h2>
+      <p class="po-sub" id="poReachSub">Pick as many as you like.</p>
+      <div class="po-chips po-chips-2x">
+        <button type="button" data-v="Call">Call</button>
+        <button type="button" data-v="Text">Text</button>
+        <button type="button" data-v="Email">Email</button>
+        <button type="button" data-v="All" data-all="1">All of the above</button>
+      </div>
+      <button class="btn po-send po-next" type="button" disabled>Continue</button>
+    </div>
+
+    <div class="po-step" data-key="windows" data-multi="1">
+      <img class="po-icon" src="icon-clock.png" alt="">
+      <h2>When's a good time to reach you privately?</h2>
+      <p class="po-sub">Pick all that work. We'll only reach out when it's a good time for you. Times are Central.</p>
+      <div class="po-chips po-chips-2x">
+        <button type="button" data-v="9 to 11 AM">9 to 11 AM</button>
+        <button type="button" data-v="11 AM to 1 PM">11 AM to 1 PM</button>
+        <button type="button" data-v="1 to 3 PM">1 to 3 PM</button>
+        <button type="button" data-v="3 to 5 PM">3 to 5 PM</button>
+        <button type="button" data-v="5 to 7 PM">5 to 7 PM</button>
+        <button type="button" data-v="7 to 9 PM">7 to 9 PM</button>
+        <button type="button" data-v="Anytime" data-any="1" class="po-span2">Anytime</button>
+      </div>
+      <button class="btn po-send po-next" type="button" disabled>Continue</button>
+    </div>
+
     <div class="po-step" data-key="contactPref">
       <img class="po-icon" src="icon-conversation.png" alt="">
       <p class="po-kicker" id="poAway" hidden>Our ring specialists are away right now</p>
@@ -471,6 +517,9 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       <label class="po-field"><span>Mobile phone</span>
         <input id="poPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(832) 555-0123" maxlength="20">
       </label>
+      <label class="po-field" id="poEmail1Wrap" hidden><span>Email</span>
+        <input id="poEmail1" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" maxlength="160">
+      </label>
       <input type="text" id="poHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="po-honey">
       <button class="btn po-send" id="poSend" type="button" disabled>Send</button>
       <p class="po-status" id="poStatus" role="status" aria-live="polite"></p>
@@ -480,21 +529,11 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     <div class="po-design" id="poDesign" hidden>
     <div class="po-step po-dstep po-astep" data-dkey="buyer">
       <img class="po-icon" src="icon-personal.png" alt="">
-      <p class="po-kicker">You're all set! 4 quick taps so we can prepare for your call</p>
-      <h2>Which one sounds like you?</h2>
+      <p class="po-kicker">You're all set! A few quick taps so we can prepare for you</p>
+      <h2>Who's the ring for?</h2>
       <div class="po-chips po-chips-1">
-        <button type="button" data-v="Planning to propose">I'm planning to propose</button>
-        <button type="button" data-v="Hoping to be proposed to">I'm hoping to be proposed to</button>
-        <button type="button" data-v="Shopping together">We're shopping together</button>
-      </div>
-    </div>
-    <div class="po-step po-dstep po-astep" data-dkey="surprise">
-      <img class="po-icon" src="icon-gift.png" alt="">
-      <h2 data-h-propose="Is it a surprise?" data-h-hoping="Does your partner know you're shopping?">Is it a surprise?</h2>
-      <div class="po-chips po-chips-1">
-        <button type="button" data-v="It's a surprise" data-l-hoping="No, I'm dropping hints" data-v-hoping="No, dropping hints">It's a surprise</button>
-        <button type="button" data-v="She knows it's coming" data-l-hoping="Yes, we talk about it" data-v-hoping="Yes, partner knows">She knows it's coming</button>
-        <button type="button" data-v="Picking it together" data-l-hoping="We're picking it together" data-v-hoping="Picking it together">We're picking it together</button>
+        <button type="button" data-v="Planning to propose">My partner (I'm proposing)</button>
+        <button type="button" data-v="Hoping to be proposed to">Me (I'm hoping to be proposed to)</button>
       </div>
     </div>
     <div class="po-step po-dstep po-astep" data-dkey="decides">
@@ -748,11 +787,15 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         ? 'Our ring specialists are away right now. Pick a 30 minute time and we\'ll call you then. Times are Central.'
         : '30 minutes with one of our ring specialists. Times are Central.';
       if (!TEXT_ENABLED && !state.sent && !state.pending) {
-        state.a.contactPref = off && !slotsFailed ? 'Book a call' : 'Call me';
+        state.a.contactPref = off && !slotsFailed && reachHas('Call') ? 'Book a call' : 'Call me';
         save();
       }
     }
 
+    function reachList() { return Array.isArray(state.a.reach) ? state.a.reach : []; }
+    function reachHas(v) { return reachList().indexOf(v) > -1 || reachList().indexOf('All') > -1; }
+    function isSurprise() { return /^Yes/.test(state.a.surprise || ''); }
+    function reachText() { var r = reachList(); return r.indexOf('All') > -1 ? 'Call, Text, Email' : r.join(', '); }
     function skipMonthly() { return state.a.pay === '50% deposit' || state.a.pay === 'Pay in full'; }
     function visibleSteps() {
       return steps.filter(function (s) {
@@ -760,6 +803,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         if (k === 'monthly' && skipMonthly()) return false;
         if (k === 'contactPref' && !TEXT_ENABLED) return false;
         if (k === 'slot' && state.a.contactPref !== 'Book a call') return false;
+        if (k === 'windows' && (!isSurprise() || state.a.contactPref === 'Book a call')) return false;
         return true;
       });
     }
@@ -826,14 +870,20 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       backBtn.classList.toggle('show', i > 0);
       var key = vis[i].dataset.key;
       vis[i].querySelectorAll('.po-chips button').forEach(function (b) {
-        b.classList.toggle('selected', state.a[key] === b.dataset.v);
+        var cur = state.a[key];
+        b.classList.toggle('selected', Array.isArray(cur) ? cur.indexOf(b.dataset.v) > -1 : cur === b.dataset.v);
       });
+      if (vis[i].dataset.multi) { var nb = vis[i].querySelector('.po-next'); nb.disabled = !(Array.isArray(state.a[key]) && state.a[key].length); }
+      if (key === 'reach') document.getElementById('poReachSub').textContent = isSurprise()
+        ? 'A ring for a moment this special should stay a secret until you\'re ready. Every message is written to keep your surprise safe. Pick as many as you like.'
+        : 'Everyone\'s schedule is different. Pick as many as you like and we\'ll work around you.';
+      if (key === 'contact') { var ew = document.getElementById('poEmail1Wrap'); ew.hidden = !reachHas('Email'); if (!ew.hidden && state.a.email) document.getElementById('poEmail1').value = state.a.email; validate(); }
       if (key === 'contact') {
         validate();
         var sub = document.getElementById('poContactSub');
         if (state.a.contactPref === 'Book a call' && state.a.slotLabel) sub.textContent = 'Your call: ' + state.a.slotLabel + '. Where should we call you?';
-        else if (teamOnline === false) sub.textContent = 'Our ring specialists are away right now. We\'ll call you during business hours.';
-        else sub.textContent = 'We\'ll call you to talk through your options. No spam, ever.';
+        else if (teamOnline === false) sub.textContent = 'Our ring specialists are away right now. We\'ll reach out during business hours.' + (isSurprise() ? ' Everything stays private.' : '');
+        else sub.textContent = 'We\'ll reach out by ' + (reachText() || 'phone').toLowerCase().replace(/, ([^,]*)$/, ' or $1') + ' to talk through your options.' + (isSurprise() ? ' Everything stays private.' : ' No spam, ever.');
       }
       if (key === 'slot') loadSlots();
     }
@@ -846,7 +896,34 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       HGTrack('quiz_abandon', { Budget: a.budget, Payment: a.pay, Monthly: a.monthly, Timing: a.timeline, Credit: a.credit, Name: a.name, Phone: a.phone }, true);
     });
 
+    // Pick-many questions (reach, windows): toggle chips, then Continue.
     steps.forEach(function (s) {
+      if (!s.dataset.multi) return;
+      var key = s.dataset.key, nb = s.querySelector('.po-next');
+      s.querySelectorAll('.po-chips button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var cur = Array.isArray(state.a[key]) ? state.a[key].slice() : [], v = b.dataset.v, on = cur.indexOf(v) > -1;
+          if (b.dataset.all) cur = on ? [] : ['Call', 'Text', 'Email', 'All'];
+          else if (b.dataset.any) cur = on ? [] : ['Anytime'];
+          else {
+            cur = cur.filter(function (x) { return x !== 'All' && x !== 'Anytime'; });
+            if (on) cur.splice(cur.indexOf(v), 1); else cur.push(v);
+            if (key === 'reach' && ['Call', 'Text', 'Email'].every(function (x) { return cur.indexOf(x) > -1; })) cur.push('All');
+          }
+          state.a[key] = cur; save();
+          s.querySelectorAll('.po-chips button').forEach(function (x) { x.classList.toggle('selected', cur.indexOf(x.dataset.v) > -1); });
+          nb.disabled = !cur.length;
+        });
+      });
+      nb.addEventListener('click', function () {
+        if (key === 'reach') applyStatus();
+        if (window.HGTrack && !state.sent) HGTrack('quiz_start', { 'First answer': key + ': ' + (state.a[key] || []).join(', ') });
+        var vis = visibleSteps(), idx = vis.indexOf(s);
+        show(idx + 1); if (vis[idx + 1] && vis[idx + 1].dataset.key === 'contact') nameEl.focus({ preventScroll: true });
+      });
+    });
+    steps.forEach(function (s) {
+      if (s.dataset.multi) return;
       s.querySelectorAll('.po-chips button').forEach(function (b) {
         b.addEventListener('click', function () {
           state.a[s.dataset.key] = b.dataset.v; save();
@@ -871,10 +948,14 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       var d = HGCheck.phoneDigits(phoneEl.value);
       if (d.length === 10 && !phoneOk()) return 'Please enter a real 10 digit mobile number.';
       if (nameEl.value.trim() && document.activeElement !== nameEl && !nameOk()) return 'Please enter your first and last name.';
+      if (emailNeeded() && (email1El.value || '').trim() && document.activeElement !== email1El && !email1Ok()) return 'Please enter a real email address.';
       return '';
     }
+    var email1El = document.getElementById('poEmail1');
+    function emailNeeded() { return reachHas('Email'); }
+    function email1Ok() { return !emailNeeded() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((email1El.value || '').trim()); }
     function validate() {
-      var ok = nameOk() && phoneOk();
+      var ok = nameOk() && phoneOk() && email1Ok();
       sendBtn.disabled = !ok || sending;
       return ok;
     }
@@ -890,6 +971,8 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     nameEl.addEventListener('input', onType);
     nameEl.addEventListener('blur', onType);
     phoneEl.addEventListener('input', function () { formatPhone(); onType(); });
+    email1El.addEventListener('input', function () { state.a.email = email1El.value.trim(); save(); onType(); });
+    email1El.addEventListener('blur', onType);
     phoneEl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && validate()) { clearTimeout(autoTimer); submit(); } });
     sendBtn.addEventListener('click', function () { clearTimeout(autoTimer); submit(); });
 
@@ -899,6 +982,8 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
         shape: state.a.shape || '', budget: state.a.budget || '', pay: state.a.pay || '',
         monthly: skipMonthly() ? '' : (state.a.monthly || ''),
         timeline: state.a.timeline || '', credit: state.a.credit || '', contact: state.a.contactPref || 'Call me',
+        surprise: state.a.surprise || '', reach: reachText(), windows: isSurprise() && state.a.contactPref !== 'Book a call' ? (state.a.windows || []).join(', ') : '',
+        email: emailNeeded() ? (state.a.email || '') : '',
         slotDate: state.a.contactPref === 'Book a call' ? (state.a.slotDate || '') : '', slotTime: state.a.contactPref === 'Book a call' ? (state.a.slotTime || '') : '',
         page: location.pathname + location.search, _honey: (document.getElementById('poHoney') || {}).value || ''
       };
@@ -907,7 +992,7 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
     var delays = [0, 2000, 5000, 10000, 20000, 40000];
     function submit() {
       if (sending || state.sent) return;
-      if (!(HGCheck.nameOk(state.a.name) && HGCheck.phoneOk(state.a.phone))) return;
+      if (!(HGCheck.nameOk(state.a.name) && HGCheck.phoneOk(state.a.phone) && email1Ok())) return;
       sending = true; state.pending = true; save(); validate();
       statusEl.className = 'po-status'; statusEl.textContent = 'Sending your answers...';
       var attempt = 0;
@@ -961,19 +1046,21 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       designEl.hidden = false;
       if (state.d && state.aPending && !state.aSent) submitAbout();
       if (state.dPending && !state.dSent) { showSendArea(); submitDesign(); return; }
+      if (/together/.test(state.a.surprise || '')) { state.d.buyer = 'Shopping together'; if (!state.dstep) state.dstep = 1; save(); }
       applyBuyer();
       dshow(state.dstep || 0);
     }
     function dshow(i) {
-      if (i < 0) i = 0; if (i > dsteps.length - 1) i = dsteps.length - 1;
+      var first = /together/.test(state.a.surprise || '') ? 1 : 0;
+      if (i < first) i = first; if (i > dsteps.length - 1) i = dsteps.length - 1;
       state.dstep = i; save();
       dSendWrap.hidden = true; document.getElementById('poSkip').hidden = false;
       dsteps.forEach(function (s) { s.classList.remove('active'); });
       dsteps[i].classList.add('active');
-      var inAbout = i < aCount, n = inAbout ? aCount : dsteps.length - aCount, k = inAbout ? i + 1 : i - aCount + 1;
+      var inAbout = i < aCount, n = inAbout ? aCount - first : dsteps.length - aCount, k = inAbout ? i + 1 - first : i - aCount + 1;
       countEl.textContent = (inAbout ? 'About you ' : (state.d.buyer === 'Hoping to be proposed to' ? 'Your style ' : 'Her style ')) + k + ' of ' + n;
       barEl.style.width = Math.round((k / n) * 100) + '%';
-      backBtn.classList.toggle('show', i > 0);
+      backBtn.classList.toggle('show', i > first);
       var key = dsteps[i].dataset.dkey;
       dsteps[i].querySelectorAll('.po-chips button').forEach(function (b) { b.classList.toggle('selected', state.d[key] === b.dataset.v); });
     }
@@ -1127,9 +1214,13 @@ html.hg-tg .po-wrap::after{content:'';position:absolute;top:360px;right:-90px;wi
       document.getElementById('poFirst').textContent = first ? ', ' + first : '';
       var msg;
       if (state.a.contactPref === 'Book a call' && state.a.slotLabel) msg = 'Your 30 minute call is booked for <strong>' + state.a.slotLabel + '</strong> (Central). One of our ring specialists will call you then.';
-      else if (state.mode === 'offline') msg = 'Our ring specialists are away right now. We\'ll ' + (state.a.contactPref === 'Text me' ? 'text' : 'call') + ' you during business hours (Mon to Sat, 9 AM to 9 PM).';
-      else if (state.a.contactPref === 'Text me') msg = 'One of our ring specialists will be texting you shortly.';
-      else msg = 'One of our ring specialists will be calling you shortly.';
+      else if (state.mode === 'offline') msg = 'Our ring specialists are away right now. We\'ll ' + (reachHas('Call') ? 'reach out' : 'reach out by ' + reachText().toLowerCase()) + ' during business hours (Mon to Sat, 9 AM to 9 PM).';
+      else {
+        var r = reachList(), how = r.indexOf('All') > -1 ? ['call', 'text', 'email'] : r.map(function (x) { return x.toLowerCase(); });
+        var verb = how.length > 1 ? 'reach out by ' + how.slice(0, -1).join(', ') + ' or ' + how[how.length - 1] : (how[0] === 'call' ? 'call you' : how[0] === 'text' ? 'text you' : how[0] === 'email' ? 'email you' : 'reach out');
+        var when = isSurprise() && (state.a.windows || []).length && (state.a.windows || [])[0] !== 'Anytime' ? ' during the times you picked (' + state.a.windows.join(', ') + ')' : ' shortly';
+        msg = 'One of our ring specialists will ' + verb + when + '.' + (isSurprise() ? ' Everything stays private.' : '');
+      }
       document.getElementById('poDoneLead').innerHTML = msg;
       try { var fn = (state.a.name || '').trim().split(' ')[0]; if (fn) { document.querySelectorAll('[data-inspo=text]').forEach(function (x) { x.href = 'sms:+18327437657?&body=' + encodeURIComponent('Hi this is ' + fn + '. Here is some ring inspiration '); }); document.querySelectorAll('[data-inspo=mail]').forEach(function (x) { x.href = 'mailto:hello@hiddengemrings.com?subject=' + encodeURIComponent('Ring inspiration from ' + fn); }); } } catch (e) {}
       var de = document.getElementById('poDoneEmail');
