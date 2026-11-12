@@ -171,8 +171,9 @@
         var ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high';
         ox.fillStyle = 'rgb(' + Math.round(br) + ',' + Math.round(bgc) + ',' + Math.round(bb) + ')'; ox.fillRect(0, 0, OUT, OUT);
         // never crop past the photo's edges (no bands or logo showing); keep the ring as centered as the photo allows
-        side = Math.min(side, bm.width, bm.height);
-        var left = Math.min(Math.max(cx - side / 2, 0), bm.width - side), top = Math.min(Math.max(cy - side / 2, 0), bm.height - side);
+        var maxR = bm.width * 0.84; // stay clear of the watermark logo on the right edge
+        side = Math.min(side, maxR, bm.height);
+        var left = Math.min(Math.max(cx - side / 2, 0), maxR - side), top = Math.min(Math.max(cy - side / 2, 0), bm.height - side);
         ox.drawImage(bm, left, top, side, side, 0, 0, OUT, OUT);
         var url = o.toDataURL('image/jpeg', 0.92);
         centerCache[src0] = url; img.src = url; img.style.opacity = '';
