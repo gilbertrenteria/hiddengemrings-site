@@ -129,8 +129,8 @@ textarea{min-height:96px;resize:vertical}
 .note{font-size:13px;color:var(--taupe-dark);text-align:center;margin-top:10px}
 .done{background:#fff;border-radius:16px;padding:14px 16px;border:1.5px solid #3fa05a;color:var(--brown-dark);font-size:15px}
 /* sheet */
-.sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;background:rgba(30,24,19,.45)}
-.sheet.on{display:flex}
+.sheet{position:fixed;inset:0;z-index:50;display:flex;visibility:hidden;pointer-events:none;align-items:flex-end;justify-content:center;background:rgba(30,24,19,.45)}
+.sheet.on{visibility:visible;pointer-events:auto}
 .sheet .in{background:var(--cream);width:min(560px,100%);max-height:88vh;overflow:auto;border-radius:26px 26px 0 0;padding:22px 20px calc(24px + env(safe-area-inset-bottom))}
 @media(min-width:700px){.sheet{align-items:center}.sheet .in{border-radius:26px}}
 .x{float:right;background:#fff;border:1px solid var(--line);border-radius:999px;width:36px;height:36px;cursor:pointer}
@@ -144,6 +144,30 @@ textarea{min-height:96px;resize:vertical}
 .foot{text-align:center;font-size:13px;color:var(--taupe-dark);margin-top:40px}
 .foot a{color:var(--taupe-dark)}
 @media(max-width:520px){.hero{max-height:44vh}.card{padding:20px 18px 26px;border-radius:22px}.lead{font-size:16px}.said li{font-size:19px}}
+
+/* motion: soft, layered, never flashy */
+.st{opacity:0;transform:translateY(16px);filter:blur(6px);animation:stIn 1s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes stIn{to{opacity:1;transform:none;filter:blur(0)}}
+.hero img{opacity:0;transform:scale(1.08);transition:opacity 1.3s ease,transform 2.8s cubic-bezier(.2,.7,.2,1);animation:none!important}
+.hero img.ld{opacity:1;transform:scale(1)}
+.card.pg,.rhead.pg{animation:pgIn .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes pgIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.ring .ph{overflow:hidden}
+.ring .ph img{transition:opacity .6s ease,transform 1.2s cubic-bezier(.2,.7,.2,1)}
+@media(hover:hover){.ring.in:hover{transform:translateY(-4px);box-shadow:0 22px 44px rgba(66,53,41,.14)}.ring.in:hover .ph img{transform:scale(1.035)}}
+.ring{transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
+.btn,.save,.nopt,.chips button,.talk .opt,.fav{transition:transform .2s ease,box-shadow .25s ease,background .25s ease,color .25s ease,border-color .25s ease}
+@media(hover:hover){.btn:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(33,26,20,.26)}.talk .opt:hover,.nopt:hover,.fav:hover{transform:translateY(-2px);border-color:var(--gold)}}
+.save.on{animation:pop .35s ease}
+@keyframes pop{50%{transform:scale(1.08)}}
+.sheet{opacity:0;transition:opacity .3s ease}
+.sheet.on{opacity:1}
+.sheet .in{transform:translateY(30px);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.sheet.on .in{transform:none}
+.pickimg img,.fav img{animation:imgIn 1.1s ease both}
+@keyframes imgIn{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
+.bar span{transition:width .9s cubic-bezier(.2,.7,.2,1)}
+@media(prefers-reduced-motion:reduce){.st{opacity:1;transform:none;filter:none}.hero img{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ring{opacity:1;transform:none}}
 </style>
 </head>
@@ -328,12 +352,23 @@ textarea{min-height:96px;resize:vertical}
     app.innerHTML = '<div class="card pg"><div class="head"><button class="back' + (ii ? ' show' : '') + '" id="bk">&lsaquo; Back</button><span class="count">' + (ii + 1) + ' of 4</span></div><div class="bar"><span style="width:' + ((ii + 1) * 25) + '%"></span></div>' +
       '<div class="story"><div class="hero"><img src="' + s.img + '" alt=""></div><div>' + s.html + (ii < 3 ? '<button class="btn mt" id="nx">Continue</button>' : '') + '</div></div>' +
       ((P.rings || []).length && ii < 3 ? '<button class="link" id="sk">Skip to ' + her() + ' rings</button>' : '') + '</div>' + foot();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
     var b = $('bk'); if (b) b.onclick = function () { intro(ii - 1); };
     var n = $('nx'); if (n) n.onclick = function () { intro(ii + 1); };
     var k = $('sk'); if (k) k.onclick = rings;
     var r = $('reveal'); if (r) r.onclick = rings;
     bindTalk();
+  }
+  // text eases in line by line; photos fade up slowly once loaded
+  function animIn() {
+    var sel = '.kick,.big,.lead,.said li,.craft > div,.story .btn,.story .link,.pickimg,.specs,label.fl,select,textarea,.chips button,.nopts button,.favs > *,.talk,.note,.mt,.notq h2,.notq p,.link';
+    var i = 0;
+    app.querySelectorAll(sel).forEach(function (el) {
+      if (el.closest('.ring') || el.closest('.notq .nopts') && view === 'rings') return;
+      if (el.parentNode && el.parentNode.closest && el.parentNode.closest('.st')) return;
+      el.classList.add('st'); el.style.animationDelay = Math.min(i++ * 0.07, 1.1) + 's';
+    });
+    app.querySelectorAll('.hero img').forEach(function (im) { var go = function () { requestAnimationFrame(function () { im.classList.add('ld'); }); }; if (im.complete && im.naturalWidth) go(); else im.addEventListener('load', go); });
   }
   function foot() { return '<p class="foot">Questions? Text or call <a href="tel:+1' + PHONE + '">' + PHONE_FMT + '</a></p>'; }
 
@@ -352,7 +387,7 @@ textarea{min-height:96px;resize:vertical}
       }).join('') + '</div>' +
       noneCard() +
       '<div style="max-width:640px;margin:0 auto">' + talkCard('rings') + '</div>' + foot();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
     var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 }) : null;
     app.querySelectorAll('.ring').forEach(function (el, i) { if (io) { el.style.transitionDelay = (i % 3) * .08 + 's'; io.observe(el); } else el.classList.add('in'); });
     app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; save(); pickPage(); }; });
@@ -392,7 +427,7 @@ textarea{min-height:96px;resize:vertical}
       '<div class="pickimg">' + (img(r) ? '<img src="' + E(img(r)) + '" alt="">' : '') + '</div><h3 style="margin-top:14px;font-size:26px">' + E(title(r)) + '</h3><div style="max-width:420px;margin:0 auto;text-align:left">' + specs(r) + '</div>' +
       '<div style="text-align:left"><label class="fl">Anything to change? Tap any (optional)</label>' + tweakChips() + '<label class="fl" for="notes">Or tell us in your words (optional)</label><textarea id="notes" placeholder="Anything else we should know">' + E(K.notes) + '</textarea></div>' +
       '<button class="btn gold mt" id="send">Send my ring</button><p class="note">No payment and no commitment. Your full custom mockup arrives within 24 hours.</p></div>' + foot();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
     $('bk').onclick = rings; bindTweaks(); centerRings();
     $('notes').oninput = function () { K.notes = this.value; save(); };
     $('send').onclick = function () { send({ mode: 'one', ring: K.ring }); };
@@ -404,7 +439,7 @@ textarea{min-height:96px;resize:vertical}
       '<p class="kick">Almost there</p><h1 class="big">Which one feels <em>most like ' + (you() ? 'you' : 'her') + '?</em></h1><p class="lead">Tap the one that keeps pulling you back.</p>' +
       '<div class="favs">' + K.favs.map(function (n) { var r = R(n); return '<button class="fav" data-n="' + n + '">' + (img(r) ? '<img src="' + E(img(r)) + '" alt="">' : '') + '<div><b>Ring ' + n + '</b>' + E(title(r)) + '</div></button>'; }).join('') + '</div>' +
       '<button class="btn ghost mt" id="all">I can\'t decide. Create all of them</button></div>' + foot();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
     $('bk').onclick = rings; centerRings();
     app.querySelectorAll('.fav').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; save(); pickPage(); }; });
     $('all').onclick = allPage;
@@ -415,7 +450,7 @@ textarea{min-height:96px;resize:vertical}
       '<p class="kick">Perfectly fine</p><h1 class="big">We will create <em>all ' + K.favs.length + '.</em></h1><p class="lead">Seeing them up close makes the choice easy. Anything we should change on them?</p>' +
       '<div style="text-align:left"><label class="fl">Tap any (optional)</label>' + tweakChips() + '<label class="fl" for="notes">Or tell us in your words (optional)</label><textarea id="notes" placeholder="Anything else we should know">' + E(K.notes) + '</textarea></div>' +
       '<button class="btn gold mt" id="send">Send my favorites</button><p class="note">No payment and no commitment. Your full mockups arrive within 24 hours.</p></div>' + foot();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
     $('bk').onclick = favsPage; bindTweaks();
     $('notes').oninput = function () { K.notes = this.value; save(); };
     $('send').onclick = function () { send({ mode: 'favs', favs: K.favs, all: true }); };
@@ -479,7 +514,7 @@ textarea{min-height:96px;resize:vertical}
       $('bk').onclick = function () { noneStep(1); };
       $('send').onclick = function () { send({ mode: 'none', why: K.why, build: K.build }); };
     }
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
   }
 
   /* ---------- send, with retries and a resend on reopen ---------- */
@@ -504,7 +539,7 @@ textarea{min-height:96px;resize:vertical}
       '<p class="lead">' + (mode === 'none' ? 'We read every word. Fresh designs made just for you arrive within 24 hours.' : 'Your full custom mockup arrives within 24 hours. We will text you the moment it is ready.') + '</p>' +
       talkCard('sent') + '<button class="link" id="again">See all rings again</button></div>' + foot();
     centerRings();
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); animIn();
     $('again').onclick = function () { rings(); };
     bindTalk();
   }
