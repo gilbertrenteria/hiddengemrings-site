@@ -1,0 +1,25 @@
+name: Fetch design images
+on:
+  push:
+    branches: [main]
+    paths: ['.github/fetch/list.json']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download each image and commit it
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          for item in json.load(open('.github/fetch/list.json')):
+              data = urllib.request.urlopen(item['url'], timeout=60).read()
+              assert len(data) > 5000, item['path']
+              open(item['path'], 'wb').write(data)
+              print(item['path'], len(data))
+          PY
+          git rm -q .github/fetch/list.json .github/workflows/fetch-images.yml
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git add -A && git commit -m "Add Canva intro images for the Ring Portal" && git push

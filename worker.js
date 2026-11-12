@@ -618,6 +618,12 @@ async function handleLead(fields, request, env, origin) {
     lead.routeReason = r.reason;
     lead.routeMode = r.mode;
   }
+  if (!lead.portalToken) {
+    // every new lead gets their Ring Portal link right away
+    const pt = newId(16);
+    await env.IG_KV.put(`portal:${pt}`, JSON.stringify({ t: pt, leadId: id, createdAt: Date.now(), answers: {}, msgs: [], inspo: [] }));
+    lead.portalToken = pt;
+  }
   await env.IG_KV.put(key, JSON.stringify(lead));
   await addToIndex(env, 'index:leads', id);
 
@@ -636,6 +642,7 @@ async function handleLead(fields, request, env, origin) {
     ['Proposing', lead.timeline],
     ['Credit (self reported)', lead.credit || 'not answered'],
     ['Sent to', `${(lead.routedNames || []).join(', ')} (${lead.routeReason})`],
+    ['Ring Portal', lead.portalToken ? `${portalLink(lead.portalToken)} (preview: add &preview=1)` : ''],
     ['Received', chicagoTime(lead.receivedAt)],
     ['Approximate location', (() => { const c = request.cf || {}; const t = [c.city, c.regionCode || c.region].filter(Boolean).join(', '); return t ? t + (c.postalCode ? ' (near ' + c.postalCode + ')' : '') : 'Unknown'; })()],
   ];
@@ -1221,6 +1228,39 @@ function portalPrefill(lead) {
   return a;
 }
 
+// Until the team loads their own 10 rings, suggest 10 from the ring library that fit
+// what the lead told us (shape, metal, stone size or budget). Frozen once the customer acts.
+const LIB = 'https://ring.gilbertrenteria.dev/img/ring/';
+const LIB_HAS = {
+  asscher: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'], cushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
+  elcushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'], emerald: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
+  marquise: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel', 'toi'], oval: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
+  pear: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel', 'toi'], princess: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+  radiant: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'], round: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'] };
+const LIB_SHAPE = { oval: 'Oval', round: 'Round', pear: 'Pear', emerald: 'Emerald', elcushion: 'Elongated Cushion', cushion: 'Cushion', radiant: 'Radiant', princess: 'Princess', marquise: 'Marquise', asscher: 'Asscher' };
+const LIB_STYLE = { solitaire: 'Solitaire', hidden: 'Hidden Halo', halo: 'Halo', side: 'Pavé Band', three: 'Three Stone', five: 'Five Stone', bezel: 'Bezel', toi: 'Toi et Moi' };
+function libShape(s) { s = String(s || '').toLowerCase(); if (/elongated/.test(s)) return 'elcushion'; return Object.keys(LIB_SHAPE).find((k) => k !== 'elcushion' && s.includes(k)) || ''; }
+function libMetal(m) { m = String(m || '').toLowerCase(); return m.includes('rose') ? 'rose' : (m.includes('white') || m.includes('platinum')) ? 'white' : m.includes('yellow') ? 'yellow' : ''; }
+const METAL_LABEL = { yellow: 'Yellow gold', white: 'White gold', rose: 'Rose gold' };
+function budgetCarat(b) {
+  b = String(b || '');
+  if (/under \$2/i.test(b)) return '1 ct'; if (/\$2,000 to/i.test(b)) return '1.5 ct'; if (/\$4,000 to/i.test(b)) return '2 ct';
+  if (/\$7,000 to/i.test(b)) return '2.5 ct'; if (/\$10,000/i.test(b)) return '3 ct'; return '1.5 ct';
+}
+function suggestRings(lead) {
+  const a = portalPrefill(lead);
+  const sh = libShape(a.shape) || 'oval', mt = libMetal(a.metal) || 'yellow';
+  const carat = a.carat ? a.carat.replace(/carats?/i, 'ct').replace('Under 1 ct', '0.75 ct') : budgetCarat(lead.budget);
+  const order = ['solitaire', 'hidden', 'halo', 'three', 'bezel', 'side', 'toi', 'five'].filter((s) => LIB_HAS[sh].includes(s));
+  const out = order.map((st) => ({ shape: LIB_SHAPE[sh], style: LIB_STYLE[st], carat, metal: METAL_LABEL[mt], img: `${LIB}${sh}-${st}-${mt}.webp`, auto: true }));
+  // fill to 10 with the two most loved looks in the other metals
+  const others = ['yellow', 'white', 'rose'].filter((x) => x !== mt);
+  for (const st of ['hidden', 'solitaire']) for (const m of others) if (out.length < 10) out.push({ shape: LIB_SHAPE[sh], style: LIB_STYLE[st], carat, metal: METAL_LABEL[m], img: `${LIB}${sh}-${st}-${m}.webp`, auto: true });
+  return out.slice(0, 10);
+}
+function ringsFor(p, lead) { return (p.rings && p.rings.length) ? p.rings : suggestRings(lead); }
+function freezeRings(p, lead) { if (!p.rings || !p.rings.length) p.rings = suggestRings(lead); }
+
 function portalView(p, lead, online) {
   // No team member names ever reach the customer.
   return {
@@ -1230,7 +1270,7 @@ function portalView(p, lead, online) {
     submittedAt: p.submittedAt || 0, version: p.version || 0,
     msgs: (p.msgs || []).map((m, i) => ({ from: m.from, name: m.from === 'team' ? 'Hidden Gem' : m.name, text: m.text, at: m.at, img: m.img ? `/portal/${p.t}/img/${m.img}` : '' })),
     inspo: (p.inspo || []).map((x) => (x.img ? { img: `/portal/${p.t}/img/${x.img}` } : { link: x.link })),
-    rings: (p.rings || []).map((r, i) => ({ n: i + 1, img: r.img ? (/^https:/.test(r.img) ? r.img : `/portal/${p.t}/img/${r.img}`) : '', shape: r.shape || '', style: r.style || '', carat: r.carat || '', metal: r.metal || '', title: r.title || '' })),
+    rings: ringsFor(p, lead).map((r, i) => ({ n: i + 1, img: r.img ? (/^https:/.test(r.img) ? r.img : `/portal/${p.t}/img/${r.img}`) : '', shape: r.shape || '', style: r.style || '', carat: r.carat || '', metal: r.metal || '', title: r.title || '' })),
     pick: p.pick || null, contact: (p.contact || []).slice(-1)[0] || null, online: !!online,
     tz: lead.tz || '', budget: lead.budget || '',
   };
@@ -1312,7 +1352,7 @@ async function handlePortalEvent(t, fields, env, origin) {
   } else if (type === 'leave' && !p.submittedAt && !(p.pick && p.pick.sentAt) && p.startedAt && (!p.leaveAt || now - p.leaveAt > 3 * 3600e3)) {
     p.leaveAt = now;
     if (fields.answers && typeof fields.answers === 'object') p.answers = cleanAnswers(fields.answers, p.answers);
-    if (fields.draft && typeof fields.draft === 'object') p.draft = cleanPick(fields.draft, p);
+    if (fields.draft && typeof fields.draft === 'object') { freezeRings(p, lead); p.draft = cleanPick(fields.draft, p); }
     subject = `RING PORTAL PAUSED: ${who} left partway`;
     html = portalEmail(lead, `${who} stepped away partway through`, `Left ${chicagoTime(now)} on ${escapeHtml(String(fields.stepName || fields.step || ''))}. Here is where they were:`, (p.rings || []).length ? pickRows(p.draft || {}, p) : portalDesignRows(p, lead), p);
   } else return json({ ok: true }, 200, origin);
@@ -1439,7 +1479,7 @@ async function handlePortalTeamRings(fields, url, env, origin) {
     if (/^data:image\//.test(img)) {
       if (img.length > 6e6) return json({ ok: false, error: 'A photo is too large (max about 4 MB)' }, 400, origin);
       p.imgN = (p.imgN || 0) + 1; await env.IG_KV.put(`pimg:${t}:${p.imgN}`, img); img = String(p.imgN);
-    } else if (/^https:\/\//.test(img) && !/^https:\/\/hiddengemrings\.com\//.test(img)) {
+    } else if (/^https:\/\//.test(img) && !/^https:\/\/(hiddengemrings\.com|ring\.gilbertrenteria\.dev)\//.test(img)) {
       try {
         const res = await fetch(img); const type = res.headers.get('Content-Type') || '';
         if (!res.ok || !/^image\//.test(type)) return json({ ok: false, error: 'Could not load a photo link' }, 400, origin);
@@ -1447,7 +1487,7 @@ async function handlePortalTeamRings(fields, url, env, origin) {
         let bin = ''; for (let i = 0; i < buf.length; i += 32768) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 32768));
         p.imgN = (p.imgN || 0) + 1; await env.IG_KV.put(`pimg:${t}:${p.imgN}`, `data:${type.split(';')[0]};base64,${btoa(bin)}`); img = String(p.imgN);
       } catch (e) { return json({ ok: false, error: 'Could not load a photo link' }, 400, origin); }
-    } else if (/^\d{1,4}$/.test(img) || /^https:\/\/hiddengemrings\.com\//.test(img)) { /* already stored or our own site */ }
+    } else if (/^\d{1,4}$/.test(img) || /^https:\/\/(hiddengemrings\.com|ring\.gilbertrenteria\.dev)\//.test(img)) { /* already stored, our site or our ring library */ }
     else img = '';
     const c = (v) => String(v || '').slice(0, 60);
     out.push({ img, shape: c(r.shape), style: c(r.style), carat: c(r.carat), metal: c(r.metal), title: c(r.title) });
@@ -1463,6 +1503,7 @@ async function handlePortalTeamRings(fields, url, env, origin) {
 async function handlePortalPick(t, fields, env, origin) {
   const { p, lead } = await portalLoad(t, env);
   if (!p || !lead) return json({ ok: false }, 404, origin);
+  freezeRings(p, lead);
   const k = cleanPick(fields, p);
   if (!k.mode || (k.mode === 'one' && !k.ring) || (k.mode === 'favs' && !k.favs.length)) return json({ ok: false, error: 'Pick a ring first' }, 400, origin);
   const sig = JSON.stringify(k);
@@ -1491,6 +1532,7 @@ async function handlePortalContact(t, fields, env, origin) {
   const c = { type, at: now, day: String(fields.day || '').slice(0, 40), window: String(fields.window || '').slice(0, 60), tz: String(fields.tz || '').slice(0, 40), central: String(fields.central || '').slice(0, 80) };
   const last = (p.contact || []).slice(-1)[0];
   if (type === 'text' && last && last.type === 'text' && now - last.at < 3600e3) return json({ ok: true }, 200, origin);
+  freezeRings(p, lead);
   p.contact = (p.contact || []).concat([c]).slice(-20);
   stampStage(lead, type === 'now' ? 'Wants a call now' : type === 'schedule' ? 'Call scheduled' : 'Texting us');
   await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));

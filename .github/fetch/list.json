@@ -1,0 +1,18 @@
+[
+ {
+  "url": "https://export-download.canva.com/cEohA/DAHavqcEohA/-1/0/0001-7340263480660018091.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH4R7NKVBA%2F20261112%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261112T165216Z&X-Amz-Expires=26389&X-Amz-Signature=169b466480e12b5f845ead877c4e0e2d1c58c368ff306e2c4ee900b7c6d9ac1a&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2013%20Nov%202026%2000%3A12%3A05%20GMT",
+  "path": "portal-intro-1.jpg"
+ },
+ {
+  "url": "https://export-download.canva.com/cEohA/DAHavqcEohA/-1/0/0001-342795556537197948.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH4R7NKVBA%2F20261112%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261112T090221Z&X-Amz-Expires=53965&X-Amz-Signature=047ce3b5e196d3b08907e7300539bee577ae9caec3189d48a5da1f9944931565&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2013%20Nov%202026%2000%3A01%3A46%20GMT",
+  "path": "portal-intro-2.jpg"
+ },
+ {
+  "url": "https://export-download.canva.com/cEohA/DAHavqcEohA/-1/0/0001-2071051917138437947.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH4R7NKVBA%2F20261112%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261112T173745Z&X-Amz-Expires=23644&X-Amz-Signature=f1bdead40a44305de04c0b26d121ac63e14caa9acce8e6f23aad7abfa3e1ee62&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Fri%2C%2013%20Nov%202026%2000%3A11%3A49%20GMT",
+  "path": "portal-intro-3.jpg"
+ },
+ {
+  "url": "https://export-download.canva.com/cEohA/DAHavqcEohA/-1/0/0001-4004222056409233554.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQYCGKMUH4R7NKVBA%2F20261112%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261112T192447Z&X-Amz-Expires=16199&X-Amz-Signature=b53336f759a81c1a8f173497b21d2d17b63eea1ae6109d0b01beabb9b0805b65&X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&response-expires=Thu%2C%2012%20Nov%202026%2023%3A54%3A46%20GMT",
+  "path": "portal-intro-4.jpg"
+ }
+]

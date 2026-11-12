@@ -200,6 +200,8 @@
       <p class="status" id="portalMsg"></p>
       <div id="portalOut" hidden><div class="linkbox" id="portalLink"></div><div class="btns"><a class="btn gold" id="portalText" href="#">Text it now</a><button class="btn ghost" type="button" id="portalCopy">Copy link</button><a class="btn ghost" id="portalOpen" href="#" target="_blank">Preview</a></div></div>
     </div>
+    <div class="card" style="margin-top:14px" id="ringsCard" hidden><h3>Their 10 rings</h3><p class="status" id="ringsNote" style="margin:4px 0 10px"></p><div id="ringsList" style="display:grid;gap:10px"></div><div class="btns"><button class="btn" type="button" id="ringsSave">Save rings to their portal</button></div><p class="status" id="ringsMsg"></p></div>
+    <div class="card" style="margin-top:14px" id="pickCard" hidden><h3>What they chose</h3><div id="pickOut"></div></div>
     <div class="card" style="margin-top:14px" id="portalDesignCard" hidden><h3>Their design so far</h3><div id="portalDesign"></div></div>
     <div class="card" style="margin-top:14px" id="portalThreadCard" hidden>
       <h3>Messages and design updates</h3>
@@ -537,15 +539,51 @@
   function portalLinkOut(link) {
     $('portalOut').hidden = false; $('portalLink').textContent = link; $('portalOpen').href = link + '&preview=1';
     var surprise = /^yes/i.test(lead.surprise || '');
-    var who = rep === 'kim' ? 'Kim' : 'Gilbert';
-    $('portalText').href = sms(lead.phone, 'Hi ' + first() + ' it\'s ' + who + ' with Hidden Gem. ' + (surprise ? 'Here is your private link whenever you have a minute. ' : 'I made you a private Ring Portal so you can design her ring at your own pace. ') + link);
+    $('portalText').href = sms(lead.phone, surprise
+      ? 'Hi ' + first() + ' this is Hidden Gem. Your private link is ready whenever you have a quiet minute ' + link
+      : 'Hi ' + first() + ' we are so excited to begin this journey with you. We already started on everything you shared and your private Ring Portal is ready. Tap here to see the rings we designed just for you ' + link);
   }
   function portalLoad() {
     if (!lead || !lead.portalToken) return;
     portalLinkOut('https://hiddengemrings.com/portal?t=' + lead.portalToken);
     fetch(API + '/portal/' + lead.portalToken).then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) return; portalDraw(j.portal); });
   }
+  var RSTYLES = ['Solitaire', 'Hidden Halo', 'Halo', 'Pavé Band', 'Three Stone', 'Five Stone', 'Bezel', 'Toi et Moi'];
+  var RSHAPES = ['Oval', 'Round', 'Pear', 'Emerald', 'Elongated Cushion', 'Cushion', 'Radiant', 'Princess', 'Marquise', 'Asscher'];
+  var RMETALS = ['Yellow gold', 'White gold', 'Rose gold', 'Platinum'];
+  var RIDS = { 'Solitaire': 'solitaire', 'Hidden Halo': 'hidden', 'Halo': 'halo', 'Pavé Band': 'side', 'Three Stone': 'three', 'Five Stone': 'five', 'Bezel': 'bezel', 'Toi et Moi': 'toi' };
+  var ringsData = [];
+  function libImg(r) { var sh = r.shape === 'Elongated Cushion' ? 'elcushion' : String(r.shape || 'oval').toLowerCase(); var mt = /rose/i.test(r.metal) ? 'rose' : /white|platinum/i.test(r.metal) ? 'white' : 'yellow'; return 'https://ring.gilbertrenteria.dev/img/ring/' + sh + '-' + (RIDS[r.style] || 'solitaire') + '-' + mt + '.webp'; }
+  function sel(list, v, k, i) { return '<select data-k="' + k + '" data-i="' + i + '" style="padding:6px;border-radius:8px">' + list.map(function (x) { return '<option' + (x === v ? ' selected' : '') + '>' + E(x) + '</option>'; }).join('') + '</select>'; }
+  function ringsDraw(p) {
+    $('ringsCard').hidden = false;
+    var auto = (p.rings || []).some(function (r) { return r.auto; }) || !(p.rings || []).length;
+    $('ringsNote').textContent = 'These are what they see. Change a style, metal or size, or upload your own Canva photo, then save.';
+    $('ringsList').innerHTML = ringsData.map(function (r, i) {
+      var src = r.newImg || (r.img ? (/^\//.test(r.img) ? API + r.img : r.img) : '');
+      return '<div style="display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px">' +
+        '<img src="' + E(src) + '" style="width:72px;height:72px;object-fit:contain;background:#f4f0e8;border-radius:10px">' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b>Ring ' + (i + 1) + '</b>' + sel(RSHAPES, r.shape, 'shape', i) + sel(RSTYLES, r.style, 'style', i) + sel(RMETALS, r.metal, 'metal', i) +
+        '<input data-k="carat" data-i="' + i + '" value="' + E(r.carat) + '" style="width:80px;padding:6px;border-radius:8px;border:1px solid var(--line)">' +
+        '<label style="cursor:pointer;text-decoration:underline;font-size:.85rem">Upload photo<input type="file" accept="image/*" data-up="' + i + '" hidden></label></div></div>';
+    }).join('');
+    $('ringsList').querySelectorAll('select,input[data-k]').forEach(function (el) { el.addEventListener('change', function () { var r = ringsData[+el.dataset.i]; r[el.dataset.k] = el.value; if (el.dataset.k !== 'carat' && !r.newImg && (!r.img || /ring\.gilbertrenteria/.test(r.img))) r.img = libImg(r); ringsDraw(p); }); });
+    $('ringsList').querySelectorAll('input[data-up]').forEach(function (el) { el.addEventListener('change', function (e) { var f = e.target.files[0]; if (!f) return; resize(URL.createObjectURL(f), function (d) { ringsData[+el.dataset.up].newImg = d; ringsDraw(p); }); }); });
+  }
+  function pickDraw(p) {
+    var k = p.pick, c = p.contact;
+    if (!k && !c) { $('pickCard').hidden = true; return; }
+    $('pickCard').hidden = false;
+    var R = p.rings || [], lab = function (n) { var r = R[n - 1]; return r ? 'Ring ' + n + ': ' + [r.shape, r.style, r.carat, r.metal].filter(Boolean).join(' ') : 'Ring ' + n; };
+    var h = '';
+    if (k) h += '<p><b>' + (k.mode === 'one' ? 'Picked ' + E(lab(k.ring)) : k.mode === 'favs' ? 'Favorites: ' + k.favs.map(lab).map(E).join(' / ') : 'None of these. Why: ' + E((k.why || []).join(', '))) + '</b></p>' +
+      (k.build && Object.keys(k.build).length ? '<p>Wants: ' + E(Object.keys(k.build).map(function (x) { return k.build[x]; }).join(' · ')) + '</p>' : '') + (k.notes ? '<p>Notes: ' + E(k.notes) + '</p>' : '') + '<p class="status">Sent ' + when(k.sentAt) + '. Promised full mockup within 24 hours.</p>';
+    if (c) h += '<p><b>' + (c.type === 'now' ? 'TALK NOW: call within 45 minutes of ' + when(c.at) : c.type === 'schedule' ? 'Call scheduled: ' + E(c.day + ' ' + c.window) : 'Tapped Text us ' + when(c.at)) + '</b></p>';
+    $('pickOut').innerHTML = h;
+  }
   function portalDraw(p) {
+    ringsData = (p.rings || []).map(function (r) { return { shape: r.shape, style: r.style, carat: r.carat, metal: r.metal, img: r.img, title: r.title }; });
+    ringsDraw(p); pickDraw(p);
     var lab = { shape: 'Shape', setting: 'Setting', carat: 'Stone size', stoneType: 'Stone', metal: 'Metal', band: 'Band', bandWidth: 'Band width', prongs: 'Prongs', ringSize: 'Ring size', engraving: 'Engraving', engravingText: 'Engraving words', herStyle: 'Her style', when: 'Timing', extras: 'Extras', story: 'Story', notes: 'Notes' };
     var a = Object.assign({}, p.prefill || {}, p.answers || {});
     var rows = Object.keys(lab).filter(function (k) { return a[k] && (!Array.isArray(a[k]) || a[k].length); }).map(function (k) { return '<div><b>' + lab[k] + ':</b> ' + E(Array.isArray(a[k]) ? a[k].join(', ') : a[k]) + '</div>'; });
@@ -561,6 +599,14 @@
       if (!j.ok) { $('portalMsg').className = 'status err'; $('portalMsg').textContent = j.error || 'Could not create it.'; return; }
       $('portalMsg').className = 'status ok'; $('portalMsg').textContent = 'Their Ring Portal is ready.'; lead.portalToken = j.token; portalLoad();
     }).catch(function () { $('portalMsg').className = 'status err'; $('portalMsg').textContent = 'Could not reach the server.'; });
+  });
+  $('ringsSave').addEventListener('click', function () {
+    $('ringsMsg').className = 'status'; $('ringsMsg').textContent = 'Saving...';
+    var list = ringsData.map(function (r) { return { shape: r.shape, style: r.style, carat: r.carat, metal: r.metal, title: r.title || '', img: r.newImg || (r.img && /^\/portal\/[a-z0-9]+\/img\/(\d+)$/.test(r.img) ? r.img.split('/').pop() : r.img) }; });
+    fetch(API + '/portal/team-rings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, leadId: leadId, rings: list }) }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) { $('ringsMsg').className = 'status err'; $('ringsMsg').textContent = j.error || 'Could not save.'; return; }
+      $('ringsMsg').className = 'status ok'; $('ringsMsg').textContent = 'Saved. Their portal shows these ' + j.count + ' rings now.'; portalDraw(j.portal);
+    }).catch(function () { $('ringsMsg').className = 'status err'; $('ringsMsg').textContent = 'Could not reach the server.'; });
   });
   $('portalCopy').addEventListener('click', function () { copy($('portalLink').textContent, this); });
   $('portalFile').addEventListener('change', function (e) { var f = e.target.files[0]; if (!f) return; resize(URL.createObjectURL(f), function (d) { portalImg = d; $('portalSendMsg').textContent = 'Photo ready to send.'; }); });
