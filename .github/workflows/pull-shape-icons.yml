@@ -1,0 +1,16 @@
+name: Pull shape icons
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          for n in pear oval round emerald radiant notsure; do
+            curl -sSf "https://long-bar-d49d.gilbertrenteria.workers.dev/asset/shape-$n.webp" | xxd -r -p > "shape-$n.webp"
+            file "shape-$n.webp"
+          done
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git add shape-*.webp && git commit -m "Add Canva shape icons" && git push
