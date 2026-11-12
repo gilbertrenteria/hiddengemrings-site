@@ -1712,12 +1712,12 @@ function customerHowNext(lead) {
   const joinOr = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' or ' + a[a.length - 1] : a[0] || '');
   const byWords = r.length === 1 ? (r[0] === 'call' ? 'call you' : r[0] === 'text' ? 'text you' : 'email you') : r.length ? 'reach out by ' + joinOr(words) : 'reach out';
   const surprise = isSurprise(lead);
-  if (lead.contact === 'Book a call' && lead.slotDate) return `Your 30 minute call is booked for <strong>${escapeHtml(slotForCustomer(lead))}</strong>. ${surprise ? "We'll call you then. Everything stays private." : 'One of our ring specialists will call you then.'}`;
+  if (lead.contact === 'Book a call' && lead.slotDate) return `Your 30 minute call is booked for <strong>${escapeHtml(slotForCustomer(lead))}</strong>. ${surprise ? "We'll call you then." : 'One of our ring specialists will call you then.'}`;
   if (surprise) {
     const how = r.length ? ' by ' + joinOr(words) : '';
     const w = String(lead.windows || '');
-    if (w && !/^Anytime/i.test(w)) return `We'll reach out privately${how} during the times you picked (${escapeHtml(w)}). Everything stays private.`;
-    return `We'll reach out privately${how}${lead.routeMode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon'}. Everything stays private.`;
+    if (w && !/^Anytime/i.test(w)) return `We'll reach out privately${how} during the times you picked (${escapeHtml(w)}).`;
+    return `We'll reach out privately${how}${lead.routeMode === 'offline' ? ' during business hours (Mon to Sat, 9 AM to 9 PM Central)' : ' soon'}.`;
   }
   if (lead.routeMode === 'offline') return `Our ring specialists are away right now. We'll ${byWords} during business hours (Mon to Sat, 9 AM to 9 PM Central).`;
   return `One of our ring specialists will ${byWords} shortly.`;
