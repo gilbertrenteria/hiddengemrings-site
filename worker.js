@@ -1187,6 +1187,199 @@ async function handleInspoSave(fields, url, env, origin) {
   return json({ ok: true, pics: list }, 200, origin);
 }
 
+
+// === Ring Portal Creator ===
+// One private link per lead (/portal?t=TOKEN). The customer designs the ring
+// step by step (answers they already gave are prefilled and never asked again),
+// adds notes and inspiration, and messages the team back and forth. No prices
+// here: price and payment come after the design is created.
+const PORTAL_KEYS = ['shape', 'setting', 'carat', 'stoneType', 'metal', 'band', 'bandWidth', 'prongs', 'ringSize', 'engraving', 'engravingText', 'herStyle', 'story', 'notes', 'when', 'extras'];
+const PORTAL_LABELS = { shape: 'Shape', setting: 'Setting', carat: 'Stone size', stoneType: 'Stone type', metal: 'Metal', band: 'Band', bandWidth: 'Band width', prongs: 'Prongs', ringSize: 'Ring size', engraving: 'Engraving', engravingText: 'Engraving words', herStyle: 'Her style', story: 'Their story', notes: 'Notes', when: 'Proposal timing', extras: 'Extras' };
+const portalLink = (t) => `https://hiddengemrings.com/portal?t=${t}`;
+
+// Turn what the lead already told us into portal answers so nothing is asked twice.
+function portalPrefill(lead) {
+  const d = lead.design || {}, a = {};
+  const ok = (v) => v && !/^not sure/i.test(v);
+  const shape = ok(d.shape) ? d.shape : ok(lead.shape) ? lead.shape : '';
+  if (shape) a.shape = shape;
+  if (ok(d.carat)) a.carat = d.carat;
+  if (ok(d.stoneType)) a.stoneType = d.stoneType;
+  if (ok(d.metal)) a.metal = d.metal;
+  if (d.band === 'Plain band') a.band = 'Plain polished'; else if (d.band === 'Diamond band') a.band = 'Pavé diamonds';
+  if (d.band === 'Hidden halo') a.setting = 'Hidden Halo';
+  if (ok(d.ringSize) && !/secret/i.test(d.ringSize)) a.ringSize = d.ringSize;
+  if (d.engraving === 'No') a.engraving = 'No engraving';
+  if (lead.timeline) a.when = lead.timeline;
+  if (d.style && /^The /.test(d.style)) a.inspiredBy = d.style;
+  return a;
+}
+
+function portalView(p, lead) {
+  return {
+    first: String(lead.name || '').split(' ')[0], rep: (lead.routedNames || [])[0] || 'Kim',
+    surprise: /^yes/i.test(lead.surprise || ''), buyer: (lead.about || {}).buyer || '',
+    prefill: portalPrefill(lead), answers: p.answers || {}, step: p.step || 0,
+    submittedAt: p.submittedAt || 0, version: p.version || 0,
+    msgs: (p.msgs || []).map((m, i) => ({ from: m.from, name: m.name, text: m.text, at: m.at, img: m.img ? `/portal/${p.t}/img/${m.img}` : '' })),
+    inspo: (p.inspo || []).map((x) => (x.img ? { img: `/portal/${p.t}/img/${x.img}` } : { link: x.link })),
+  };
+}
+
+async function portalLoad(t, env) {
+  if (!/^[a-z0-9]{10,32}$/.test(t || '')) return {};
+  const p = await env.IG_KV.get(`portal:${t}`, 'json');
+  if (!p) return {};
+  const lead = await env.IG_KV.get(`lead:${p.leadId}`, 'json');
+  return { p, lead };
+}
+
+async function portalSaveImg(t, p, data, env) {
+  if (!/^data:image\/(jpeg|png|webp);base64,/.test(data) || data.length > 900000) return '';
+  p.imgN = (p.imgN || 0) + 1;
+  await env.IG_KV.put(`pimg:${t}:${p.imgN}`, data);
+  return String(p.imgN);
+}
+
+function portalDesignRows(p, lead) {
+  const a = Object.assign({}, portalPrefill(lead), p.answers || {});
+  return PORTAL_KEYS.filter((k) => a[k]).map((k) => [PORTAL_LABELS[k], Array.isArray(a[k]) ? a[k].join(', ') : a[k]]);
+}
+
+function portalEmail(lead, title, intro, rows, p, extra) {
+  return `<div style="font-family:Arial,sans-serif;max-width:560px">` +
+    `<div style="display:inline-block;background:#54453A;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">RING PORTAL</div>` +
+    `<h2 style="margin:14px 0 6px">${escapeHtml(title)}</h2><p style="margin:0 0 14px;color:#333">${intro}</p>` +
+    (rows && rows.length ? `<table cellpadding="7" style="border-collapse:collapse">` + rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') + `</table>` : '') +
+    (extra || '') +
+    `<p style="margin-top:16px">Phone: ${escapeHtml(fmtPhone(lead.phone))}${/^yes/i.test(lead.surprise || '') ? ' · <b>SURPRISE, keep it private</b>' : ''}${lead.windowsCentral ? ' · Best times: ' + escapeHtml(lead.windowsCentral) : ''}</p>` +
+    `<p><a href="https://hiddengemrings.com/call?lead=${encodeURIComponent(lead.id)}" style="background:#54453A;color:#fff;padding:11px 20px;border-radius:999px;text-decoration:none;font-weight:700">Open their call page to reply</a></p></div>`;
+}
+
+async function handlePortalCreate(fields, url, env, origin) {
+  if (!(isAdmin(fields, url, env) || teamAuth(fields, url, env))) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const leadId = String(fields.leadId || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${leadId}`, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  if (!lead.portalToken) {
+    const t = newId(16);
+    await env.IG_KV.put(`portal:${t}`, JSON.stringify({ t, leadId, createdAt: Date.now(), answers: {}, msgs: [], inspo: [] }));
+    lead.portalToken = t; stampStage(lead, 'Ring Portal sent');
+    await env.IG_KV.put(`lead:${leadId}`, JSON.stringify(lead));
+  }
+  return json({ ok: true, token: lead.portalToken, link: portalLink(lead.portalToken) }, 200, origin);
+}
+
+async function handlePortalGet(t, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false, error: 'Not found' }, 404, origin);
+  return json({ ok: true, portal: portalView(p, lead) }, 200, origin);
+}
+
+async function handlePortalImg(t, n, env) {
+  const data = await env.IG_KV.get(`pimg:${t}:${n}`);
+  const m = data && data.match(/^data:(image\/[a-z+]+);base64,(.*)$/);
+  if (!m) return new Response('Not found', { status: 404 });
+  const bin = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
+  return new Response(bin, { headers: { 'Content-Type': m[1], 'Cache-Control': 'private, max-age=86400', 'Access-Control-Allow-Origin': '*' } });
+}
+
+// open (real person only, sent by the page after a real tap or scroll), start, leave
+async function handlePortalEvent(t, fields, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false }, 404, origin);
+  const type = String(fields.type || ''), now = Date.now(), who = lead.name;
+  let subject = '', html = '';
+  if (type === 'open' && (!p.openedAt || now - p.openedAt > 6 * 3600e3)) {
+    p.openedAt = now; stampStage(lead, 'Ring Portal opened');
+    subject = `RING PORTAL OPENED: ${who}`;
+    html = portalEmail(lead, `${who} just opened their Ring Portal`, `Opened ${chicagoTime(now)}. Good moment for a quick text if they asked for text.`, null, p);
+  } else if (type === 'start' && !p.startedAt) {
+    p.startedAt = now; stampStage(lead, 'Designing in portal');
+    subject = `RING PORTAL STARTED: ${who} is designing`;
+    html = portalEmail(lead, `${who} started designing`, `Started ${chicagoTime(now)}.`, null, p);
+  } else if (type === 'leave' && !p.submittedAt && p.startedAt && (!p.leaveAt || now - p.leaveAt > 3 * 3600e3)) {
+    p.leaveAt = now;
+    if (fields.answers && typeof fields.answers === 'object') p.answers = cleanAnswers(fields.answers, p.answers);
+    subject = `RING PORTAL PAUSED: ${who} left partway`;
+    html = portalEmail(lead, `${who} stepped away partway through`, `Left ${chicagoTime(now)} on step ${escapeHtml(String(fields.stepName || fields.step || ''))}. Here is what they picked so far:`, portalDesignRows(p, lead), p);
+  } else return json({ ok: true }, 200, origin);
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
+  await sendEmail(env, { to: leadRecipients(lead), subject, html });
+  return json({ ok: true }, 200, origin);
+}
+
+function cleanAnswers(inp, prev) {
+  const out = Object.assign({}, prev || {});
+  PORTAL_KEYS.forEach((k) => { if (inp[k] != null) out[k] = Array.isArray(inp[k]) ? inp[k].slice(0, 10).map((x) => String(x).slice(0, 80)) : String(inp[k]).slice(0, k === 'story' || k === 'notes' ? 2000 : 200); });
+  return out;
+}
+
+// autosave on every answer; final=true sends the finished design to the team
+async function handlePortalSave(t, fields, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false }, 404, origin);
+  p.answers = cleanAnswers(fields.answers || {}, p.answers);
+  p.step = Number(fields.step) || 0;
+  let emailed = false;
+  if (fields.final) {
+    const sig = JSON.stringify(p.answers);
+    if (sig !== p.lastSentSig) {
+      p.version = (p.version || 0) + 1; p.submittedAt = Date.now(); p.lastSentSig = sig;
+      stampStage(lead, p.version > 1 ? 'Design updated' : 'Design created');
+      lead.portalDesign = Object.assign({}, portalPrefill(lead), p.answers);
+      const sent = await sendEmail(env, { to: leadRecipients(lead), subject: `${p.version > 1 ? 'DESIGN UPDATED' : 'DESIGN CREATED'}: ${lead.name}${/^yes/i.test(lead.surprise || '') ? ' (SURPRISE)' : ''}`,
+        html: portalEmail(lead, `${lead.name} ${p.version > 1 ? 'updated' : 'created'} their ring`, `Version ${p.version}, ${chicagoTime(p.submittedAt)}. Next: send their price and financing options.`, portalDesignRows(p, lead), p,
+          (p.inspo || []).length ? `<p>${p.inspo.length} inspiration item(s) in the portal.</p>` : '') });
+      if (!sent.ok) { await env.IG_KV.put(`portal:${t}`, JSON.stringify(p)); return json({ ok: false, error: 'Saved but the email did not send', saved: true }, 502, origin); }
+      emailed = true;
+    }
+  }
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
+  return json({ ok: true, emailed, version: p.version || 0 }, 200, origin);
+}
+
+// customer message or inspiration (photo or link)
+async function handlePortalMsg(t, fields, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false }, 404, origin);
+  const text = String(fields.text || '').trim().slice(0, 2000), link = String(fields.link || '').trim().slice(0, 500);
+  const isInspo = !!fields.inspo;
+  let img = '';
+  if (fields.image) { img = await portalSaveImg(t, p, String(fields.image), env); if (!img) return json({ ok: false, error: 'That photo is too large' }, 400, origin); }
+  if (!text && !img && !link) return json({ ok: false, error: 'Empty' }, 400, origin);
+  if (isInspo) { p.inspo = p.inspo || []; if (p.inspo.length >= 20) return json({ ok: false, error: 'Up to 20 inspiration items' }, 400, origin); p.inspo.push(img ? { img } : { link: /^https?:\/\//.test(link) ? link : '' }); }
+  else { p.msgs = p.msgs || []; p.msgs.push({ from: 'customer', name: String(lead.name || '').split(' ')[0], text, img, at: Date.now() }); }
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  const what = isInspo ? (img ? 'added an inspiration photo' : 'added an inspiration link') : 'sent you a message';
+  await sendEmail(env, { to: leadRecipients(lead), subject: `RING PORTAL MESSAGE: ${lead.name} ${what}`,
+    html: portalEmail(lead, `${lead.name} ${what}`, text ? `"${escapeHtml(text)}"` : link ? escapeHtml(link) : 'See the photo in their portal.', null, p) });
+  return json({ ok: true, portal: portalView(p, lead) }, 200, origin);
+}
+
+// team reply or design update (text and an optional photo of the updated design)
+async function handlePortalTeamMsg(fields, url, env, origin) {
+  if (!(isAdmin(fields, url, env) || teamAuth(fields, url, env))) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const leadId = String(fields.leadId || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${leadId}`, 'json');
+  if (!lead || !lead.portalToken) return json({ ok: false, error: 'No portal for this customer yet' }, 404, origin);
+  const t = lead.portalToken, p = await env.IG_KV.get(`portal:${t}`, 'json');
+  const text = String(fields.text || '').trim().slice(0, 2000);
+  let img = '';
+  if (fields.image) { img = await portalSaveImg(t, p, String(fields.image), env); if (!img) return json({ ok: false, error: 'That photo is too large' }, 400, origin); }
+  if (!text && !img) return json({ ok: false, error: 'Type a message or add a photo' }, 400, origin);
+  p.msgs = p.msgs || [];
+  p.msgs.push({ from: 'team', name: String(fields.rep || (lead.routedNames || [])[0] || 'Kim').slice(0, 30), text, img, at: Date.now() });
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  if (lead.email && fields.notify) {
+    await sendEmail(env, { to: [lead.email], from: CUSTOMER_FROM, replyTo: PUBLIC_EMAIL, subject: 'You have an update from Hidden Gem',
+      html: `<div style="font-family:Arial,sans-serif;max-width:520px"><p>Hi ${escapeHtml(String(lead.name).split(' ')[0])},</p><p>There is a new update waiting for you.</p><p><a href="${portalLink(t)}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Open my portal</a></p><p style="color:#777">Hidden Gem</p></div>` });
+  }
+  return json({ ok: true, portal: portalView(p, lead), link: portalLink(t) }, 200, origin);
+}
+
 async function handleAdminList(url, env, origin) {
   if (!isAdmin(null, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
   const leadIds = ((await env.IG_KV.get('index:leads', 'json')) || []).slice(0, 50);
@@ -1232,12 +1425,16 @@ export default {
       if (path === '/team/state') return handleTeamState(url, env, origin);
       if (path === '/book/slots') return handleSlots(env, origin);
       if (path === '/email/check') return handleEmailCheck(url, env, origin);
-      let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image\/([0-5]|size)$/);
+      let m = path.match(/^\/order\/([a-z0-9]{6,32})\/image\/([0-9]|size)$/);
       if (m) return handleOptionImage(m[1], m[2], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
       if (m) return handleOrderImage(m[1], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})$/);
       if (m) return handleOrderGet(m[1], env, origin);
+      m = path.match(/^\/portal\/([a-z0-9]{10,32})\/img\/(\d{1,4})$/);
+      if (m) return handlePortalImg(m[1], m[2], env);
+      m = path.match(/^\/portal\/([a-z0-9]{10,32})$/);
+      if (m) return handlePortalGet(m[1], env, origin);
       return new Response('Not found', { status: 404 });
     }
 
@@ -1270,6 +1467,10 @@ export default {
     if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
     if (path === '/order/create-options') return handleOptionsCreate(fields, env, origin, url);
+    if (path === '/portal/create') return handlePortalCreate(fields, url, env, origin);
+    if (path === '/portal/team-msg') return handlePortalTeamMsg(fields, url, env, origin);
+    const pm = path.match(/^\/portal\/([a-z0-9]{10,32})\/(event|save|msg)$/);
+    if (pm) return pm[2] === 'event' ? handlePortalEvent(pm[1], fields, env, origin) : pm[2] === 'save' ? handlePortalSave(pm[1], fields, env, origin) : handlePortalMsg(pm[1], fields, env, origin);
     const sm = path.match(/^\/order\/([a-z0-9]{6,32})\/seen$/);
     if (sm) return handleOrderSeen(sm[1], env, origin);
     const chm = path.match(/^\/order\/([a-z0-9]{6,32})\/choose$/);
@@ -1343,7 +1544,7 @@ function emailType(subject) {
   const map = [
     [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
     [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
-    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
+    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RING PORTAL OPENED/i, 'Ring Portal opened'], [/RING PORTAL STARTED/i, 'Ring Portal started'], [/RING PORTAL PAUSED/i, 'Ring Portal left partway'], [/RING PORTAL MESSAGE/i, 'Ring Portal message'], [/DESIGN (CREATED|UPDATED)/i, 'Ring Portal design'], [/update from Hidden Gem/i, 'Portal update to customer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
     [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'],
     [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
   ];

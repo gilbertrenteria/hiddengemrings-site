@@ -191,6 +191,27 @@
   </section>
 
   <!-- 5 SEND -->
+  <section class="pg" data-label="Ring Portal">
+    <span class="eyebrow">Design together, no prices yet</span>
+    <h2>Their <span class="script">Ring Portal</span></h2>
+    <p class="sub">They design the ring on their own time. Answers they already gave are filled in and never asked again. You get an email when they open it, start, step away, message you or save their design.</p>
+    <div class="card" style="margin-top:12px">
+      <div class="btns" style="margin-top:0"><button class="btn" type="button" id="portalCreate">Create their Ring Portal link</button></div>
+      <p class="status" id="portalMsg"></p>
+      <div id="portalOut" hidden><div class="linkbox" id="portalLink"></div><div class="btns"><a class="btn gold" id="portalText" href="#">Text it now</a><button class="btn ghost" type="button" id="portalCopy">Copy link</button><a class="btn ghost" id="portalOpen" href="#" target="_blank">Preview</a></div></div>
+    </div>
+    <div class="card" style="margin-top:14px" id="portalDesignCard" hidden><h3>Their design so far</h3><div id="portalDesign"></div></div>
+    <div class="card" style="margin-top:14px" id="portalThreadCard" hidden>
+      <h3>Messages and design updates</h3>
+      <div id="portalThread" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;margin:10px 0"></div>
+      <textarea id="portalReply" placeholder="Reply, or describe a design update" style="width:100%;min-height:80px"></textarea>
+      <div class="btns"><label class="btn ghost" style="cursor:pointer">Add design photo<input type="file" accept="image/*" id="portalFile" hidden></label><button class="btn" type="button" id="portalSend">Send to their portal</button></div>
+      <label class="ck"><input type="checkbox" id="portalNotify">Also email them "You have an update" (only if they gave an email)</label>
+      <p class="status" id="portalSendMsg"></p>
+    </div>
+    <div class="pgnav"><button class="btn ghost" type="button" data-back>Back</button><button class="btn" type="button" data-next>Next</button></div>
+  </section>
+
   <section class="pg" data-label="Send 10 rings">
     <span class="eyebrow">Pick Your Ring + Checkout</span>
     <h2>Send Their <span class="script">6 Rings</span></h2>
@@ -510,9 +531,52 @@
         .then(function () { $('saveMsg').className = 'status ok'; $('saveMsg').textContent = 'Outcome saved'; refresh(); });
     };
   }
+
+  /* ---------------- Ring Portal ---------------- */
+  var portalImg = '';
+  function portalLinkOut(link) {
+    $('portalOut').hidden = false; $('portalLink').textContent = link; $('portalOpen').href = link + '&preview=1';
+    var surprise = /^yes/i.test(lead.surprise || '');
+    var who = rep === 'kim' ? 'Kim' : 'Gilbert';
+    $('portalText').href = sms(lead.phone, 'Hi ' + first() + ' it\'s ' + who + ' with Hidden Gem. ' + (surprise ? 'Here is your private link whenever you have a minute. ' : 'I made you a private Ring Portal so you can design her ring at your own pace. ') + link);
+  }
+  function portalLoad() {
+    if (!lead || !lead.portalToken) return;
+    portalLinkOut('https://hiddengemrings.com/portal?t=' + lead.portalToken);
+    fetch(API + '/portal/' + lead.portalToken).then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) return; portalDraw(j.portal); });
+  }
+  function portalDraw(p) {
+    var lab = { shape: 'Shape', setting: 'Setting', carat: 'Stone size', stoneType: 'Stone', metal: 'Metal', band: 'Band', bandWidth: 'Band width', prongs: 'Prongs', ringSize: 'Ring size', engraving: 'Engraving', engravingText: 'Engraving words', herStyle: 'Her style', when: 'Timing', extras: 'Extras', story: 'Story', notes: 'Notes' };
+    var a = Object.assign({}, p.prefill || {}, p.answers || {});
+    var rows = Object.keys(lab).filter(function (k) { return a[k] && (!Array.isArray(a[k]) || a[k].length); }).map(function (k) { return '<div><b>' + lab[k] + ':</b> ' + E(Array.isArray(a[k]) ? a[k].join(', ') : a[k]) + '</div>'; });
+    $('portalDesignCard').hidden = false;
+    $('portalDesign').innerHTML = (p.submittedAt ? '<p class="status ok">Saved design, version ' + p.version + '</p>' : '<p class="status">Not saved yet</p>') + rows.join('') +
+      ((p.inspo || []).length ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' + p.inspo.map(function (x) { return x.img ? '<img src="' + API + x.img + '" style="width:80px;height:80px;object-fit:cover;border-radius:10px">' : '<a href="' + E(x.link) + '" target="_blank">' + E(x.link) + '</a>'; }).join('') + '</div>' : '');
+    $('portalThreadCard').hidden = false;
+    $('portalThread').innerHTML = (p.msgs || []).map(function (m) { var me = m.from === 'team'; return '<div style="align-self:' + (me ? 'flex-end' : 'flex-start') + ';max-width:85%;background:' + (me ? 'var(--deep)' : '#fff') + ';color:' + (me ? '#fff' : 'inherit') + ';border:1px solid var(--line);border-radius:14px;padding:8px 12px;white-space:pre-wrap">' + E(m.text) + (m.img ? '<img src="' + API + m.img + '" style="display:block;max-width:100%;border-radius:8px;margin-top:6px">' : '') + '<div style="font-size:.72rem;opacity:.7;margin-top:3px">' + E(m.name) + ' · ' + new Date(m.at).toLocaleString() + '</div></div>'; }).join('') || '<p class="status">No messages yet.</p>';
+  }
+  $('portalCreate').addEventListener('click', function () {
+    $('portalMsg').textContent = 'Creating...';
+    fetch(API + '/portal/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, leadId: leadId }) }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) { $('portalMsg').className = 'status err'; $('portalMsg').textContent = j.error || 'Could not create it.'; return; }
+      $('portalMsg').className = 'status ok'; $('portalMsg').textContent = 'Their Ring Portal is ready.'; lead.portalToken = j.token; portalLoad();
+    }).catch(function () { $('portalMsg').className = 'status err'; $('portalMsg').textContent = 'Could not reach the server.'; });
+  });
+  $('portalCopy').addEventListener('click', function () { copy($('portalLink').textContent, this); });
+  $('portalFile').addEventListener('change', function (e) { var f = e.target.files[0]; if (!f) return; resize(URL.createObjectURL(f), function (d) { portalImg = d; $('portalSendMsg').textContent = 'Photo ready to send.'; }); });
+  $('portalSend').addEventListener('click', function () {
+    var text = $('portalReply').value.trim(); if (!text && !portalImg) return;
+    $('portalSendMsg').className = 'status'; $('portalSendMsg').textContent = 'Sending...';
+    fetch(API + '/portal/team-msg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, leadId: leadId, text: text, image: portalImg, rep: rep === 'kim' ? 'Kim' : 'Gilbert', notify: $('portalNotify').checked }) }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j.ok) { $('portalSendMsg').className = 'status err'; $('portalSendMsg').textContent = j.error || 'Could not send.'; return; }
+      $('portalReply').value = ''; portalImg = ''; $('portalSendMsg').className = 'status ok'; $('portalSendMsg').textContent = 'Sent. They will see it in their portal.'; portalDraw(j.portal);
+    }).catch(function () { $('portalSendMsg').className = 'status err'; $('portalSendMsg').textContent = 'Could not reach the server.'; });
+  });
+
   function lead2view() {
     $('cName').textContent = lead.name; $('h1name').textContent = first() ? first() + "'s Ring" : 'This Ring';
     $('custTop').textContent = lead.name;
+    portalLoad();
     $('cLabel').textContent = lead.label || 'NEW';
     var tel = String(lead.phone || '').replace(/\D/g, '');
     $('cTel').href = 'tel:+1' + tel.replace(/^1(?=\d{10}$)/, ''); $('cTel').textContent = lead.phone;
