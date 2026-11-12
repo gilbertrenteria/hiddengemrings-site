@@ -1792,15 +1792,17 @@ async function logActivity(env, path, fields, resBody) {
     const detail = Object.entries(f).filter(([k, v]) => !skip.has(k) && v !== '' && v != null && (typeof v !== 'object' || (Array.isArray(v) && v.length)))
       .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : String(v)}`.slice(0, 160)).join(' | ').slice(0, 1200);
     const entry = { at: Date.now(), time: centralTime(), type, name, leadId, orderId, test: /^\s*test\b/i.test(name), detail };
-    const k = `activity:${centralDay()}`;
-    const list = (await env.IG_KV.get(k, 'json')) || [];
-    list.unshift(entry);
-    await env.IG_KV.put(k, JSON.stringify(list.slice(0, 500)), { expirationTtl: 86400 * 60 });
+    // one key per submission (no lost entries when forms arrive at the same moment)
+    entry.detail = entry.detail.slice(0, 700);
+    const k = `act:${centralDay()}:${String(9999999999999 - entry.at).padStart(13, '0')}-${Math.random().toString(36).slice(2, 7)}`;
+    await env.IG_KV.put(k, '1', { expirationTtl: 86400 * 60, metadata: entry });
   } catch (e) {}
 }
 async function handleActivity(url, env, origin) {
   const day = url.searchParams.get('day') || centralDay();
-  const list = (await env.IG_KV.get(`activity:${day}`, 'json')) || [];
+  const list = [];
+  let cursor;
+  do { const r = await env.IG_KV.list({ prefix: `act:${day}:`, cursor }); r.keys.forEach((k) => k.metadata && list.push(k.metadata)); cursor = r.list_complete ? null : r.cursor; } while (cursor);
   if (url.searchParams.get('format') === 'json') return json({ ok: true, day, count: list.length, activity: list }, 200, origin);
   const prev = new Date(new Date(day + 'T12:00:00Z').getTime() - 86400000).toISOString().slice(0, 10);
   const row = (x) => `<tr${x.test ? ' style="opacity:.55"' : ''}><td>${escapeHtml(x.time.replace(/^\w+, /, ''))}</td><td><b>${escapeHtml(x.type)}</b>${x.test ? ' (test)' : ''}</td><td>${escapeHtml(x.name || '')}${x.leadId ? `<br><a href="${SITE}/call?lead=${encodeURIComponent(x.leadId)}">call page</a>` : ''}</td><td style="font-size:12.5px;color:#5c4d40">${escapeHtml(x.detail || '')}</td></tr>`;
@@ -2024,10 +2026,11 @@ export default {
     const copy = watch ? request.clone() : null;
     const res = await app.fetch(request, env);
     if (watch && res && res.ok) {
+      const resCopy = res.clone(); // read our copy, the original goes to the customer untouched
       const task = (async () => {
         let fields = {};
         try { const ct = copy.headers.get('Content-Type') || ''; fields = ct.includes('application/json') ? await copy.json() : Object.fromEntries((await copy.formData()).entries()); } catch (e) {}
-        let body = null; try { body = await res.clone().json(); } catch (e) {}
+        let body = null; try { body = await resCopy.json(); } catch (e) {}
         await logActivity(env, path, fields, body);
       })();
       if (ctx && ctx.waitUntil) ctx.waitUntil(task); else await task;
