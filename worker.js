@@ -426,6 +426,49 @@ function leadRecipients(lead) {
   return Array.from(new Set([PUBLIC_EMAIL].concat(lead.routedEmails || [], [OWNER_ADDRESS]).filter(Boolean)));
 }
 
+const ABOUT_FIELDS = [['buyer', 'Who is buying'], ['surprise', 'Surprise or open'], ['decides', 'Who decides'], ['shopped', 'Shopped elsewhere']];
+
+// Call tips built from the About you answers, so the rep knows how to open the call.
+function aboutTips(a) {
+  const t = [];
+  if (a.buyer === 'Hoping to be proposed to') t.push('She is shopping for herself. Help her pick and offer to send the options to her partner.');
+  if (a.buyer === 'Shopping together') t.push('They are choosing together. Talk to both and keep it fun.');
+  if (/surprise/i.test(a.surprise || '')) t.push('Surprise proposal. Keep texts discreet and help with her ring size.');
+  if (/dropping hints/i.test(a.surprise || '')) t.push('Partner does not know yet. Ask if she wants us to share options with him.');
+  if (/family|friend/i.test(a.decides || '')) t.push('Someone else is helping decide. Offer to send photos they can share.');
+  if (a.shopped === 'Found one but want better') t.push('HOT: already found a ring elsewhere. Ask what she liked and beat it on design and price.');
+  if (a.shopped === 'Not yet') t.push('We are the first stop. Build trust and set the next call.');
+  return t;
+}
+
+async function handleAbout(fields, env, origin) {
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const key = `lead:${id}`;
+  const lead = await env.IG_KV.get(key, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  if (lead.about && lead.aboutEmailed) return json({ ok: true, duplicate: true }, 200, origin);
+  lead.about = Object.fromEntries(ABOUT_FIELDS.map(([k]) => [k, String(fields[k] || '').slice(0, 120)]));
+  lead.aboutAt = Date.now();
+  await env.IG_KV.put(key, JSON.stringify(lead));
+  const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
+  const rows = ABOUT_FIELDS.map(([k, label]) => [label, lead.about[k] || 'not answered'])
+    .concat([['Proposing', lead.timeline], ['Budget', lead.budget], ['Phone', fmtPhone(lead.phone)]]);
+  const tips = aboutTips(lead.about);
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px">` +
+    `<div style="display:inline-block;background:#54453A;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">ABOUT THE BUYER</div>` +
+    `<h2 style="margin:14px 0 6px">Who ${escapeHtml(lead.name)} is</h2>` +
+    `<p style="margin:0 0 14px;color:#777">Lead is with: ${escapeHtml((lead.routedNames || []).join(', ') || 'everyone')}</p>` +
+    `<table cellpadding="7" style="border-collapse:collapse">` +
+    rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v || 'n/a')}</td></tr>`).join('') + `</table>` +
+    (tips.length ? `<div style="background:#F7F0E1;border-radius:10px;padding:12px 16px;margin-top:14px"><strong>How to open the call</strong><ul style="margin:6px 0 0;padding-left:18px">${tips.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul></div>` : '') +
+    `<p style="margin-top:18px"><a href="tel:+1${tel}" style="background:#54453A;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Call ${escapeHtml(lead.name.split(' ')[0])}</a></p></div>`;
+  const sent = await sendEmail(env, { to: leadRecipients(lead), subject: `ABOUT THE BUYER: ${lead.name} (${lead.about.buyer || 'n/a'}, ${lead.about.surprise || 'n/a'})`, html });
+  if (!sent.ok) return json({ ok: false, error: sent.error, saved: true }, 502, origin);
+  lead.aboutEmailed = true;
+  await env.IG_KV.put(key, JSON.stringify(lead));
+  return json({ ok: true }, 200, origin);
+}
+
 async function handleDesign(fields, env, origin) {
   const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
   const key = `lead:${id}`;
@@ -433,10 +476,12 @@ async function handleDesign(fields, env, origin) {
   if (!lead) return json({ ok: false, error: 'Lead not found, send the first form again' }, 404, origin);
   if (lead.design && lead.designEmailed) return json({ ok: true, duplicate: true }, 200, origin);
   lead.design = lead.design || Object.fromEntries(DESIGN_FIELDS.map(([k]) => [k, String(fields[k] || '').slice(0, 300)]));
+  if (!lead.design.shape && lead.shape) lead.design.shape = lead.shape;
   lead.designAt = lead.designAt || Date.now();
   await env.IG_KV.put(key, JSON.stringify(lead));
   const tel = digits(lead.phone).replace(/^1(?=\d{10}$)/, '');
   const rows = DESIGN_FIELDS.map(([k, label]) => [label, lead.design[k] || 'not answered'])
+    .concat(lead.about ? ABOUT_FIELDS.filter(([k]) => lead.about[k]).map(([k, label]) => [label, lead.about[k]]) : [])
     .concat([['Budget', lead.budget], ['Pay', lead.pay], ['Proposing', lead.timeline], ['Reach by', lead.contact || 'n/a'], ['Phone', fmtPhone(lead.phone)]]);
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px">` +
     `<div style="display:inline-block;background:#B99C5F;color:#fff;font-weight:700;padding:6px 12px;border-radius:6px;letter-spacing:.06em">RING STYLE</div>` +
@@ -1191,6 +1236,7 @@ export default {
 
     if (path === '/lead') return handleLead(fields, request, env, origin);
     if (path === '/lead/design') return handleDesign(fields, env, origin);
+    if (path === '/lead/about') return handleAbout(fields, env, origin);
     if (path === '/lead/email') return handleLeadEmail(fields, env, origin);
     if (path === '/team/update') return handleTeamUpdate(fields, url, env, origin);
     if (path === '/order/create') return handleOrderCreate(fields, env, origin, url);
@@ -1268,7 +1314,7 @@ function emailType(subject) {
   const map = [
     [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
     [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
-    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
+    [/daily summary/i, 'Daily summary'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
     [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'],
     [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
   ];
