@@ -143,7 +143,19 @@
       img.setAttribute('data-src0', src0);
       if (centerCache[src0]) { img.src = centerCache[src0]; return; }
       img.style.opacity = '0';
-      fetch(src0, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm) {
+      fetch(src0, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm0) {
+        // erase the small watermark in the bottom right so it never shows in a crop
+        var bm = document.createElement('canvas'); bm.width = bm0.width; bm.height = bm0.height;
+        var fx = bm.getContext('2d'); fx.drawImage(bm0, 0, 0);
+        var x0 = Math.round(bm.width * 0.8), y0 = Math.round(bm.height * 0.6), rw = bm.width - x0, rh = bm.height - y0;
+        var reg = fx.getImageData(x0 - 4, y0, rw + 4, rh), rd = reg.data, RW = rw + 4;
+        for (var ry = 0; ry < rh; ry++) {
+          var ri = (ry * RW) * 4, R = rd[ri], G = rd[ri + 1], B = rd[ri + 2];
+          for (var rx = 4; rx < RW; rx++) { var q = (ry * RW + rx) * 4;
+            if (Math.max(Math.abs(rd[q] - R), Math.abs(rd[q + 1] - G), Math.abs(rd[q + 2] - B)) > 22) { rd[q] = R; rd[q + 1] = G; rd[q + 2] = B; }
+            else { R = rd[q]; G = rd[q + 1]; B = rd[q + 2]; } }
+        }
+        fx.putImageData(reg, x0 - 4, y0);
         var sc = Math.min(1, 400 / Math.max(bm.width, bm.height));
         var W = Math.round(bm.width * sc), H = Math.round(bm.height * sc);
         var c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -171,9 +183,8 @@
         var ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high';
         ox.fillStyle = 'rgb(' + Math.round(br) + ',' + Math.round(bgc) + ',' + Math.round(bb) + ')'; ox.fillRect(0, 0, OUT, OUT);
         // never crop past the photo's edges (no bands or logo showing); keep the ring as centered as the photo allows
-        var maxR = bm.width * 0.84; // stay clear of the watermark logo on the right edge
-        side = Math.min(side, maxR, bm.height);
-        var left = Math.min(Math.max(cx - side / 2, 0), maxR - side), top = Math.min(Math.max(cy - side / 2, 0), bm.height - side);
+        side = Math.min(side, bm.width, bm.height);
+        var left = Math.min(Math.max(cx - side / 2, 0), bm.width - side), top = Math.min(Math.max(cy - side / 2, 0), bm.height - side);
         ox.drawImage(bm, left, top, side, side, 0, 0, OUT, OUT);
         var url = o.toDataURL('image/jpeg', 0.92);
         centerCache[src0] = url; img.src = url; img.style.opacity = '';
