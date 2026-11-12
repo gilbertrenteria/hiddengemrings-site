@@ -1435,7 +1435,7 @@ async function handlePortalTeamMsg(fields, url, env, origin) {
 
 
 // ---------- Ring Portal v2: 10 rings we design for them, pick, and talk ----------
-const PICK_WHY = ['Stones look too big', 'Stones look too small', 'Not the shape I want', 'Wrong metal color', 'Too plain', 'Too flashy', 'Not her style', 'Want more sparkle on the band', 'Something else'];
+const PICK_WHY = ['Stones look too big', 'Stones look too small', 'Not the shape I want', 'Wrong metal color', 'Want a different setting', 'Too plain', 'Too flashy', 'Not her style', 'Want more sparkle on the band', 'Something else'];
 const BUILD_KEYS = { shape: 'Shape', carat: 'Stone size', metal: 'Metal', setting: 'Setting', band: 'Band', stoneType: 'Stone type', style: 'Her style' };
 function ringLabel(r, i) { return `Ring ${i + 1}` + [r.title || [r.shape, r.style].filter(Boolean).join(' '), r.carat, r.metal].filter(Boolean).map((x) => ' · ' + x).join(''); }
 function cleanPick(f, p) {

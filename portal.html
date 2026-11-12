@@ -64,7 +64,7 @@ button{font:inherit;color:inherit}
 .ring{background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 12px 34px rgba(66,53,41,.08);display:flex;flex-direction:column;opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease,box-shadow .2s,border-color .2s}
 .ring.in{opacity:1;transform:none}
 .ring.saved{border-color:var(--gold);box-shadow:0 0 0 3px rgba(185,156,95,.35),0 12px 34px rgba(66,53,41,.08)}
-.ring .ph{aspect-ratio:3/2;background:#2e2722;display:flex;align-items:center;justify-content:center;position:relative}
+.ring .ph{aspect-ratio:1;background:#2e2722;display:flex;align-items:center;justify-content:center;position:relative}
 .ring .ph img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .ring .num{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.92);border-radius:999px;padding:5px 11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--brown-dark)}
 .ring .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
@@ -85,6 +85,16 @@ button{font:inherit;color:inherit}
 .dock{visibility:hidden}.dock.show{transform:translate(-50%,0);visibility:visible}
 .dock span{flex:1;font-size:14px}
 .dock button{background:#fff;color:var(--brown-dark);border:0;border-radius:999px;padding:11px 18px;font:700 12px 'Work Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.notq{max-width:720px;margin:40px auto 0;background:#fff;border:1px solid var(--line);border-radius:26px;padding:26px 22px;box-shadow:0 12px 34px rgba(66,53,41,.08);text-align:center}
+.notq h2{font-size:clamp(26px,5vw,34px)}
+.notq h2 em{font-style:italic;color:var(--gold)}
+.notq p{color:#6B5B4C;margin:8px 0 0}
+.nopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;text-align:left}
+@media(min-width:700px){.nopts{grid-template-columns:1fr 1fr 1fr}}
+.nopt{display:flex;align-items:center;gap:10px;background:var(--cream);border:1.5px solid rgba(92,77,64,.16);border-radius:16px;padding:13px 12px;cursor:pointer;font-size:14.5px;font-weight:500;color:var(--brown-dark);min-height:58px;transition:all .2s}
+.nopt svg{flex:none;width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nopt.sel{background:linear-gradient(135deg,var(--brown),var(--brown-dark));color:#fff;border-color:transparent}
+.nopt.sel svg{stroke:#e9d7a8}
 .none{text-align:center;margin:34px auto 0;max-width:520px}
 .none button{background:none;border:0;font-family:'Newsreader',serif;font-style:italic;font-size:20px;color:var(--brown-dark);text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:5px;cursor:pointer}
 /* chips like /start */
@@ -96,11 +106,11 @@ label.fl{display:block;font-size:12px;letter-spacing:.14em;text-transform:upperc
 select,textarea{width:100%;font:16px 'Work Sans',sans-serif;color:var(--brown-dark);background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:14px;padding:14px}
 select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--taupe-dark) 50%),linear-gradient(135deg,var(--taupe-dark) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat}
 textarea{min-height:96px;resize:vertical}
-.pickimg{border-radius:20px;overflow:hidden;background:#2e2722;aspect-ratio:3/2;max-width:420px;margin:18px auto 0}
+.pickimg{border-radius:20px;overflow:hidden;background:#2e2722;aspect-ratio:1;max-width:420px;margin:18px auto 0}
 .pickimg img{width:100%;height:100%;object-fit:cover;display:block}
 .favs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
 .fav{border:1.5px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;cursor:pointer;text-align:left;padding:0}
-.fav img{width:100%;aspect-ratio:3/2;object-fit:cover;background:#2e2722;display:block}
+.fav img{width:100%;aspect-ratio:1;object-fit:cover;background:#2e2722;display:block}
 .fav div{padding:10px 12px;font-size:13px;color:var(--brown-dark)}
 .fav b{display:block;font-family:'Newsreader',serif;font-size:18px;font-weight:500}
 .center{text-align:center}
@@ -194,6 +204,83 @@ textarea{min-height:96px;resize:vertical}
     return '<div class="size"><svg viewBox="0 0 96 76" width="96" height="76" aria-hidden="true"><rect x="0" y="34" width="96" height="8" rx="4" fill="' + gold + '"/><g fill="#fff" stroke="#9aa3ad" stroke-width="1.2">' + stonePath(sh, 48, 38, L, W) + '</g></svg>' +
       '<small><b>True size ' + d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm.</b> The photo shows the style. This drawing shows ' + her() + ' real stone size.</small></div>';
   }
+  var centerCache = {};
+  // Puts every ring dead center: finds the ring against its background, then
+  // redraws the photo as a square with the ring centered at the same size in every card.
+  function centerRings() {
+    app.querySelectorAll('.ring .ph img, .pickimg img, .fav img').forEach(function (img) {
+      var src0 = img.getAttribute('data-src0') || img.currentSrc || img.src;
+      if (!src0 || /^data:/.test(src0)) return;
+      img.setAttribute('data-src0', src0);
+      if (centerCache[src0]) { img.src = centerCache[src0]; return; }
+      img.style.opacity = '0';
+      fetch(src0, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm0) {
+        // erase the small watermark in the bottom right so it never shows in a crop
+        var bm = document.createElement('canvas'); bm.width = bm0.width; bm.height = bm0.height;
+        var fx = bm.getContext('2d'); fx.drawImage(bm0, 0, 0);
+        var x0 = Math.round(bm.width * 0.8), y0 = Math.round(bm.height * 0.6), rw = bm.width - x0, rh = bm.height - y0;
+        var reg = fx.getImageData(x0 - 4, y0, rw + 4, rh), rd = reg.data, RW = rw + 4;
+        for (var ry = 0; ry < rh; ry++) {
+          var ri = (ry * RW) * 4, R = rd[ri], G = rd[ri + 1], B = rd[ri + 2];
+          for (var rx = 4; rx < RW; rx++) { var q = (ry * RW + rx) * 4;
+            if (Math.max(Math.abs(rd[q] - R), Math.abs(rd[q + 1] - G), Math.abs(rd[q + 2] - B)) > 12) { rd[q] = R; rd[q + 1] = G; rd[q + 2] = B; }
+            else { R = rd[q]; G = rd[q + 1]; B = rd[q + 2]; } }
+        }
+        fx.putImageData(reg, x0 - 4, y0);
+        var sc = Math.min(1, 400 / Math.max(bm.width, bm.height));
+        var W = Math.round(bm.width * sc), H = Math.round(bm.height * sc);
+        var c = document.createElement('canvas'); c.width = W; c.height = H;
+        var x = c.getContext('2d'); x.drawImage(bm, 0, 0, W, H);
+        var d = x.getImageData(0, 0, W, H).data;
+        // background color from the top edge and the upper side edges
+        var br = 0, bgc = 0, bb = 0, bn = 0;
+        function addPx(px, py) { var j = (py * W + px) * 4; br += d[j]; bgc += d[j + 1]; bb += d[j + 2]; bn++; }
+        for (var px = 0; px < W; px += 2) { addPx(px, 1); addPx(px, 3); }
+        for (var py = 0; py < H * 0.6; py += 2) { addPx(1, py); addPx(W - 2, py); }
+        br /= bn; bgc /= bn; bb /= bn;
+        var cols = new Array(W).fill(0), rows = new Array(H).fill(0), m = Math.max(2, Math.round(W * 0.012));
+        // background can glow or fade across the photo, so compare each pixel with its own row's
+        // background (blended from that row's left and right edges)
+        function edge(y, x1) { var r = 0, g = 0, b = 0; for (var k = 0; k < 4; k++) { var j = (y * W + x1 + k) * 4; r += d[j]; g += d[j + 1]; b += d[j + 2]; } return [r / 4, g / 4, b / 4]; }
+        for (var y = m; y < H - m; y++) {
+          var Lc = edge(y, m), Rc = edge(y, W - m - 4);
+          for (var xx = m; xx < W - m; xx++) {
+            if (xx > W * 0.76 && y > H * 0.6) continue; // logo corner
+            var t = xx / W, i = (y * W + xx) * 4;
+            var diff = Math.max(Math.abs(d[i] - (Lc[0] + (Rc[0] - Lc[0]) * t)), Math.abs(d[i + 1] - (Lc[1] + (Rc[1] - Lc[1]) * t)), Math.abs(d[i + 2] - (Lc[2] + (Rc[2] - Lc[2]) * t)));
+            if (diff > 42) { cols[xx]++; rows[y]++; }
+          }
+        }
+        function span(arr, need) { var lo = -1, hi = -1; for (var k = 0; k < arr.length; k++) if (arr[k] > need) { if (lo < 0) lo = k; hi = k; } return [lo, hi]; }
+        var sx = span(cols, Math.max(2, H * 0.012)), sy = span(rows, Math.max(2, W * 0.012));
+        if (sx[0] < 0 || sy[0] < 0) { img.style.opacity = ''; return; }
+        var cx = (sx[0] + sx[1]) / 2 / sc, cy = (sy[0] + sy[1]) / 2 / sc;
+        var side = Math.max(sx[1] - sx[0], sy[1] - sy[0]) / sc / 0.78; // ring fills 78% of the square
+        var OUT = 900, o = document.createElement('canvas'); o.width = OUT; o.height = OUT;
+        var ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high';
+        ox.fillStyle = 'rgb(' + Math.round(br) + ',' + Math.round(bgc) + ',' + Math.round(bb) + ')'; ox.fillRect(0, 0, OUT, OUT);
+        // never crop past the photo's edges (no bands or logo showing); keep the ring as centered as the photo allows
+        // center exactly; where the crop runs past the photo, stretch the photo's own edge so the background continues smoothly
+        side = Math.min(side, Math.max(bm.width, bm.height) * 1.1);
+        var left = cx - side / 2, top = cy - side / 2;
+        var pad = Math.ceil(Math.max(0, -left, -top, left + side - bm.width, top + side - bm.height));
+        var src = bm;
+        if (pad > 0) {
+          var P = document.createElement('canvas'), PW = bm.width + pad * 2, PH = bm.height + pad * 2; P.width = PW; P.height = PH;
+          var pc = P.getContext('2d');
+          pc.drawImage(bm, pad, pad);
+          pc.drawImage(bm, 0, 0, 2, bm.height, 0, pad, pad, bm.height);
+          pc.drawImage(bm, bm.width - 2, 0, 2, bm.height, pad + bm.width, pad, pad, bm.height);
+          pc.drawImage(P, 0, pad, PW, 2, 0, 0, PW, pad);
+          pc.drawImage(P, 0, pad + bm.height - 2, PW, 2, 0, pad + bm.height, PW, pad);
+          src = P; left += pad; top += pad;
+        }
+        ox.drawImage(src, left, top, side, side, 0, 0, OUT, OUT);
+        var url = o.toDataURL('image/jpeg', 0.92);
+        centerCache[src0] = url; img.src = url; img.style.opacity = '';
+      }).catch(function () { img.style.opacity = ''; });
+    });
+  }
   function specs(r) {
     var pre = P.prefill || {}, ct = caratNum(r.carat), sh = shapeId(r.shape), d = ct ? stoneMM(sh, ct) : null;
     var st = String(r.style || '').toLowerCase();
@@ -263,15 +350,15 @@ textarea{min-height:96px;resize:vertical}
           '<div class="body"><h3>' + E(title(r)) + '</h3>' + specs(r) +
           '<div class="acts"><button class="btn one" data-n="' + n + '">This is the one</button><button class="save' + (sv ? ' on' : '') + '" data-n="' + n + '" aria-pressed="' + sv + '">' + (sv ? '&#9829; Saved' : '&#9825; Save') + '</button></div></div></article>';
       }).join('') + '</div>' +
-      '<div class="none"><button id="noneBtn">None of these feel right?</button><p class="note">Tell us why and we will create new designs for you.</p></div>' +
+      noneCard() +
       '<div style="max-width:640px;margin:0 auto">' + talkCard('rings') + '</div>' + foot();
     window.scrollTo(0, 0);
     var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 }) : null;
     app.querySelectorAll('.ring').forEach(function (el, i) { if (io) { el.style.transitionDelay = (i % 3) * .08 + 's'; io.observe(el); } else el.classList.add('in'); });
     app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; save(); pickPage(); }; });
     app.querySelectorAll('.save').forEach(function (b) { b.onclick = function () { toggleFav(+b.dataset.n); }; });
-    $('noneBtn').onclick = function () { noneStep(0); };
-    bindTalk(); updDock();
+    bindNone();
+    bindTalk(); updDock(); centerRings();
   }
   function toggleFav(n) {
     var i = K.favs.indexOf(n);
@@ -306,7 +393,7 @@ textarea{min-height:96px;resize:vertical}
       '<div style="text-align:left"><label class="fl">Anything to change? Tap any (optional)</label>' + tweakChips() + '<label class="fl" for="notes">Or tell us in your words (optional)</label><textarea id="notes" placeholder="Anything else we should know">' + E(K.notes) + '</textarea></div>' +
       '<button class="btn gold mt" id="send">Send my ring</button><p class="note">No payment and no commitment. Your full custom mockup arrives within 24 hours.</p></div>' + foot();
     window.scrollTo(0, 0);
-    $('bk').onclick = rings; bindTweaks();
+    $('bk').onclick = rings; bindTweaks(); centerRings();
     $('notes').oninput = function () { K.notes = this.value; save(); };
     $('send').onclick = function () { send({ mode: 'one', ring: K.ring }); };
   }
@@ -318,7 +405,7 @@ textarea{min-height:96px;resize:vertical}
       '<div class="favs">' + K.favs.map(function (n) { var r = R(n); return '<button class="fav" data-n="' + n + '">' + (img(r) ? '<img src="' + E(img(r)) + '" alt="">' : '') + '<div><b>Ring ' + n + '</b>' + E(title(r)) + '</div></button>'; }).join('') + '</div>' +
       '<button class="btn ghost mt" id="all">I can\'t decide. Create all of them</button></div>' + foot();
     window.scrollTo(0, 0);
-    $('bk').onclick = rings;
+    $('bk').onclick = rings; centerRings();
     app.querySelectorAll('.fav').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; save(); pickPage(); }; });
     $('all').onclick = allPage;
   }
@@ -335,6 +422,26 @@ textarea{min-height:96px;resize:vertical}
   }
 
   /* ---------- none of these ---------- */
+  var NOPTS = [
+    ['Not the shape I want', 'A different shape', '<path d="M13 3l7 7-7 13-7-13z"/>'],
+    ['Stones look too small', 'A bigger stone', '<circle cx="13" cy="13" r="9"/><path d="M13 9v8M9 13h8"/>'],
+    ['Stones look too big', 'A smaller stone', '<circle cx="13" cy="13" r="6"/><path d="M10 13h6"/>'],
+    ['Wrong metal color', 'A different metal color', '<circle cx="13" cy="13" r="9"/><path d="M13 4a9 9 0 0 1 0 18z" fill="#e9d7a8" stroke="none"/>'],
+    ['Want a different setting', 'A different setting', '<path d="M7 20c0-4 3-6 6-6s6 2 6 6"/><path d="M13 3l4 4-4 6-4-6z"/>'],
+    ['Too flashy', 'Simpler and cleaner', '<path d="M5 13h16"/>'],
+    ['Too plain', 'More sparkle', '<path d="M13 3v6M13 17v6M3 13h6M17 13h6M6 6l3 3M17 17l3 3M20 6l-3 3M9 17l-3 3"/>'],
+    ['Not her style', 'Not ' + 'her style', '<path d="M13 22s-8-5-8-11a5 5 0 0 1 8-3 5 5 0 0 1 8 3c0 6-8 11-8 11z"/>'],
+    ['Something else', 'Let me describe it', '<path d="M4 6h18v11H9l-5 4z"/>']
+  ];
+  function noneCard() {
+    return '<section class="notq"><p class="kick" style="margin:0 0 8px">Not quite right?</p><h2>Tell us what to <em>change.</em></h2><p>Tap everything that fits. We will create new designs for you within 24 hours.</p>' +
+      '<div class="nopts">' + NOPTS.map(function (o) { var lab = o[1].replace('her style', you() ? 'my style' : 'her style'); return '<button type="button" class="nopt' + (K.why.indexOf(o[0]) > -1 ? ' sel' : '') + '" data-w="' + E(o[0]) + '"><svg viewBox="0 0 26 26" aria-hidden="true">' + o[2] + '</svg>' + E(lab) + '</button>'; }).join('') + '</div>' +
+      '<button class="btn mt" id="noneGo">Create new designs for me</button></section>';
+  }
+  function bindNone() {
+    app.querySelectorAll('.nopt').forEach(function (b) { b.onclick = function () { var w = b.dataset.w, i = K.why.indexOf(w); if (i > -1) K.why.splice(i, 1); else K.why.push(w); b.classList.toggle('sel'); save(); }; });
+    var g = $('noneGo'); if (g) g.onclick = function () { noneStep(K.why.length ? 1 : 0); };
+  }
   var WHY = ['Stones look too big', 'Stones look too small', 'Not the shape I want', 'Wrong metal color', 'Too plain', 'Too flashy', 'Not ' + 'her style', 'Want more sparkle on the band', 'Something else'];
   var BUILD = [
     ['shape', 'Stone shape', ['Oval', 'Round', 'Emerald', 'Pear', 'Radiant', 'Cushion', 'Elongated Cushion', 'Princess', 'Marquise', 'Asscher', 'Not sure, show me ideas']],
@@ -351,7 +458,7 @@ textarea{min-height:96px;resize:vertical}
     var head = '<div class="card pg"><div class="head"><button class="back show" id="bk">&lsaquo; Back</button><span class="count">' + (s + 1) + ' of 3</span></div><div class="bar"><span style="width:' + ((s + 1) * 33) + '%"></span></div>';
     if (s === 0) {
       app.innerHTML = head + '<div class="center"><p class="kick">Let\'s get it right</p><h1 class="big">What felt <em>a little off?</em></h1><p class="lead">Pick all that fit. This helps us create exactly what you see in your mind.</p></div>' +
-        '<div class="chips">' + WHY.map(function (w) { var lab = w.replace('her style', you() ? 'my style' : 'her style'); return '<button type="button" class="wy' + (K.why.indexOf(w) > -1 ? ' sel' : '') + '" data-w="' + E(w) + '">' + E(lab) + '</button>'; }).join('') + '</div>' +
+        '<div class="nopts">' + NOPTS.map(function (o) { var lab = o[1].replace('her style', you() ? 'my style' : 'her style'); return '<button type="button" class="nopt wy' + (K.why.indexOf(o[0]) > -1 ? ' sel' : '') + '" data-w="' + E(o[0]) + '"><svg viewBox="0 0 26 26" aria-hidden="true">' + o[2] + '</svg>' + E(lab) + '</button>'; }).join('') + '</div>' +
         '<button class="btn mt" id="nx">Continue</button></div>' + foot();
       app.querySelectorAll('.wy').forEach(function (b) { b.onclick = function () { var w = b.dataset.w, i = K.why.indexOf(w); if (i > -1) K.why.splice(i, 1); else K.why.push(w); b.classList.toggle('sel'); save(); }; });
       $('bk').onclick = rings; $('nx').onclick = function () { noneStep(1); };
@@ -396,6 +503,7 @@ textarea{min-height:96px;resize:vertical}
       (r && img(r) ? '<div class="pickimg" style="max-width:300px">' + '<img src="' + E(img(r)) + '" alt=""></div>' : '') +
       '<p class="lead">' + (mode === 'none' ? 'We read every word. Fresh designs made just for you arrive within 24 hours.' : 'Your full custom mockup arrives within 24 hours. We will text you the moment it is ready.') + '</p>' +
       talkCard('sent') + '<button class="link" id="again">See all rings again</button></div>' + foot();
+    centerRings();
     window.scrollTo(0, 0);
     $('again').onclick = function () { rings(); };
     bindTalk();
