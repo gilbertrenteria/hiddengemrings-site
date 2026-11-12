@@ -55,7 +55,29 @@
   .funnel b{display:block;font:500 28px 'Newsreader',serif;color:var(--brown-dark);}
   .funnel small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe-dark);}
   .hide{display:none;}
-  @media(max-width:640px){.grid{grid-template-columns:1fr;}.funnel{grid-template-columns:repeat(3,1fr);}.nav{flex-direction:column;align-items:flex-start;}}
+  .today{margin-bottom:22px;}
+  .tcount{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+  .tcount div{background:#fff;border-radius:14px;padding:12px;text-align:center;border:1px solid rgba(92,77,64,.12);}
+  .tcount div.hot{background:#fbe9e5;border-color:#e3b3a6;}
+  .tcount b{display:block;font:500 28px 'Newsreader',serif;color:var(--brown-dark);}
+  .tcount div.hot b,.tcount div.hot small{color:#9a3b2e;}
+  .tcount small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe-dark);}
+  .tgroup{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--taupe-dark);margin:16px 0 4px;}
+  .tgroup.hot{color:#9a3b2e;}
+  .trow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(92,77,64,.10);flex-wrap:wrap;}
+  .trow b{font-size:16px;color:var(--brown-dark);}
+  .trow small{display:block;font-size:13px;color:var(--taupe-dark);margin-top:2px;}
+  .trow small.late{color:#9a3b2e;font-weight:600;}
+  .trow small.soon{color:#a0660b;font-weight:600;}
+  .tbtns{display:flex;gap:6px;flex-wrap:wrap;}
+  .tbtns a,.tbtns button{font:600 12px 'Work Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border-radius:999px;padding:9px 13px;border:1.5px solid var(--brown-dark);background:#fff;color:var(--brown-dark);cursor:pointer;}
+  .tbtns .main{background:var(--brown-dark);color:#fff;}
+  .clear{color:var(--taupe-dark);margin:6px 0 2px;}
+  .t-TEST{background:#9b9b9b;}
+  .marks{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .marks button{font:600 12px 'Work Sans',sans-serif;background:#fff;border:1.5px solid var(--gold);color:var(--brown-dark);border-radius:999px;padding:7px 12px;cursor:pointer;}
+  .marks button.done{background:var(--gold);color:#fff;}
+  @media(max-width:640px){.tcount{grid-template-columns:repeat(2,1fr);}.trow{align-items:flex-start;}.grid{grid-template-columns:1fr;}.funnel{grid-template-columns:repeat(3,1fr);}.nav{flex-direction:column;align-items:flex-start;}}
 </style>
 </head>
 <body>
@@ -71,7 +93,11 @@
   </section>
 
   <section id="tab-leads" class="hide">
-    <h1>Leads</h1>
+    <section class="today"><h1>Today</h1><p class="sub" id="todaySub">What needs you right now. Updates every minute.</p>
+      <div class="tcount" id="tcount"></div>
+      <div class="card" id="todayList"><p>Loading...</p></div>
+    </section>
+    <h1>All leads</h1>
     <p class="sub">Newest first. Tap a status as you work each lead.</p>
     <div class="funnel" id="funnel"></div>
     <div class="card" id="leadList"><p>Loading...</p></div>
@@ -142,7 +168,7 @@
   function refresh() {
     fetch(API + '/admin/list?key=' + encodeURIComponent(key)).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.ok) { try { localStorage.removeItem(KEYSTORE); } catch (e) {} key = ''; showTab('leads'); return; }
-      data = j; drawLeads(); drawOrders();
+      data = j; drawToday(); drawLeads(); drawOrders();
     });
   }
 
@@ -154,11 +180,85 @@
     Object.keys(l).forEach(function (k) { if (!skip[k]) add(k, l[k]); });
     return '<table style="font-size:.9rem;margin-top:8px;border-collapse:collapse">' + rows.join('') + '</table>';
   }
+  // ===== Today view =====
+  var TZ = 'America/Chicago';
+  function isTest(l) { return /^(test|demo)\b|claude.*test|stripe test/i.test(l.name || ''); }
+  function first(l) { return String(l.name || '').trim().split(/\s+/)[0] || 'there'; }
+  function telOf(l) { return digits(l.phone).replace(/^1(?=\d{10}$)/, ''); }
+  function lastAt(l, re) { var j = (l.journey || []).filter(function (x) { return re.test(x.stage); }); return j.length ? j[j.length - 1].at : 0; }
+  function ago(ms) { var m = Math.max(0, Math.round((Date.now() - ms) / 60000)); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; }
+  function left(ms) { var m = Math.round((ms - Date.now()) / 60000); return m <= 0 ? null : m < 60 ? m + ' min left' : Math.round(m / 60) + ' h left'; }
+  function textFor(l) {
+    var link = l.portalToken ? ' https://hiddengemrings.com/portal?t=' + l.portalToken : '';
+    if (/^yes/i.test(l.surprise || '')) return 'Hi ' + first(l) + ' this is Hidden Gem. Your private link is ready whenever you have a quiet minute' + link;
+    return 'Hi ' + first(l) + ' we are so excited to begin this journey with you. We already started on everything you shared and your private Ring Portal is ready. Tap here to see the rings we designed just for you' + link;
+  }
+  function todayItems() {
+    var now = Date.now(), dayLbl = new Date().toLocaleDateString('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric' }), dayIso = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+    var g = { now: [], calls: [], mock: [], fresh: [] };
+    data.leads.filter(function (l) { return !isTest(l); }).forEach(function (l) {
+      var touched = l.statusAt || 0, cr = l.callReq;
+      if (cr && cr.type === 'now' && touched < cr.at && now - cr.at < 864e5) {
+        var due = cr.at + 45 * 60000; g.now.push({ l: l, sort: due, why: 'Tapped Talk now ' + ago(cr.at), time: left(due) || 'Past the 45 minutes', late: !left(due) });
+      }
+      if (l.slotDate === dayIso && l.slotTime) g.calls.push({ l: l, sort: +String(l.slotTime).replace(':', ''), why: 'Booked on the form', time: l.slotTime });
+      if (cr && cr.type === 'schedule' && touched < cr.at && String(cr.central || '').indexOf(dayLbl) === 0) g.calls.push({ l: l, sort: 9999, why: 'Asked in the Ring Portal', time: String(cr.central).slice(dayLbl.length).trim() + ' Central' });
+      var asked = lastAt(l, /^(Picked in portal|Wants new designs|Mockup changes)$/), sent = lastAt(l, /^Mockup sent$/);
+      if (asked && asked > sent) { var d24 = asked + 864e5; g.mock.push({ l: l, sort: d24, mock: 1, why: (/new designs/i.test(l.stage) ? 'Wants new designs' : /changes/i.test(l.stage) ? 'Wants mockup changes' : 'Picked a ring') + ' ' + ago(asked), time: left(d24) || 'Past 24 hours', late: !left(d24), soon: d24 - now < 6 * 36e5 }); }
+      if ((l.status || 'new') === 'new') {
+        var opened = lastAt(l, /^Ring Portal opened$/);
+        g.fresh.push({ l: l, sort: l.receivedAt || 0, why: 'New ' + ago(l.receivedAt) + ' · ' + (opened ? 'portal opened ' + ago(opened) : 'portal not opened yet'), late: now - (l.receivedAt || now) > 36e5 });
+      }
+    });
+    Object.keys(g).forEach(function (k) { g[k].sort(function (a, b) { return a.sort - b.sort; }); });
+    return g;
+  }
+  function slotLabel(hm) { var p = String(hm).split(':'), h = +p[0]; return (h % 12 || 12) + ':' + (p[1] || '00') + (h >= 12 ? ' PM' : ' AM') + ' Central'; }
+  function row(x) {
+    var l = x.l, id = esc(l.id), t = telOf(l), call = 'call.html?lead=' + encodeURIComponent(l.id) + '&rep=gilbert';
+    var btns = x.mock
+      ? '<a class="main" href="' + call + '">Open</a><button type="button" data-mark="Mockup sent" data-id="' + id + '">Mark sent</button>'
+      : '<a class="main" data-touch="' + id + '" href="tel:+1' + t + '">Call</a><a data-touch="' + id + '" href="sms:+1' + t + '?&body=' + encodeURIComponent(textFor(l)) + '">Text</a><a href="' + call + '">Details</a>';
+    var time = x.why === 'Booked on the form' ? slotLabel(x.time) : x.time;
+    return '<div class="trow"><div><b>' + esc(l.name) + '</b>' + (/^yes/i.test(l.surprise || '') ? ' <span class="tag t-WARM">SURPRISE</span>' : '') +
+      '<small>' + esc(x.why) + '</small>' + (time ? '<small class="' + (x.late ? 'late' : x.soon ? 'soon' : '') + '">' + esc(time) + '</small>' : x.late ? '<small class="late">Waiting over an hour</small>' : '') +
+      '</div><div class="tbtns">' + btns + '</div></div>';
+  }
+  function drawToday() {
+    var g = todayItems();
+    var sets = [['now', 'Call now'], ['calls', 'Calls today'], ['mock', 'Mockups due'], ['fresh', 'Not contacted yet']];
+    $('tcount').innerHTML = sets.map(function (s) { return '<div class="' + (s[0] === 'now' && g.now.length ? 'hot' : '') + '"><b>' + g[s[0]].length + '</b><small>' + s[1] + '</small></div>'; }).join('');
+    var any = sets.some(function (s) { return g[s[0]].length; });
+    $('todayList').innerHTML = !any ? '<p class="clear">All clear. Nothing needs you right now.</p>' : sets.filter(function (s) { return g[s[0]].length; }).map(function (s) {
+      return '<div class="tgroup' + (s[0] === 'now' ? ' hot' : '') + '">' + s[1] + '</div>' + g[s[0]].map(row).join('');
+    }).join('');
+    $('todaySub').textContent = 'What needs you right now. Updated ' + new Date().toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' }) + ' Central.';
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-touch]');
+    if (a) {
+      var l = data.leads.find(function (x) { return x.id === a.dataset.touch; }); if (!l) return;
+      var st = (l.status || 'new') === 'new' ? 'called' : l.status;
+      l.status = st; l.statusAt = Date.now();
+      fetch(API + '/admin/lead-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: l.id, status: st }) }).then(function () { setTimeout(refresh, 800); });
+      setTimeout(function () { drawToday(); drawLeads(); }, 300);
+      return;
+    }
+    var m = e.target.closest('[data-mark]');
+    if (m) {
+      var ld = data.leads.find(function (x) { return x.id === m.dataset.id; }); if (!ld) return;
+      m.textContent = 'Saving...';
+      fetch(API + '/admin/lead-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: ld.id, status: ld.status || 'new', stage: m.dataset.mark }) }).then(refresh);
+    }
+  });
+  setInterval(function () { if (key && !document.hidden && !$('tab-leads').classList.contains('hide')) refresh(); }, 60000);
+
   function nextStep(l) {
     var s = l.stage || 'Form sent', age = Date.now() - (l.stageAt || l.receivedAt || 0), H = 3600e3;
     if (/Loves the mockup/i.test(s)) return 'READY TO CLOSE: send their checkout link and call now';
     if (/call now/i.test(s)) return 'Call them within 45 minutes';
-    if (/scheduled/i.test(s)) return 'Call at the time they picked';
+    if (/scheduled/i.test(s)) return 'Call at the time they picked' + (l.callReq && l.callReq.central ? ' (' + l.callReq.central + ' Central)' : '');
+    if (/Link 3 sent/i.test(s)) return age > 24 * H ? 'No checkout yet: call or text them' : 'Wait for checkout';
     if (/Texting/i.test(s)) return 'Watch for their text and reply fast';
     if (/Picked|new designs|Mockup changes/i.test(s)) return age > 20 * H ? 'Mockup is due now (promised within 24 hours)' : 'Send the full mockup within 24 hours';
     if (/Mockup sent/i.test(s)) return age > 24 * H ? 'No answer on the mockup yet: text them' : 'Wait for their answer on the mockup';
@@ -167,13 +267,13 @@
     return '';
   }
   function drawLeads() {
-    var L = data.leads;
+    var L = data.leads.filter(function (l) { return !isTest(l); });
     var c = function (s) { return L.filter(function (l) { return (l.status || 'new') === s; }).length; };
     $('funnel').innerHTML = [['Leads', L.length], ['Called', c('called') + c('link sent') + c('approved') + c('declined')], ['Link sent', c('link sent') + c('approved') + c('declined')], ['Approved', c('approved')], ['Declined', c('declined')]]
       .map(function (x) { return '<div><b>' + x[1] + '</b><small>' + x[0] + '</small></div>'; }).join('');
-    if (!L.length) { $('leadList').innerHTML = '<p>No leads yet. They show up here the moment someone finishes the payment options form.</p>'; return; }
-    $('leadList').innerHTML = L.map(function (l) {
-      var lab = (l.label || 'NEW'), cls = 't-' + lab.split(' ')[0];
+    if (!data.leads.length) { $('leadList').innerHTML = '<p>No leads yet. They show up here the moment someone finishes the payment options form.</p>'; return; }
+    $('leadList').innerHTML = data.leads.map(function (l) {
+      var lab = isTest(l) ? 'TEST' : (l.label || 'NEW'), cls = 't-' + lab.split(' ')[0];
       var tel = digits(l.phone).replace(/^1(?=\d{10}$)/, '');
       return '<div class="item"><div><h3><span class="tag ' + cls + '">' + esc(lab) + '</span>' + esc(l.name) + '</h3>' +
         '<p><a href="tel:+1' + tel + '">' + esc(l.phone) + '</a> · ' + esc(when(l.receivedAt)) + '</p>' +
@@ -183,6 +283,7 @@
         (l.portalToken ? '<p>Ring Portal: <a href="portal?t=' + encodeURIComponent(l.portalToken) + '&preview=1" target="_blank">preview</a> · <span style="user-select:all">https://hiddengemrings.com/portal?t=' + esc(l.portalToken) + '</span></p>' : '') +
         '<p><b style="color:var(--brown-dark)">Stage: ' + esc(l.stage || 'Form sent') + '</b>' + (l.stageAt ? ' · ' + esc(when(l.stageAt)) : '') + (l.hearts && l.hearts.length ? ' · Loved ' + l.hearts.length : '') + '</p>' +
         '<div class="row" style="margin-top:8px"><a class="btn" style="padding:11px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=gilbert">Call (Gilbert)</a><a class="btn ghost" style="padding:10px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=kim">Call (Kim)</a></div>' +
+        '<div class="marks">' + [['Mockup sent', /^Mockup sent$/], ['Link 3 sent', /^Link 3 sent$/]].map(function (m) { var at = lastAt(l, m[1]); return '<button type="button" data-mark="' + m[0] + '" data-id="' + esc(l.id) + '" class="' + (at ? 'done' : '') + '">' + (at ? m[0] + ' ' + when(at) : 'Mark ' + m[0].toLowerCase()) + '</button>'; }).join('') + '</div>' +
         '<div class="stat stage" data-id="' + esc(l.id) + '" style="margin-top:8px">' + ['In production', 'Shipped', 'Delivered'].map(function (s) { return '<button type="button" data-stage="' + s + '" class="' + (l.stage === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div>' +
         '<div class="stat" data-id="' + esc(l.id) + '">' + STATUSES.map(function (s) { return '<button type="button" class="' + ((l.status || 'new') === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div>' +
         '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">Everything they filled out</summary>' + allAnswers(l) + '</details>' +

@@ -1112,8 +1112,10 @@ async function handleOrderApprove(id, fields, request, env, origin) {
 // === Customer journey ===
 // One timeline per lead so every link knows where the customer is.
 const STAGES = ['Form sent', 'Call booked', 'Called', 'Intro opened', 'Loved rings', 'Options sent', 'Options opened', 'Ring picked', 'Approved', 'Deposit paid', 'Financed', 'Paid in full', 'In production', 'Shipped', 'Delivered', 'Not ready', 'Lost'];
+// Any stage name is kept (portal and mockup stages included). STAGES is only the classic order.
 function stampStage(lead, stage) {
-  if (!lead || !STAGES.includes(stage)) return lead;
+  stage = String(stage || '').replace(/[<>]/g, '').trim().slice(0, 40);
+  if (!lead || !stage) return lead;
   lead.journey = lead.journey || [];
   const last = lead.journey[lead.journey.length - 1];
   if (!last || last.stage !== stage) lead.journey.push({ stage, at: Date.now() });
@@ -1565,6 +1567,7 @@ async function handlePortalContact(t, fields, env, origin) {
   if (type === 'text' && last && last.type === 'text' && now - last.at < 3600e3) return json({ ok: true }, 200, origin);
   freezeRings(p, lead);
   p.contact = (p.contact || []).concat([c]).slice(-20);
+  lead.callReq = c; // the dashboard Today view reads this
   stampStage(lead, type === 'now' ? 'Wants a call now' : type === 'schedule' ? 'Call scheduled' : 'Texting us');
   await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
   await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
