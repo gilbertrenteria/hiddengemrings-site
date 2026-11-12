@@ -66,6 +66,7 @@ button{font:inherit;color:inherit}
 .ring.saved{border-color:var(--gold);box-shadow:0 0 0 3px rgba(185,156,95,.35),0 12px 34px rgba(66,53,41,.08)}
 .ring .ph{aspect-ratio:1;background:#2e2722;display:flex;align-items:center;justify-content:center;position:relative}
 .ring .ph img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.ring .stl{position:absolute;bottom:12px;left:12px;background:rgba(30,24,19,.55);color:#f3ead8;border-radius:999px;padding:4px 10px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(4px)}
 .ring .num{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.92);border-radius:999px;padding:5px 11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--brown-dark)}
 .ring .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
 .ring h3{font-size:24px}
@@ -315,9 +316,9 @@ textarea{min-height:96px;resize:vertical}
       ['Center stone', [r.carat, r.shape].filter(Boolean).join(' ') + (pre.stoneType ? ', ' + pre.stoneType.toLowerCase() : ', lab grown diamond')],
       ['Stone size', d ? d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm face up' : ''],
       ['Setting', r.style ? r.style + ' · ' + hold : ''],
-      ['Metal', r.metal ? '<span class="sw" style="background:' + sw + '"></span>' + E(r.metal) + (/gold/i.test(r.metal) ? ', 14k' : '') : ''],
+      ['Metal', r.metal ? '<span class="sw" style="background:' + sw + '"></span>' + E(r.metal) : ''],
       ['Band', band + ', about 2 mm wide'],
-      ['Ring size', pre.ringSize || 'Sized for ' + her() + ' finger, free']
+      ['Ring size', pre.ringSize || '']
     ];
     return '<dl class="specs">' + rows.filter(function (x) { return x[1]; }).map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + (x[0] === 'Metal' ? x[1] : E(x[1])) + '</dd>'; }).join('') + '</dl>';
   }
@@ -340,7 +341,7 @@ textarea{min-height:96px;resize:vertical}
   var INTRO = [
     function () { return { img: 'portal-intro-1.jpg', html: '<p class="kick">Made only for ' + E(first() || 'you') + '</p><h1 class="big">Every forever begins with <em>a single moment.</em></h1><p class="lead">' + (first() ? E(first()) + ', this' : 'This') + ' one is yours. Take a breath. What you are about to see was created with one person in mind.</p>' }; },
     function () { var s = saidLines(); return { img: 'portal-intro-2.jpg', html: '<p class="kick">' + (you() ? 'You' : 'Her') + ', in your words</p><h1 class="big">We listened to <em>every word.</em></h1>' + (s.length ? '<ul class="said">' + s.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>' : '<p class="lead">You told us what matters. We carried every detail into ' + her() + ' designs.</p>') }; },
-    function () { return { img: 'portal-intro-3.jpg', html: '<p class="kick">The craft</p><h1 class="big">Nothing is <em>left to chance.</em></h1><p class="lead">Every ring we create is drawn to ' + her() + ' true size, measured to the millimeter, and set exactly where it belongs on ' + her() + ' hand.</p><div class="craft"><div><b>I</b><span>A true size drawing sits beside every ring, so what you see is what ' + she() + ' wears.</span></div><div><b>II</b><span>Every stone, prong and band is checked by hand before it is ever shown to you.</span></div><div><b>III</b><span>Nothing is final until it feels like ' + (you() ? 'you' : 'her') + '.</span></div></div>' }; },
+    function () { return { img: 'portal-intro-3.jpg', html: '<p class="kick">Made for ' + (you() ? 'you' : 'her') + '</p><h1 class="big">Made for the moment <em>' + she() + ' says yes.</em></h1><p class="lead">Somewhere ahead is a moment you will never forget. ' + (you() ? 'Your' : 'Her') + ' hand in yours, ' + (you() ? 'your' : 'her') + ' eyes on the ring, and everything you feel finally said out loud. Every ring here was created for that moment.</p><div class="craft"><div><b>I</b><span>Imagine the first time ' + she() + ' sees it, and the look you will remember for the rest of your life.</span></div><div><b>II</b><span>Every curve, every stone and every detail is chosen around ' + (you() ? 'you' : 'her') + ', not the other way around.</span></div><div><b>III</b><span>Nothing is final until it feels like ' + (you() ? 'you' : 'her') + '. We keep going until you know.</span></div></div>' }; },
     function () { var n = (P.rings || []).length; return n ? { img: 'portal-intro-4.jpg', html: '<p class="kick">The reveal</p><h1 class="big">' + (n === 10 ? 'Ten' : n) + ' rings. <em>One ' + (you() ? 'you' : 'her') + '.</em></h1><p class="lead">We designed ' + (n === 10 ? 'ten rings' : 'these rings') + ' with one person in mind. One of them is waiting for you.</p><button class="btn gold mt" id="reveal">Reveal ' + her() + ' rings</button>' }
       : { img: 'portal-intro-4.jpg', html: '<p class="kick">The reveal</p><h1 class="big">Your rings are <em>being designed now.</em></h1><p class="lead">We are creating ' + her() + ' rings by hand right now. You will get a text the moment they are ready to see.</p>' + talkCard('wait') }; }
   ];
@@ -381,7 +382,7 @@ textarea{min-height:96px;resize:vertical}
     app.innerHTML = '<div class="rhead pg"><p class="kick">Designed for ' + E(first() || 'you') + '</p><h1 class="big">Which one feels <em>like ' + (you() ? 'you' : 'her') + '?</em></h1><p class="lead">Take your time. Tap <b>This is the one</b> when it feels right, or save up to 3 favorites.</p></div>' +
       '<div class="rings">' + L.map(function (r, i) {
         var n = i + 1, sv = K.favs.indexOf(n) > -1;
-        return '<article class="ring' + (sv ? ' saved' : '') + '" data-n="' + n + '"><div class="ph">' + (img(r) ? '<img loading="lazy" src="' + E(img(r)) + '" alt="' + E(title(r)) + '">' : '') + '<span class="num">Ring ' + n + '</span></div>' +
+        return '<article class="ring' + (sv ? ' saved' : '') + '" data-n="' + n + '"><div class="ph">' + (img(r) ? '<img loading="lazy" src="' + E(img(r)) + '" alt="' + E(title(r)) + '">' : '') + '<span class="num">Ring ' + n + '</span>' + (/ring\.gilbertrenteria/.test(r.img || '') ? '<span class="stl">Style photo · stone not to scale</span>' : '') + '</div>' +
           '<div class="body"><h3>' + E(title(r)) + '</h3>' + specs(r) +
           '<div class="acts"><button class="btn one" data-n="' + n + '">This is the one</button><button class="save' + (sv ? ' on' : '') + '" data-n="' + n + '" aria-pressed="' + sv + '">' + (sv ? '&#9829; Saved' : '&#9825; Save') + '</button></div></div></article>';
       }).join('') + '</div>' +
