@@ -168,11 +168,17 @@
         for (var py = 0; py < H * 0.6; py += 2) { addPx(1, py); addPx(W - 2, py); }
         br /= bn; bgc /= bn; bb /= bn;
         var cols = new Array(W).fill(0), rows = new Array(H).fill(0), m = Math.max(2, Math.round(W * 0.012));
-        for (var y = m; y < H - m; y++) for (var xx = m; xx < W - m; xx++) {
-          if (xx > W * 0.76 && y > H * 0.6) continue; // logo corner
-          var i = (y * W + xx) * 4;
-          var diff = Math.max(Math.abs(d[i] - br), Math.abs(d[i + 1] - bgc), Math.abs(d[i + 2] - bb));
-          if (diff > 48) { cols[xx]++; rows[y]++; }
+        // background can glow or fade across the photo, so compare each pixel with its own row's
+        // background (blended from that row's left and right edges)
+        function edge(y, x1) { var r = 0, g = 0, b = 0; for (var k = 0; k < 4; k++) { var j = (y * W + x1 + k) * 4; r += d[j]; g += d[j + 1]; b += d[j + 2]; } return [r / 4, g / 4, b / 4]; }
+        for (var y = m; y < H - m; y++) {
+          var Lc = edge(y, m), Rc = edge(y, W - m - 4);
+          for (var xx = m; xx < W - m; xx++) {
+            if (xx > W * 0.76 && y > H * 0.6) continue; // logo corner
+            var t = xx / W, i = (y * W + xx) * 4;
+            var diff = Math.max(Math.abs(d[i] - (Lc[0] + (Rc[0] - Lc[0]) * t)), Math.abs(d[i + 1] - (Lc[1] + (Rc[1] - Lc[1]) * t)), Math.abs(d[i + 2] - (Lc[2] + (Rc[2] - Lc[2]) * t)));
+            if (diff > 42) { cols[xx]++; rows[y]++; }
+          }
         }
         function span(arr, need) { var lo = -1, hi = -1; for (var k = 0; k < arr.length; k++) if (arr[k] > need) { if (lo < 0) lo = k; hi = k; } return [lo, hi]; }
         var sx = span(cols, Math.max(2, H * 0.012)), sy = span(rows, Math.max(2, W * 0.012));
