@@ -157,7 +157,7 @@
         br /= bn; bgc /= bn; bb /= bn;
         var cols = new Array(W).fill(0), rows = new Array(H).fill(0), m = Math.max(2, Math.round(W * 0.012));
         for (var y = m; y < H - m; y++) for (var xx = m; xx < W - m; xx++) {
-          if (xx > W * 0.8 && y > H * 0.8) continue; // logo corner
+          if (xx > W * 0.76 && y > H * 0.6) continue; // logo corner
           var i = (y * W + xx) * 4;
           var diff = Math.max(Math.abs(d[i] - br), Math.abs(d[i + 1] - bgc), Math.abs(d[i + 2] - bb));
           if (diff > 48) { cols[xx]++; rows[y]++; }
@@ -170,8 +170,10 @@
         var OUT = 900, o = document.createElement('canvas'); o.width = OUT; o.height = OUT;
         var ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high';
         ox.fillStyle = 'rgb(' + Math.round(br) + ',' + Math.round(bgc) + ',' + Math.round(bb) + ')'; ox.fillRect(0, 0, OUT, OUT);
-        var k2 = OUT / side;
-        ox.drawImage(bm, (side / 2 - cx) * k2, (side / 2 - cy) * k2, bm.width * k2, bm.height * k2);
+        // never crop past the photo's edges (no bands or logo showing); keep the ring as centered as the photo allows
+        side = Math.min(side, bm.width, bm.height);
+        var left = Math.min(Math.max(cx - side / 2, 0), bm.width - side), top = Math.min(Math.max(cy - side / 2, 0), bm.height - side);
+        ox.drawImage(bm, left, top, side, side, 0, 0, OUT, OUT);
         var url = o.toDataURL('image/jpeg', 0.92);
         centerCache[src0] = url; img.src = url; img.style.opacity = '';
       }).catch(function () { img.style.opacity = ''; });
