@@ -15,7 +15,7 @@
   .rc:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(66,53,41,.12)}
   .rc.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(185,156,95,.45),0 14px 34px rgba(66,53,41,.14)}
   .rc .ph{position:relative;background:var(--cream2)}
-  .rc .ph img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+  .rc .ph img{width:100%;aspect-ratio:1;object-fit:cover;display:block;transition:opacity .25s}
   .rc .ph .badge{position:absolute;top:12px;left:12px}
   .rc .num{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(66,53,41,.85);color:var(--gold);display:grid;place-items:center;font-family:'Newsreader',serif;font-weight:600}
   .rc .bd{padding:16px 18px 18px;display:flex;flex-direction:column;gap:4px;flex:1}
@@ -134,34 +134,47 @@
   // Keep every ring centered in its photo frame. Wide library photos are
   // cropped to a square, so find where the ring sits and center the crop on it.
   var centerCache = {};
+  // Puts every ring dead center: finds the ring against its background, then
+  // redraws the photo as a square with the ring centered at the same size in every card.
   function centerRings() {
     app.querySelectorAll('.ph img, .chosen img').forEach(function (img) {
-      function go() {
-        var w = img.naturalWidth, hgt = img.naturalHeight;
-        if (!w || !hgt || w < hgt * 1.08) return;
-        var src = img.currentSrc || img.src;
-        if (centerCache[src] != null) { img.style.objectPosition = centerCache[src] + '% 50%'; return; }
-        fetch(src, { mode: 'cors' }).then(function (r) { return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm) {
-          var c = document.createElement('canvas'), sc = Math.min(1, 320 / bm.width);
-          c.width = Math.round(bm.width * sc); c.height = Math.round(bm.height * sc);
-          var x = c.getContext('2d'); x.drawImage(bm, 0, 0, c.width, c.height);
-          var W = c.width, H = c.height, d = x.getImageData(0, 0, W, H).data, bg = 0, bn = 0, col = [], n = 0;
-          for (var yy = 0; yy < Math.max(2, H * 0.03); yy++) for (var xx = 0; xx < W; xx += 2) { var j = (yy * W + xx) * 4; bg += (d[j] + d[j + 1] + d[j + 2]) / 3; bn++; }
-          bg /= bn;
-          for (var xx2 = 0; xx2 < W; xx2++) col[xx2] = 0;
-          for (var y2 = 0; y2 < H; y2++) for (var x2 = 0; x2 < W; x2++) {
-            if (x2 > W * 0.82 && y2 > H * 0.62) continue; // skip the logo corner
-            var i = (y2 * W + x2) * 4; if ((d[i] + d[i + 1] + d[i + 2]) / 3 > bg + 45) col[x2]++;
-          }
-          var minx = -1, maxx = -1, need = Math.max(2, H * 0.01);
-          for (var x3 = 0; x3 < W; x3++) if (col[x3] > need) { if (minx < 0) minx = x3; maxx = x3; }
-          if (minx < 0) return; n = 1; var sx = (minx + maxx) / 2 * c.width / W;
-          var cx = sx / c.width, side = c.height / c.width, left = Math.min(Math.max(cx - side / 2, 0), 1 - side);
-          var pos = Math.round(left / (1 - side) * 100);
-          centerCache[src] = pos; img.style.objectPosition = pos + '% 50%';
-        }).catch(function () {});
-      }
-      if (img.complete) go(); else img.addEventListener('load', go, { once: true });
+      var src0 = img.getAttribute('data-src0') || img.currentSrc || img.src;
+      if (!src0 || /^data:/.test(src0)) return;
+      img.setAttribute('data-src0', src0);
+      if (centerCache[src0]) { img.src = centerCache[src0]; return; }
+      img.style.opacity = '0';
+      fetch(src0, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm) {
+        var sc = Math.min(1, 400 / Math.max(bm.width, bm.height));
+        var W = Math.round(bm.width * sc), H = Math.round(bm.height * sc);
+        var c = document.createElement('canvas'); c.width = W; c.height = H;
+        var x = c.getContext('2d'); x.drawImage(bm, 0, 0, W, H);
+        var d = x.getImageData(0, 0, W, H).data;
+        // background color from the top edge and the upper side edges
+        var br = 0, bgc = 0, bb = 0, bn = 0;
+        function addPx(px, py) { var j = (py * W + px) * 4; br += d[j]; bgc += d[j + 1]; bb += d[j + 2]; bn++; }
+        for (var px = 0; px < W; px += 2) { addPx(px, 1); addPx(px, 3); }
+        for (var py = 0; py < H * 0.6; py += 2) { addPx(1, py); addPx(W - 2, py); }
+        br /= bn; bgc /= bn; bb /= bn;
+        var cols = new Array(W).fill(0), rows = new Array(H).fill(0), m = Math.max(2, Math.round(W * 0.012));
+        for (var y = m; y < H - m; y++) for (var xx = m; xx < W - m; xx++) {
+          if (xx > W * 0.8 && y > H * 0.8) continue; // logo corner
+          var i = (y * W + xx) * 4;
+          var diff = Math.max(Math.abs(d[i] - br), Math.abs(d[i + 1] - bgc), Math.abs(d[i + 2] - bb));
+          if (diff > 48) { cols[xx]++; rows[y]++; }
+        }
+        function span(arr, need) { var lo = -1, hi = -1; for (var k = 0; k < arr.length; k++) if (arr[k] > need) { if (lo < 0) lo = k; hi = k; } return [lo, hi]; }
+        var sx = span(cols, Math.max(2, H * 0.012)), sy = span(rows, Math.max(2, W * 0.012));
+        if (sx[0] < 0 || sy[0] < 0) { img.style.opacity = ''; return; }
+        var cx = (sx[0] + sx[1]) / 2 / sc, cy = (sy[0] + sy[1]) / 2 / sc;
+        var side = Math.max(sx[1] - sx[0], sy[1] - sy[0]) / sc / 0.78; // ring fills 78% of the square
+        var OUT = 900, o = document.createElement('canvas'); o.width = OUT; o.height = OUT;
+        var ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high';
+        ox.fillStyle = 'rgb(' + Math.round(br) + ',' + Math.round(bgc) + ',' + Math.round(bb) + ')'; ox.fillRect(0, 0, OUT, OUT);
+        var k2 = OUT / side;
+        ox.drawImage(bm, (side / 2 - cx) * k2, (side / 2 - cy) * k2, bm.width * k2, bm.height * k2);
+        var url = o.toDataURL('image/jpeg', 0.92);
+        centerCache[src0] = url; img.src = url; img.style.opacity = '';
+      }).catch(function () { img.style.opacity = ''; });
     });
   }
   function render() {
