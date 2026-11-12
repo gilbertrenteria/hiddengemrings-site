@@ -64,8 +64,8 @@ button{font:inherit;color:inherit}
 .ring{background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 12px 34px rgba(66,53,41,.08);display:flex;flex-direction:column;opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease,box-shadow .2s,border-color .2s}
 .ring.in{opacity:1;transform:none}
 .ring.saved{border-color:var(--gold);box-shadow:0 0 0 3px rgba(185,156,95,.35),0 12px 34px rgba(66,53,41,.08)}
-.ring .ph{aspect-ratio:1;background:#f4f0e8;display:flex;align-items:center;justify-content:center;position:relative}
-.ring .ph img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
+.ring .ph{aspect-ratio:3/2;background:#2e2722;display:flex;align-items:center;justify-content:center;position:relative}
+.ring .ph img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .ring .num{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.92);border-radius:999px;padding:5px 11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--brown-dark)}
 .ring .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
 .ring h3{font-size:24px}
@@ -92,11 +92,11 @@ label.fl{display:block;font-size:12px;letter-spacing:.14em;text-transform:upperc
 select,textarea{width:100%;font:16px 'Work Sans',sans-serif;color:var(--brown-dark);background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:14px;padding:14px}
 select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--taupe-dark) 50%),linear-gradient(135deg,var(--taupe-dark) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat}
 textarea{min-height:96px;resize:vertical}
-.pickimg{border-radius:20px;overflow:hidden;background:#f4f0e8;aspect-ratio:1;max-width:420px;margin:18px auto 0}
-.pickimg img{width:100%;height:100%;object-fit:contain;display:block}
+.pickimg{border-radius:20px;overflow:hidden;background:#2e2722;aspect-ratio:3/2;max-width:420px;margin:18px auto 0}
+.pickimg img{width:100%;height:100%;object-fit:cover;display:block}
 .favs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
 .fav{border:1.5px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;cursor:pointer;text-align:left;padding:0}
-.fav img{width:100%;aspect-ratio:1;object-fit:contain;background:#f4f0e8;display:block}
+.fav img{width:100%;aspect-ratio:3/2;object-fit:cover;background:#2e2722;display:block}
 .fav div{padding:10px 12px;font-size:13px;color:var(--brown-dark)}
 .fav b{display:block;font-family:'Newsreader',serif;font-size:18px;font-weight:500}
 .center{text-align:center}
@@ -125,11 +125,11 @@ textarea{min-height:96px;resize:vertical}
 .msg.me{margin-left:auto;background:var(--brown);color:#fff;border:0}
 .msg img{max-width:100%;border-radius:10px;display:block}
 .msg small{display:block;opacity:.7;font-size:11px;margin-top:3px}
-.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-160%);background:var(--brown-dark);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;z-index:60;transition:transform .3s}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-300%);background:var(--brown-dark);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;z-index:60;transition:transform .3s}
 .toast.on{transform:translate(-50%,0)}
 .foot{text-align:center;font-size:13px;color:var(--taupe-dark);margin-top:40px}
 .foot a{color:var(--taupe-dark)}
-@media(max-width:520px){.card{padding:20px 18px 26px;border-radius:22px}.lead{font-size:16px}.said li{font-size:19px}}
+@media(max-width:520px){.hero{max-height:44vh}.card{padding:20px 18px 26px;border-radius:22px}.lead{font-size:16px}.said li{font-size:19px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ring{opacity:1;transform:none}}
 </style>
 </head>
@@ -185,9 +185,9 @@ textarea{min-height:96px;resize:vertical}
   }
   function sizeRow(r) {
     var ct = caratNum(r.carat); if (!ct) return '';
-    var sh = shapeId(r.shape), d = stoneMM(sh, ct), k = 3.6, L = d[0] * k, W = d[1] * k;
+    var sh = shapeId(r.shape), d = stoneMM(sh, ct), k = 5, L = d[0] * k, W = d[1] * k;
     var gold = /rose/i.test(r.metal) ? '#dfa58f' : /white|platinum/i.test(r.metal) ? '#cfd3d8' : '#d9b45f';
-    return '<div class="size"><svg viewBox="0 0 74 56" width="74" height="56" aria-hidden="true"><rect x="0" y="25" width="74" height="6" rx="3" fill="' + gold + '"/><g fill="#fff" stroke="#9aa3ad" stroke-width="1.2">' + stonePath(sh, 37, 28, L, W) + '</g></svg>' +
+    return '<div class="size"><svg viewBox="0 0 96 76" width="96" height="76" aria-hidden="true"><rect x="0" y="34" width="96" height="8" rx="4" fill="' + gold + '"/><g fill="#fff" stroke="#9aa3ad" stroke-width="1.2">' + stonePath(sh, 48, 38, L, W) + '</g></svg>' +
       '<small><b>True size ' + d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm.</b> The photo shows the style. This drawing shows ' + her() + ' real stone size.</small></div>';
   }
   function img(r) { return r.img ? (/^\//.test(r.img) ? API + r.img : r.img) : ''; }
@@ -203,7 +203,7 @@ textarea{min-height:96px;resize:vertical}
     if (a.carat) out.push('A stone around ' + a.carat.toLowerCase().replace(' carats', ' carats') + '.');
     if (a.stoneType) out.push(a.stoneType + ', chosen with care.');
     if (a.band) out.push('A band that is ' + a.band.toLowerCase() + '.');
-    if (a.when) out.push(/asap/i.test(a.when) ? 'And you are ready soon.' : 'Ready for the moment, ' + a.when.toLowerCase() + ' away.');
+    if (a.when) out.push(/asap/i.test(a.when) ? 'And you are ready soon.' : 'Ready for the moment, ' + a.when.toLowerCase().replace(/(\d)\s*-\s*(\d)/, '$1 to $2') + ' away.');
     return out.slice(0, 5);
   }
   var INTRO = [
