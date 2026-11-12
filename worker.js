@@ -17,6 +17,7 @@ const ALLOWED_ORIGINS = new Set([
 // Public contact email (live Google Workspace inbox).
 const PUBLIC_EMAIL = 'hello@hiddengemrings.com';
 const TO_ADDRESS = PUBLIC_EMAIL;
+const CLAUDE_COPY = 'gilbertrenteriaboxing@gmail.com';
 const PUBLIC_PHONE = '(832) 743-7657';
 const PUBLIC_TEL = '+18327437657';
 const OWNER_ADDRESS = 'gilbertrenteria@yahoo.com';
@@ -1215,14 +1216,18 @@ function portalPrefill(lead) {
   return a;
 }
 
-function portalView(p, lead) {
+function portalView(p, lead, online) {
+  // No team member names ever reach the customer.
   return {
-    first: String(lead.name || '').split(' ')[0], rep: (lead.routedNames || [])[0] || 'Kim',
+    first: String(lead.name || '').split(' ')[0], rep: 'Hidden Gem',
     surprise: /^yes/i.test(lead.surprise || ''), buyer: (lead.about || {}).buyer || '',
     prefill: portalPrefill(lead), answers: p.answers || {}, step: p.step || 0,
     submittedAt: p.submittedAt || 0, version: p.version || 0,
-    msgs: (p.msgs || []).map((m, i) => ({ from: m.from, name: m.name, text: m.text, at: m.at, img: m.img ? `/portal/${p.t}/img/${m.img}` : '' })),
+    msgs: (p.msgs || []).map((m, i) => ({ from: m.from, name: m.from === 'team' ? 'Hidden Gem' : m.name, text: m.text, at: m.at, img: m.img ? `/portal/${p.t}/img/${m.img}` : '' })),
     inspo: (p.inspo || []).map((x) => (x.img ? { img: `/portal/${p.t}/img/${x.img}` } : { link: x.link })),
+    rings: (p.rings || []).map((r, i) => ({ n: i + 1, img: r.img ? (/^https:/.test(r.img) ? r.img : `/portal/${p.t}/img/${r.img}`) : '', shape: r.shape || '', style: r.style || '', carat: r.carat || '', metal: r.metal || '', title: r.title || '' })),
+    pick: p.pick || null, contact: (p.contact || []).slice(-1)[0] || null, online: !!online,
+    tz: lead.tz || '', budget: lead.budget || '',
   };
 }
 
@@ -1273,7 +1278,8 @@ async function handlePortalCreate(fields, url, env, origin) {
 async function handlePortalGet(t, env, origin) {
   const { p, lead } = await portalLoad(t, env);
   if (!p || !lead) return json({ ok: false, error: 'Not found' }, 404, origin);
-  return json({ ok: true, portal: portalView(p, lead) }, 200, origin);
+  const cfg = await getConfig(env);
+  return json({ ok: true, portal: portalView(p, lead, cfg.reps.some((r) => r.online)) }, 200, origin);
 }
 
 async function handlePortalImg(t, n, env) {
@@ -1298,11 +1304,12 @@ async function handlePortalEvent(t, fields, env, origin) {
     p.startedAt = now; stampStage(lead, 'Designing in portal');
     subject = `RING PORTAL STARTED: ${who} is designing`;
     html = portalEmail(lead, `${who} started designing`, `Started ${chicagoTime(now)}.`, null, p);
-  } else if (type === 'leave' && !p.submittedAt && p.startedAt && (!p.leaveAt || now - p.leaveAt > 3 * 3600e3)) {
+  } else if (type === 'leave' && !p.submittedAt && !(p.pick && p.pick.sentAt) && p.startedAt && (!p.leaveAt || now - p.leaveAt > 3 * 3600e3)) {
     p.leaveAt = now;
     if (fields.answers && typeof fields.answers === 'object') p.answers = cleanAnswers(fields.answers, p.answers);
+    if (fields.draft && typeof fields.draft === 'object') p.draft = cleanPick(fields.draft, p);
     subject = `RING PORTAL PAUSED: ${who} left partway`;
-    html = portalEmail(lead, `${who} stepped away partway through`, `Left ${chicagoTime(now)} on step ${escapeHtml(String(fields.stepName || fields.step || ''))}. Here is what they picked so far:`, portalDesignRows(p, lead), p);
+    html = portalEmail(lead, `${who} stepped away partway through`, `Left ${chicagoTime(now)} on ${escapeHtml(String(fields.stepName || fields.step || ''))}. Here is where they were:`, (p.rings || []).length ? pickRows(p.draft || {}, p) : portalDesignRows(p, lead), p);
   } else return json({ ok: true }, 200, origin);
   await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
   await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
@@ -1380,6 +1387,119 @@ async function handlePortalTeamMsg(fields, url, env, origin) {
   return json({ ok: true, portal: portalView(p, lead), link: portalLink(t) }, 200, origin);
 }
 
+
+// ---------- Ring Portal v2: 10 rings we design for them, pick, and talk ----------
+const PICK_WHY = ['Stones look too big', 'Stones look too small', 'Not the shape I want', 'Wrong metal color', 'Too plain', 'Too flashy', 'Not her style', 'Want more sparkle on the band', 'Something else'];
+const BUILD_KEYS = { shape: 'Shape', carat: 'Stone size', metal: 'Metal', setting: 'Setting', band: 'Band', stoneType: 'Stone type', style: 'Her style' };
+function ringLabel(r, i) { return `Ring ${i + 1}` + [r.title || [r.shape, r.style].filter(Boolean).join(' '), r.carat, r.metal].filter(Boolean).map((x) => ' · ' + x).join(''); }
+function cleanPick(f, p) {
+  const n = (p.rings || []).length;
+  const num = (x) => { x = Number(x); return x >= 1 && x <= n ? x : 0; };
+  const out = { mode: ['one', 'favs', 'none'].includes(f.mode) ? f.mode : '' };
+  out.ring = num(f.ring);
+  out.favs = Array.isArray(f.favs) ? [...new Set(f.favs.map(num).filter(Boolean))].slice(0, 3) : [];
+  out.all = !!f.all;
+  out.why = Array.isArray(f.why) ? f.why.filter((w) => PICK_WHY.includes(w)) : [];
+  out.build = {};
+  if (f.build && typeof f.build === 'object') Object.keys(BUILD_KEYS).forEach((k) => { if (f.build[k]) out.build[k] = String(f.build[k]).slice(0, 80); });
+  out.notes = String(f.notes || '').slice(0, 2000);
+  return out;
+}
+function pickRows(k, p) {
+  const R = p.rings || [], rows = [];
+  if (k.ring) rows.push(['Their ring', ringLabel(R[k.ring - 1], k.ring - 1)]);
+  if (k.favs && k.favs.length) rows.push(['Favorites', k.favs.map((x) => ringLabel(R[x - 1], x - 1)).join('\n')]);
+  if (k.all) rows.push(['Wants', 'Full mockups of all their favorites']);
+  if (k.why && k.why.length) rows.push(['Why none fit', k.why.join(', ')]);
+  Object.keys(k.build || {}).forEach((b) => rows.push([BUILD_KEYS[b], k.build[b]]));
+  if (k.notes) rows.push(['Notes', k.notes]);
+  return rows;
+}
+function ringThumbs(k, p, t) {
+  const ids = k.ring ? [k.ring] : (k.favs || []);
+  return ids.map((x) => { const r = (p.rings || [])[x - 1]; if (!r || !r.img) return ''; const src = /^https:/.test(r.img) ? r.img : `https://long-bar-d49d.gilbertrenteria.workers.dev/portal/${t}/img/${r.img}`; return `<img src="${src}" width="150" style="border-radius:10px;margin:6px 6px 0 0">`; }).join('');
+}
+
+// team loads the 10 rings (photo as data URL, or an https link we fetch and keep)
+async function handlePortalTeamRings(fields, url, env, origin) {
+  if (!teamAuth(fields, url, env)) return json({ ok: false, error: 'Wrong key' }, 403, origin);
+  const leadId = String(fields.leadId || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${leadId}`, 'json');
+  if (!lead || !lead.portalToken) return json({ ok: false, error: 'Create the portal link first' }, 404, origin);
+  const t = lead.portalToken, p = await env.IG_KV.get(`portal:${t}`, 'json');
+  const list = Array.isArray(fields.rings) ? fields.rings.slice(0, 12) : [];
+  const out = [];
+  for (const r of list) {
+    let img = String(r.img || '');
+    if (/^data:image\//.test(img)) {
+      if (img.length > 6e6) return json({ ok: false, error: 'A photo is too large (max about 4 MB)' }, 400, origin);
+      p.imgN = (p.imgN || 0) + 1; await env.IG_KV.put(`pimg:${t}:${p.imgN}`, img); img = String(p.imgN);
+    } else if (/^https:\/\//.test(img) && !/^https:\/\/hiddengemrings\.com\//.test(img)) {
+      try {
+        const res = await fetch(img); const type = res.headers.get('Content-Type') || '';
+        if (!res.ok || !/^image\//.test(type)) return json({ ok: false, error: 'Could not load a photo link' }, 400, origin);
+        const buf = new Uint8Array(await res.arrayBuffer()); if (buf.length > 4.5e6) return json({ ok: false, error: 'A photo is too large' }, 400, origin);
+        let bin = ''; for (let i = 0; i < buf.length; i += 32768) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 32768));
+        p.imgN = (p.imgN || 0) + 1; await env.IG_KV.put(`pimg:${t}:${p.imgN}`, `data:${type.split(';')[0]};base64,${btoa(bin)}`); img = String(p.imgN);
+      } catch (e) { return json({ ok: false, error: 'Could not load a photo link' }, 400, origin); }
+    } else if (/^\d{1,4}$/.test(img) || /^https:\/\/hiddengemrings\.com\//.test(img)) { /* already stored or our own site */ }
+    else img = '';
+    const c = (v) => String(v || '').slice(0, 60);
+    out.push({ img, shape: c(r.shape), style: c(r.style), carat: c(r.carat), metal: c(r.metal), title: c(r.title) });
+  }
+  p.rings = out; p.ringsAt = Date.now(); p.pick = null; p.draft = null;
+  stampStage(lead, 'Rings loaded in portal');
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  await env.IG_KV.put(`lead:${leadId}`, JSON.stringify(lead));
+  return json({ ok: true, count: out.length, link: portalLink(t), portal: portalView(p, lead, false) }, 200, origin);
+}
+
+// customer sends their pick, their favorites, or "none of these" with why and ideas
+async function handlePortalPick(t, fields, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false }, 404, origin);
+  const k = cleanPick(fields, p);
+  if (!k.mode || (k.mode === 'one' && !k.ring) || (k.mode === 'favs' && !k.favs.length)) return json({ ok: false, error: 'Pick a ring first' }, 400, origin);
+  const sig = JSON.stringify(k);
+  if (p.pick && p.pick.sig === sig && p.pick.emailed) return json({ ok: true, emailed: true, dup: true }, 200, origin);
+  k.sentAt = Date.now(); k.sig = sig; p.pick = k; p.draft = null;
+  stampStage(lead, k.mode === 'none' ? 'Wants new designs' : 'Picked in portal');
+  const sur = /^yes/i.test(lead.surprise || '') ? ' (SURPRISE)' : '';
+  const subject = k.mode === 'one' ? `RING PICKED: ${lead.name} chose Ring ${k.ring}${sur}` : k.mode === 'favs' ? `FAVORITES SAVED: ${lead.name} (${k.favs.length})${sur}` : `NEW DESIGNS NEEDED: ${lead.name}${sur}`;
+  const intro = (k.mode === 'none' ? 'None of the 10 felt right. Here is why and what they want.' : 'They are excited right now. Reach out within the hour.') + ` Sent ${chicagoTime(k.sentAt)}. Promised: full mockup within 24 hours.`;
+  const sent = await sendEmail(env, { to: leadRecipients(lead), subject, html: portalEmail(lead, subject.split(':')[0] === 'RING PICKED' ? `${lead.name} picked their ring` : subject, intro, pickRows(k, p), p, ringThumbs(k, p, t)) });
+  p.pick.emailed = !!sent.ok;
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
+  if (!sent.ok) return json({ ok: false, saved: true, error: 'Saved, still sending' }, 502, origin);
+  return json({ ok: true, emailed: true }, 200, origin);
+}
+
+// text, schedule a call, or talk now (talk now only when someone is online)
+async function handlePortalContact(t, fields, env, origin) {
+  const { p, lead } = await portalLoad(t, env);
+  if (!p || !lead) return json({ ok: false }, 404, origin);
+  const type = String(fields.type || ''), now = Date.now();
+  if (!['text', 'schedule', 'now'].includes(type)) return json({ ok: false }, 400, origin);
+  const cfg = await getConfig(env), online = cfg.reps.some((r) => r.online);
+  if (type === 'now' && !online) return json({ ok: false, offline: true, error: 'We are away right now. Pick a time instead.' }, 409, origin);
+  const c = { type, at: now, day: String(fields.day || '').slice(0, 40), window: String(fields.window || '').slice(0, 60), tz: String(fields.tz || '').slice(0, 40), central: String(fields.central || '').slice(0, 80) };
+  const last = (p.contact || []).slice(-1)[0];
+  if (type === 'text' && last && last.type === 'text' && now - last.at < 3600e3) return json({ ok: true }, 200, origin);
+  p.contact = (p.contact || []).concat([c]).slice(-20);
+  stampStage(lead, type === 'now' ? 'Wants a call now' : type === 'schedule' ? 'Call scheduled' : 'Texting us');
+  await env.IG_KV.put(`portal:${t}`, JSON.stringify(p));
+  await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
+  const sur = /^yes/i.test(lead.surprise || '') ? ' (SURPRISE)' : '';
+  let subject, intro;
+  if (type === 'now') { subject = `URGENT CALL NOW: ${lead.name}${sur}`; intro = `<b>Call ${escapeHtml(fmtPhone(lead.phone))} within 30 to 45 minutes.</b> They tapped Talk now at ${chicagoTime(now)}. We promised the call by ${chicagoTime(now + 45 * 60e3)}.`; }
+  else if (type === 'schedule') { subject = `CALL SCHEDULED: ${lead.name}, ${c.central || c.day + ' ' + c.window}${sur}`; intro = `They asked for a call ${escapeHtml(c.day)} ${escapeHtml(c.window)}${c.central ? ' (' + escapeHtml(c.central) + ' Central)' : ''}.`; }
+  else { subject = `TEXTING YOU: ${lead.name}${sur}`; intro = `They tapped Text us at ${chicagoTime(now)}. A text from them should arrive at (832) 743-7657. If it does not, text them first.`; }
+  const k = p.pick || p.draft;
+  await sendEmail(env, { to: leadRecipients(lead), subject, html: portalEmail(lead, subject, intro, k ? pickRows(k, p) : null, p, k ? ringThumbs(k, p, t) : '') });
+  return json({ ok: true }, 200, origin);
+}
+
 async function handleAdminList(url, env, origin) {
   if (!isAdmin(null, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
   const leadIds = ((await env.IG_KV.get('index:leads', 'json')) || []).slice(0, 50);
@@ -1388,6 +1508,23 @@ async function handleAdminList(url, env, origin) {
   const orders = (await Promise.all(orderIds.map((id) => env.IG_KV.get(`order:${id}`, 'json')))).filter(Boolean)
     .map((o) => ({ ...publicOrder(o), customerPhone: o.customerPhone, link: `${SITE}/${o.options ? 'rings' : 'approve'}?id=${o.id}` }));
   return json({ ok: true, leads, orders }, 200, origin);
+}
+
+// Admin: delete a lead for good (lead, its portal, portal photos, and the index entry)
+async function handleLeadDelete(fields, url, env, origin) {
+  if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
+  const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
+  const lead = await env.IG_KV.get(`lead:${id}`, 'json');
+  if (!lead) return json({ ok: false, error: 'Lead not found' }, 404, origin);
+  if (lead.portalToken) {
+    const p = await env.IG_KV.get(`portal:${lead.portalToken}`, 'json');
+    for (let n = 1; n <= ((p && p.imgN) || 0); n++) await env.IG_KV.delete(`pimg:${lead.portalToken}:${n}`);
+    await env.IG_KV.delete(`portal:${lead.portalToken}`);
+  }
+  await env.IG_KV.delete(`lead:${id}`);
+  const idx = (await env.IG_KV.get('index:leads', 'json')) || [];
+  await env.IG_KV.put('index:leads', JSON.stringify(idx.filter((x) => x !== id)));
+  return json({ ok: true }, 200, origin);
 }
 
 async function handleLeadStatus(fields, url, env, origin) {
@@ -1469,13 +1606,17 @@ export default {
     if (path === '/order/create-options') return handleOptionsCreate(fields, env, origin, url);
     if (path === '/portal/create') return handlePortalCreate(fields, url, env, origin);
     if (path === '/portal/team-msg') return handlePortalTeamMsg(fields, url, env, origin);
-    const pm = path.match(/^\/portal\/([a-z0-9]{10,32})\/(event|save|msg)$/);
+    if (path === '/portal/team-rings') return handlePortalTeamRings(fields, url, env, origin);
+    const pm = path.match(/^\/portal\/([a-z0-9]{10,32})\/(event|save|msg|pick|contact)$/);
+    if (pm && pm[2] === 'pick') return handlePortalPick(pm[1], fields, env, origin);
+    if (pm && pm[2] === 'contact') return handlePortalContact(pm[1], fields, env, origin);
     if (pm) return pm[2] === 'event' ? handlePortalEvent(pm[1], fields, env, origin) : pm[2] === 'save' ? handlePortalSave(pm[1], fields, env, origin) : handlePortalMsg(pm[1], fields, env, origin);
     const sm = path.match(/^\/order\/([a-z0-9]{6,32})\/seen$/);
     if (sm) return handleOrderSeen(sm[1], env, origin);
     const chm = path.match(/^\/order\/([a-z0-9]{6,32})\/choose$/);
     if (chm) return handleOptionsChoose(chm[1], fields, env, origin);
     if (path === '/admin/lead-status') return handleLeadStatus(fields, url, env, origin);
+    if (path === '/admin/lead-delete') return handleLeadDelete(fields, url, env, origin);
     if (path === '/admin/call-save') return handleCallSave(fields, url, env, origin);
     if (path === '/admin/inspo') return handleInspoSave(fields, url, env, origin);
     if (path === '/intro/heart') return handleIntroHeart(fields, env, origin);
@@ -1579,6 +1720,8 @@ async function handleEmailLog(url, env, origin) {
 }
 async function sendEmail(env, { to, subject, html, replyTo, from }) {
   const payload = { from: from || FROM_ADDRESS, to: to || [OWNER_ADDRESS, TO_ADDRESS], subject, html };
+  // Team alerts are also copied to the inbox Claude can read, so every form and pick is on record.
+  if (payload.to.some((x) => x === OWNER_ADDRESS || x === PUBLIC_EMAIL)) payload.bcc = [CLAUDE_COPY];
   if (replyTo) payload.reply_to = replyTo;
   let result = { ok: false, error: 'not sent' };
   for (let attempt = 1; attempt <= 2; attempt++) {

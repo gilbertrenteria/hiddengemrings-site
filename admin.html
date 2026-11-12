@@ -147,6 +147,13 @@
   }
 
   var STATUSES = ['new', 'called', 'link sent', 'approved', 'declined', 'not ready'];
+  function allAnswers(l) {
+    var skip = { id: 1, hearts: 1, portalDesign: 1, call: 1 };
+    var rows = [];
+    function add(k, v) { if (v == null || v === '' || (Array.isArray(v) && !v.length)) return; if (typeof v === 'object' && !Array.isArray(v)) { Object.keys(v).forEach(function (x) { add(k + ' · ' + x, v[x]); }); return; } if (/At$/.test(k) && typeof v === 'number') v = when(v); rows.push('<tr><td style="font-weight:600;color:#6B5B4C;padding:4px 10px 4px 0;vertical-align:top">' + esc(k) + '</td><td style="padding:4px 0">' + esc(Array.isArray(v) ? v.join(', ') : String(v)) + '</td></tr>'); }
+    Object.keys(l).forEach(function (k) { if (!skip[k]) add(k, l[k]); });
+    return '<table style="font-size:.9rem;margin-top:8px;border-collapse:collapse">' + rows.join('') + '</table>';
+  }
   function drawLeads() {
     var L = data.leads;
     var c = function (s) { return L.filter(function (l) { return (l.status || 'new') === s; }).length; };
@@ -163,8 +170,18 @@
         '<p><b style="color:var(--brown-dark)">Stage: ' + esc(l.stage || 'Form sent') + '</b>' + (l.stageAt ? ' · ' + esc(when(l.stageAt)) : '') + (l.hearts && l.hearts.length ? ' · Loved ' + l.hearts.length : '') + '</p>' +
         '<div class="row" style="margin-top:8px"><a class="btn" style="padding:11px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=gilbert">Call (Gilbert)</a><a class="btn ghost" style="padding:10px 16px" href="call.html?lead=' + encodeURIComponent(l.id) + '&rep=kim">Call (Kim)</a></div>' +
         '<div class="stat stage" data-id="' + esc(l.id) + '" style="margin-top:8px">' + ['In production', 'Shipped', 'Delivered'].map(function (s) { return '<button type="button" data-stage="' + s + '" class="' + (l.stage === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div>' +
-        '<div class="stat" data-id="' + esc(l.id) + '">' + STATUSES.map(function (s) { return '<button type="button" class="' + ((l.status || 'new') === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div></div></div>';
+        '<div class="stat" data-id="' + esc(l.id) + '">' + STATUSES.map(function (s) { return '<button type="button" class="' + ((l.status || 'new') === s ? 'selected' : '') + '">' + s + '</button>'; }).join('') + '</div>' +
+        '<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">Everything they filled out</summary>' + allAnswers(l) + '</details>' +
+        '<button type="button" class="delLead" data-id="' + esc(l.id) + '" style="margin-top:10px;background:none;border:1px solid #c9a59a;color:#9a3b2e;border-radius:999px;padding:7px 14px;font-weight:600;cursor:pointer">Delete lead</button></div></div>';
     }).join('');
+    document.querySelectorAll('.delLead').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Tap again to delete for good'; b.style.background = '#9a3b2e'; b.style.color = '#fff'; setTimeout(function () { if (b.isConnected && b.dataset.armed) { delete b.dataset.armed; b.textContent = 'Delete lead'; b.style.background = 'none'; b.style.color = '#9a3b2e'; } }, 5000); return; }
+        b.textContent = 'Deleting...';
+        fetch(API + '/admin/lead-delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: key, id: b.dataset.id }) }).then(function (r) { return r.json(); })
+          .then(function (j) { if (j.ok) { data.leads = data.leads.filter(function (x) { return x.id !== b.dataset.id; }); drawLeads(); } else b.textContent = j.error || 'Could not delete'; });
+      });
+    });
     document.querySelectorAll('.stat.stage button').forEach(function (b) {
       b.addEventListener('click', function (e) {
         e.stopPropagation();
