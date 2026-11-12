@@ -863,6 +863,7 @@ async function handleOptionsChoose(id, fields, env, origin) {
   const key = `order:${id}`;
   const o = await env.IG_KV.get(key, 'json');
   if (!o || !o.options) return json({ ok: false, error: 'Order not found' }, 404, origin);
+  await clearTestApproval(o, key, env);
   if (o.approval) return json({ ok: false, error: 'This design is already approved.' }, 400, origin);
   const i = Number(fields.index);
   const opt = o.options[i];
@@ -931,8 +932,18 @@ async function handleOrderCreate(fields, env, origin, url) {
   return json({ ok: true, id: order.id, link: `${SITE}/approve?id=${order.id}` }, 200, origin);
 }
 
+// A rep test approval (typed name starting with "Test") never locks the customer's link.
+async function clearTestApproval(o, key, env) {
+  if (!o || !o.approval || !/^\s*test\b/i.test(o.approval.name || '')) return false;
+  o.approval = null;
+  if (o.options) { o.chosen = null; o.ring = ''; o.metal = ''; o.stone = ''; o.price = ''; o.size = ''; o.sizeMethod = ''; o.sizeEstimated = false; o.hasImage = false; o.imageUrl = ''; }
+  await env.IG_KV.put(key, JSON.stringify(o));
+  return true;
+}
+
 async function handleOrderGet(id, env, origin) {
   const o = await env.IG_KV.get(`order:${id}`, 'json');
+  await clearTestApproval(o, `order:${id}`, env);
   if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
   return json({ ok: true, order: publicOrder(o) }, 200, origin);
 }
@@ -950,6 +961,7 @@ async function handleOrderApprove(id, fields, request, env, origin) {
   const key = `order:${id}`;
   const o = await env.IG_KV.get(key, 'json');
   if (!o) return json({ ok: false, error: 'Order not found' }, 404, origin);
+  await clearTestApproval(o, key, env);
   if (o.approval && o.approval.emailed) return json({ ok: true, order: publicOrder(o), duplicate: true }, 200, origin);
 
   if (o.options && o.chosen == null) return json({ ok: false, error: 'Please pick your ring and size first.' }, 400, origin);
