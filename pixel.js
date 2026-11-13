@@ -31,6 +31,8 @@
   })(0);
 
   var TEST = /\b(test|checkpoint)\b/i;
+  var TEST_PHONES = ['8327437657', '8324544655']; // team test numbers
+  function isTest(b) { var d = String(b.phone || '').replace(/\D/g, '').slice(-10); return TEST.test(b.name || '') || /^x+\s*x*$/i.test((b.name || '').trim()) || TEST_PHONES.indexOf(d) > -1; }
   function once(key) { try { if (sessionStorage.getItem('hgpx_' + key)) return false; sessionStorage.setItem('hgpx_' + key, '1'); } catch (e) {} return true; }
   function evId(name) { return name + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
   function fire(name, params, key) {
