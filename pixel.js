@@ -19,7 +19,16 @@
     t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
   }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', PIXEL_ID);
-  fbq('track', 'PageView');
+  // Private links (?t=, ?id=, ?lead=, ?token=) never reach Meta: once fbevents.js
+  // has loaded, PageView fires while the address shows only the bare path.
+  var hidden = /[?&](t|id|lead|token)=/i.test(location.search);
+  if (!hidden) fbq('track', 'PageView');
+  else (function wait(n) {
+    if (!window.fbq.callMethod) { if (n < 100) setTimeout(function () { wait(n + 1); }, 100); return; }
+    var full = location.pathname + location.search + location.hash;
+    try { history.replaceState(history.state, '', location.pathname); fbq('track', 'PageView'); }
+    finally { history.replaceState(history.state, '', full); }
+  })(0);
 
   var TEST = /\b(test|checkpoint)\b/i;
   function once(key) { try { if (sessionStorage.getItem('hgpx_' + key)) return false; sessionStorage.setItem('hgpx_' + key, '1'); } catch (e) {} return true; }
