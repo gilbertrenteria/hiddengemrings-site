@@ -718,7 +718,7 @@
     });
     drawSlots();
   }
-  function slotSrc(s) { return s.upload || (s.combo ? HGLIB.url(s.combo.split('-')[0], s.combo.split('-')[1], s.metalKey) : s.lib ? 'design-' + s.lib + '-' + s.metalKey + '.jpg' : ''); }
+  function slotSrc(s) { return s.upload || (s.combo ? HGLIB.url(s.combo.split('-')[0], s.combo.split('-')[1], s.metalKey) : s.lib ? 'design-dark-' + s.lib + '-' + s.metalKey + '.jpg' : ''); }
   function slotOptions(s) {
     var cur = s.combo ? 'c:' + s.combo : s.lib ? 'l:' + s.lib : '';
     var h = '<option value="">Upload my own</option><optgroup label="Signature collection">' + LIB.map(function (l) { return '<option value="l:' + l.id + '"' + (cur === 'l:' + l.id ? ' selected' : '') + '>' + l.name + '</option>'; }).join('') + '</optgroup>';
@@ -729,7 +729,7 @@
     var hearts = lead.hearts || [];
     $('slots').innerHTML = slots.map(function (s, i) {
       var src = slotSrc(s), lovedKey = s.combo || s.lib;
-      return '<div class="slot filled" data-i="' + i + '"><img class="pv" src="' + (src || 'design-penelope-yellow.jpg') + '" alt="">' +
+      return '<div class="slot filled" data-i="' + i + '"><img class="pv" src="' + (src || 'design-dark-penelope-yellow.jpg') + '" alt="">' +
         '<b style="font-family:Newsreader,serif;font-size:1.1rem;color:var(--deep)">Ring ' + (i + 1) + (lovedKey && hearts.indexOf(lovedKey) > -1 ? '<span class="lovepill">Loved</span>' : '') + '</b>' +
         '<select data-f="lib">' + slotOptions(s) + '</select>' +
         '<input type="file" accept="image/*" data-f="upload" style="margin-top:8px' + (s.lib || s.combo ? ';display:none' : '') + '">' +
@@ -761,7 +761,7 @@
     im.onerror = function () { cb(''); };
     im.src = url;
   }
-  function imgData(s) { return new Promise(function (res) { if (s.upload) return res(s.upload); if (s.combo || !s.lib) return res(''); resize('design-' + s.lib + '-' + s.metalKey + '.jpg', res); }); }
+  function imgData(s) { return new Promise(function (res) { if (s.upload) return res(s.upload); if (s.combo || !s.lib) return res(''); resize('design-dark-' + s.lib + '-' + s.metalKey + '.jpg', res); }); }
 
   function createLink() {
     var btn = $('createLink'), msg = $('createMsg');
