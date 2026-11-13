@@ -2,6 +2,8 @@
 // visitor taps, scrolls, clicks or types, so bots and link previews never
 // trigger an alert. Usage: HGTrack('event', { details }, useBeacon)
 (function () {
+  // Meta Pixel (pixel.js decides when it may run)
+  try { var px = document.createElement('script'); px.src = 'pixel.js?v=1'; px.async = true; document.head.appendChild(px); } catch (e) {}
   var API = 'https://long-bar-d49d.gilbertrenteria.workers.dev/track';
   var sid;
   try { sid = sessionStorage.getItem('hgSid'); if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('hgSid', sid); } }
