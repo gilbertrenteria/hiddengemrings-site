@@ -248,6 +248,8 @@ textarea{min-height:96px;resize:vertical}
       if (centerCache[src0]) { img.src = centerCache[src0]; return; }
       img.style.opacity = '0';
       fetch(src0, { mode: 'cors' }).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) { return createImageBitmap(b); }).then(function (bm0) {
+        // photos we already centered (square, prepared in Canva) are shown as they are
+        if (bm0.width === bm0.height) { img.style.opacity = ''; return; }
         // erase the small watermark in the bottom right so it never shows in a crop
         var bm = document.createElement('canvas'); bm.width = bm0.width; bm.height = bm0.height;
         var fx = bm.getContext('2d'); fx.drawImage(bm0, 0, 0);
