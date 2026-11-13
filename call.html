@@ -550,7 +550,7 @@
     portalLinkOut('https://hiddengemrings.com/portal?t=' + lead.portalToken);
     fetch(API + '/portal/' + lead.portalToken).then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) return; portalDraw(j.portal); });
   }
-  var RSTYLES = ['Solitaire', 'Hidden Halo', 'Halo', 'Pavé Band', 'Three Stone', 'Five Stone', 'Bezel', 'Toi et Moi'];
+  var RSTYLES = ['Solitaire', 'Hidden Halo', 'Halo', 'Pavé Band', 'Three Stone', 'Five Stone', 'Bezel'];
   var RSHAPES = ['Oval', 'Round', 'Pear', 'Emerald', 'Elongated Cushion', 'Cushion', 'Radiant', 'Princess', 'Marquise', 'Asscher'];
   var RMETALS = ['Yellow gold', 'White gold', 'Rose gold', 'Platinum'];
   var RIDS = { 'Solitaire': 'solitaire', 'Hidden Halo': 'hidden', 'Halo': 'halo', 'Pavé Band': 'side', 'Three Stone': 'three', 'Five Stone': 'five', 'Bezel': 'bezel', 'Toi et Moi': 'toi' };

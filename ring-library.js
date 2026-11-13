@@ -22,19 +22,18 @@
     { id: 'side', label: 'Pavé Band', note: 'Diamonds down the band for sparkle from every angle.' },
     { id: 'three', label: 'Three Stone', note: 'Past, present and future.' },
     { id: 'five', label: 'Five Stone', note: 'A row of brilliance across the finger.' },
-    { id: 'bezel', label: 'Bezel', note: 'A sleek metal rim. Modern and secure for everyday life.' },
-    { id: 'toi', label: 'Toi et Moi', note: '"You and me." Two stones side by side.' }
+    { id: 'bezel', label: 'Bezel', note: 'A sleek metal rim. Modern and secure for everyday life.' }
   ];
   var HAS = {
     asscher: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
-    cushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-    elcushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-    emerald: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-    marquise: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel', 'toi'],
-    oval: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-    pear: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel', 'toi'],
+    cushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+    elcushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+    emerald: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+    marquise: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel'],
+    oval: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+    pear: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel'],
     princess: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
-    radiant: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
+    radiant: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
     round: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel']
   };
   function shape(id) { return SHAPES.filter(function (s) { return s.id === id; })[0]; }

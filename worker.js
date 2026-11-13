@@ -1236,11 +1236,11 @@ function portalPrefill(lead) {
 // what the lead told us (shape, metal, stone size or budget). Frozen once the customer acts.
 const LIB = 'https://ring.gilbertrenteria.dev/img/ring/';
 const LIB_HAS = {
-  asscher: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'], cushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-  elcushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'], emerald: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-  marquise: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel', 'toi'], oval: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'],
-  pear: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel', 'toi'], princess: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
-  radiant: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel', 'toi'], round: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'] };
+  asscher: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'], cushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+  elcushion: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'], emerald: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+  marquise: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel'], oval: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+  pear: ['solitaire', 'hidden', 'halo', 'side', 'three', 'bezel'], princess: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'],
+  radiant: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'], round: ['solitaire', 'hidden', 'halo', 'side', 'three', 'five', 'bezel'] };
 const LIB_SHAPE = { oval: 'Oval', round: 'Round', pear: 'Pear', emerald: 'Emerald', elcushion: 'Elongated Cushion', cushion: 'Cushion', radiant: 'Radiant', princess: 'Princess', marquise: 'Marquise', asscher: 'Asscher' };
 const LIB_STYLE = { solitaire: 'Solitaire', hidden: 'Hidden Halo', halo: 'Halo', side: 'Pavé Band', three: 'Three Stone', five: 'Five Stone', bezel: 'Bezel', toi: 'Toi et Moi' };
 function libShape(s) { s = String(s || '').toLowerCase(); if (/elongated/.test(s)) return 'elcushion'; return Object.keys(LIB_SHAPE).find((k) => k !== 'elcushion' && s.includes(k)) || ''; }
@@ -1255,7 +1255,7 @@ function suggestRings(lead) {
   const a = portalPrefill(lead);
   const sh = libShape(a.shape) || 'oval', mt = libMetal(a.metal) || 'yellow';
   const carat = a.carat ? a.carat.replace(/carats?/i, 'ct').replace('Under 1 ct', '0.75 ct') : budgetCarat(lead.budget);
-  const order = ['solitaire', 'hidden', 'halo', 'three', 'bezel', 'side', 'toi', 'five'].filter((s) => LIB_HAS[sh].includes(s));
+  const order = ['solitaire', 'hidden', 'halo', 'three', 'bezel', 'side', 'five'].filter((s) => LIB_HAS[sh].includes(s));
   const out = order.map((st) => ({ shape: LIB_SHAPE[sh], style: LIB_STYLE[st], carat, metal: METAL_LABEL[mt], img: `${LIB}${sh}-${st}-${mt}.webp`, auto: true }));
   // fill to 10 with the two most loved looks in the other metals
   const others = ['yellow', 'white', 'rose'].filter((x) => x !== mt);
