@@ -569,7 +569,7 @@
         '<input data-k="carat" data-i="' + i + '" value="' + E(r.carat) + '" style="width:80px;padding:6px;border-radius:8px;border:1px solid var(--line)">' +
         '<label style="cursor:pointer;text-decoration:underline;font-size:.85rem">Upload photo<input type="file" accept="image/*" data-up="' + i + '" hidden></label></div></div>';
     }).join('');
-    $('ringsList').querySelectorAll('select,input[data-k]').forEach(function (el) { el.addEventListener('change', function () { ringsDirty = true; var r = ringsData[+el.dataset.i]; r[el.dataset.k] = el.value; if (el.dataset.k !== 'carat' && !r.newImg && (!r.img || /ring\.gilbertrenteria/.test(r.img))) r.img = libImg(r); ringsDraw(p); }); });
+    $('ringsList').querySelectorAll('select,input[data-k]').forEach(function (el) { el.addEventListener('change', function () { ringsDirty = true; var r = ringsData[+el.dataset.i]; r[el.dataset.k] = el.value; if (el.dataset.k !== 'carat') { r.img = libImg(r); delete r.newImg; } ringsDraw(p); }); });
     $('ringsList').querySelectorAll('input[data-up]').forEach(function (el) { el.addEventListener('change', function (e) { var f = e.target.files[0]; if (!f) return; ringsDirty = true; resize(URL.createObjectURL(f), function (d) { ringsData[+el.dataset.up].newImg = d; ringsDraw(p); }); }); });
   }
   function pickDraw(p) {
