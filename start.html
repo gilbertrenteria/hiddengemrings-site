@@ -987,7 +987,9 @@ body.po-compact .po-wrap{padding-top:10px}
       state.step = i; save();
       steps.forEach(function (s) { s.classList.remove('active'); });
       vis[i].classList.add('active');
-      countEl.textContent = i === 0 ? 'Takes about 30 seconds' : (i + 1) + ' of ' + vis.length;
+      // Words, not numbers: '3 of 10' makes the form feel long. The bar shows the progress.
+      var left = vis.length - 1 - i;
+      countEl.textContent = i === 0 ? 'Takes about 30 seconds' : left === 0 ? 'Last step' : left <= 2 ? 'Almost done' : '';
       // The bar never slides backward when a question is added (surprise adds the time question).
       var pct = Math.round(((i + 1) / vis.length) * 100);
       if (i >= lastI && pct < lastPct) pct = lastPct;
@@ -1235,7 +1237,8 @@ body.po-compact .po-wrap{padding-top:10px}
       dsteps[i].classList.add('active');
       inLead(false); compact(); pin();
       var inAbout = i < aCount, n = inAbout ? aCount - first : dsteps.length - aCount, k = inAbout ? i + 1 - first : i - aCount + 1;
-      countEl.textContent = (inAbout ? 'About you ' : (state.d.buyer === 'Hoping to be proposed to' ? 'Your style ' : 'Her style ')) + k + ' of ' + n;
+      var lbl = inAbout ? 'About you' : (state.d.buyer === 'Hoping to be proposed to' ? 'Your style' : 'Her style');
+      countEl.textContent = k === n ? lbl + ' · last one' : k === 1 ? lbl + ' · optional' : lbl;
       barEl.style.width = Math.round((k / n) * 100) + '%';
       backBtn.classList.toggle('show', i > first);
       var key = dsteps[i].dataset.dkey;
