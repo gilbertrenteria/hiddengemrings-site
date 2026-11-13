@@ -469,11 +469,11 @@ textarea{min-height:96px;resize:vertical}
       '<div class="pickimg">' + (img(r) ? '<img src="' + E(img(r)) + '" alt="">' : '') + '</div><h3 style="margin-top:14px;font-size:26px">' + E(title(r)) + '</h3><div style="max-width:420px;margin:0 auto;text-align:left">' + specs(r) + '</div>' +
       '<h2 style="font-size:24px;margin-top:26px">Do you want to change or add anything to this ring?</h2>' +
       '<div class="talk" style="background:none;border:0;padding:0;margin-top:14px"><div class="opts">' +
+        '<button class="opt" id="cGem" style="border-color:var(--gold);background:var(--goldsoft)"><span class="ic">&#9830;</span><span><b>Add an engraving or hidden gem</b><small>A secret only you two will know.</small></span></button>' +
         '<button class="opt" id="cLove"><span class="ic">&#9825;</span><span><b>I love it as it is</b><small>Add a personal touch next, if you like.</small></span></button>' +
         '<button class="opt" id="cChange"><span class="ic">&#9998;</span><span><b>Change something</b><small>Stone size, band, metal and more.</small></span></button>' +
         '<button class="opt" id="cSim"><span class="ic">&#10022;</span><span><b>See other settings</b><small>This ' + E(String(r.shape || '').toLowerCase()) + ' stone in more settings and metals.</small></span></button>' +
         '<button class="opt" id="cShp"><span class="ic">&#9671;</span><span><b>See other stone shapes</b><small>This look with a different diamond shape.</small></span></button>' +
-        '<button class="opt" id="cGem" style="border-color:var(--gold);background:var(--goldsoft)"><span class="ic">&#9830;</span><span><b>Add an engraving or hidden gem</b><small>A secret only you two will know.</small></span></button>' +
       '</div></div>' + talkCard('pick') + '</div>' + foot();
     window.scrollTo(0, 0); animIn();
     $('bk').onclick = function () { K.alt = null; save(); rings(); }; centerRings();
