@@ -83,6 +83,8 @@ button{font:inherit;color:inherit}
 .save{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:0 16px;cursor:pointer;font:600 12.5px 'Work Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--brown-dark);white-space:nowrap}
 .save.on{background:var(--goldsoft);border-color:var(--gold)}
 .dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translate(-50%,140%);transition:transform .35s ease;z-index:30;width:min(560px,calc(100% - 24px));background:var(--brown-dark);color:#fff;border-radius:999px;padding:8px 8px 8px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 14px 36px rgba(0,0,0,.25)}
+.pers{margin-top:10px;width:100%;background:var(--goldsoft);border:1.5px solid rgba(185,156,95,.55);border-radius:999px;padding:11px 14px;font:600 12.5px 'Work Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#7a6334;cursor:pointer}
+.next3{max-width:720px;margin:36px auto 0}
 .dock{visibility:hidden}.dock.show{transform:translate(-50%,0);visibility:visible}
 .dock span{flex:1;font-size:14px}
 .dock button{background:#fff;color:var(--brown-dark);border:0;border-radius:999px;padding:11px 18px;font:700 12px 'Work Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
@@ -398,9 +400,14 @@ textarea{min-height:96px;resize:vertical}
         var n = i + 1, sv = K.favs.indexOf(n) > -1;
         return '<article class="ring' + (sv ? ' saved' : '') + '" data-n="' + n + '"><div class="ph">' + (img(r) ? '<img loading="lazy" src="' + E(img(r)) + '" alt="' + E(title(r)) + '">' : '') + '<span class="num">Ring ' + n + '</span>' + (/ring\.gilbertrenteria/.test(r.img || '') ? '<span class="stl">Style photo · stone not to scale</span>' : '') + '</div>' +
           '<div class="body"><h3>' + E(title(r)) + '</h3>' + specs(r) +
-          '<div class="acts"><button class="btn one" data-n="' + n + '">This is the one</button><button class="save' + (sv ? ' on' : '') + '" data-n="' + n + '" aria-pressed="' + sv + '">' + (sv ? '&#9829; Saved' : '&#9825; Save') + '</button></div></div></article>';
+          '<div class="acts"><button class="btn one" data-n="' + n + '">This is the one</button><button class="save' + (sv ? ' on' : '') + '" data-n="' + n + '" aria-pressed="' + sv + '">' + (sv ? '&#9829; Saved' : '&#9825; Save') + '</button></div>' +
+          '<button class="pers" data-n="' + n + '">&#9830; Add an engraving or hidden gem</button></div></article>';
       }).join('') + '</div>' +
-      noneCard() +
+      '<section class="notq next3"><p class="kick" style="margin:0 0 8px">What is next?</p><h2>Want to see more, or <em>talk it through?</em></h2><p>Pick whatever is easiest for you.</p><div class="talk" style="background:none;border:0;padding:0;margin-top:14px"><div class="opts">' +
+        '<button class="opt" id="nSim"><span class="ic">&#10022;</span><span><b>See other options</b><small>More styles like ' + her() + ' favorites.</small></span></button>' +
+        '<button class="opt" id="nSch"><span class="ic">&#128197;</span><span><b>Schedule a call</b><small>Pick a day and time that works for you.</small></span></button>' +
+        '<button class="opt" id="nTxt"><span class="ic">&#9993;</span><span><b>Text us</b><small>The easiest way. We reply fast.</small></span></button>' +
+        '</div></div></section>' + noneCard() +
       '<div style="max-width:640px;margin:0 auto">' + talkCard('rings') + '</div>' + foot();
     window.scrollTo(0, 0); animIn();
     var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 }) : null;
@@ -408,6 +415,10 @@ textarea{min-height:96px;resize:vertical}
     app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; K.alt = null; save(); pickPage(); }; });
     app.querySelectorAll('.save').forEach(function (b) { b.onclick = function () { toggleFav(+b.dataset.n); }; });
     bindNone();
+    app.querySelectorAll('.pers').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; K.alt = null; K.tweaks = []; save(); personalPage(); }; });
+    $('nSim').onclick = function () { K.mode = 'one'; K.ring = K.favs[0] || 1; K.alt = null; save(); similarPage(); };
+    $('nSch').onclick = function () { schedSheet(); };
+    $('nTxt').onclick = function () { talkAction('text'); };
     bindTalk(); updDock(); centerRings();
   }
   function toggleFav(n) {
@@ -460,13 +471,14 @@ textarea{min-height:96px;resize:vertical}
         '<button class="opt" id="cChange"><span class="ic">&#9998;</span><span><b>Change something</b><small>Stone size, band, metal and more.</small></span></button>' +
         '<button class="opt" id="cSim"><span class="ic">&#10022;</span><span><b>See similar options</b><small>More ' + E(String(r.shape || '').toLowerCase()) + ' styles like this one.</small></span></button>' +
         '<button class="opt" id="cGem" style="border-color:var(--gold);background:var(--goldsoft)"><span class="ic">&#9830;</span><span><b>Add an engraving or hidden gem</b><small>A secret only you two will know.</small></span></button>' +
-      '</div></div></div>' + foot();
+      '</div></div>' + talkCard('pick') + '</div>' + foot();
     window.scrollTo(0, 0); animIn();
     $('bk').onclick = function () { K.alt = null; save(); rings(); }; centerRings();
     $('cLove').onclick = function () { K.tweaks = []; save(); personalPage(); };
     $('cChange').onclick = changeRingPage;
     $('cSim').onclick = similarPage;
     $('cGem').onclick = function () { K.tweaks = []; save(); personalPage(); };
+    bindTalk();
   }
   function changeRingPage() {
     view = 'pickchange';
@@ -495,6 +507,7 @@ textarea{min-height:96px;resize:vertical}
     var r = chosen();
     app.className = 'wrap';
     app.innerHTML = '<div class="card pg"><div class="head"><button class="back show" id="bk">&lsaquo; Back</button><span class="count">The final touch</span></div><div class="center"><p class="kick">Only the two of you will know</p><h1 class="big">Make it <em>' + (you() ? 'yours' : 'hers') + ' alone.</em></h1><p class="lead">Add a secret only you two share. Both are optional.</p></div>' +
+      (r ? '<div style="display:flex;gap:12px;align-items:center;background:var(--cream);border-radius:16px;padding:10px;margin-top:16px"><div class="pickimg" style="width:84px;margin:0;flex:none;border-radius:12px"><img src="' + E(img(r)) + '" alt=""></div><div><b style="font-family:Newsreader,serif;font-size:20px;font-weight:500">' + E(title(r)) + '</b><div style="font-size:13px;color:#776C5C">' + E([r.carat, r.metal].filter(Boolean).join(' · ')) + '</div></div></div>' : '') +
       '<label class="fl" for="eng">A hidden engraving inside the band</label><input id="eng" maxlength="24" value="' + E(K.eng) + '" placeholder="Initials, a date or a word" style="width:100%;font:16px Work Sans,sans-serif;background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:14px;padding:14px">' +
       '<div class="chips" style="grid-template-columns:repeat(3,1fr)">' + ['Forever', 'Always', 'My person'].map(function (w) { return '<button type="button" class="engw">' + w + '</button>'; }).join('') + '</div>' +
       '<div id="engPrev" style="margin-top:12px;text-align:center;background:linear-gradient(135deg,#efe3c4,#d9b45f);border-radius:999px;padding:14px;font-family:Newsreader,serif;font-style:italic;font-size:20px;color:#5a4320;letter-spacing:.06em;min-height:52px"></div>' +
@@ -502,6 +515,7 @@ textarea{min-height:96px;resize:vertical}
       '<div id="monthWrap" style="margin-top:10px' + (K.gem === 'Her birthstone' ? '' : ';display:none') + '"><select id="month"><option value="">Which month?</option>' + MONTHS.map(function (m) { return '<option' + (K.month === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>' +
       '<button class="btn gold mt" id="send">Send my ring</button><p class="note">No payment and no commitment. Your full custom mockup arrives within 24 hours.</p></div>' + foot();
     window.scrollTo(0, 0); animIn();
+    centerRings();
     function prev() { var v = $('eng').value.trim(); $('engPrev').textContent = v || 'Your words appear here'; $('engPrev').style.opacity = v ? 1 : .55; K.eng = v; save(); }
     prev(); $('eng').oninput = prev;
     app.querySelectorAll('.engw').forEach(function (b) { b.onclick = function () { $('eng').value = b.textContent; prev(); }; });
@@ -678,7 +692,7 @@ textarea{min-height:96px;resize:vertical}
 
   /* ---------- talk with us: text, schedule, talk now ---------- */
   function talkCard(where) {
-    var h = where === 'love' ? 'Want to talk about next steps?' : where === 'sent' ? 'Want to talk it through now?' : where === 'wait' ? 'Questions while you wait?' : 'Talk with your ring specialist';
+    var h = where === 'pick' ? 'Rather talk it through first?' : where === 'love' ? 'Want to talk about next steps?' : where === 'sent' ? 'Want to talk it through now?' : where === 'wait' ? 'Questions while you wait?' : 'Talk with your ring specialist';
     var last = P.contact;
     var doneNow = last && last.type === 'now' && Date.now() - last.at < 3 * 3600e3;
     var doneSch = last && last.type === 'schedule';
