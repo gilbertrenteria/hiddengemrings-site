@@ -327,7 +327,7 @@ textarea{min-height:96px;resize:vertical}
     var st = String(r.style || '').toLowerCase();
     var sw = /rose/i.test(r.metal) ? '#dfa58f' : /platinum/i.test(r.metal) ? '#d3d6da' : /white/i.test(r.metal) ? '#e3e4e6' : '#d9b45f';
     var band = /pav/.test(st) ? 'Pavé diamonds part way down' : /five/.test(st) ? 'Polished, with 4 side stones' : (pre.band || 'Plain polished');
-    var hold = /bezel/.test(st) ? 'Full metal bezel rim' : /double/.test(st) ? '4 claw prongs inside two rows of halo diamonds' : /halo/.test(st) && !/hidden/.test(st) ? '4 claw prongs inside a diamond halo' : /hidden/.test(st) ? '4 claw prongs over a hidden diamond halo' : /toi/.test(st) ? 'Two stones, each in 4 claw prongs' : /three/.test(st) ? '4 claw prongs, plus 2 side stones' : '4 claw prongs';
+    var hold = /bezel/.test(st) ? 'Full metal bezel rim' : /split/.test(st) ? '4 claw prongs on a band that splits into two fine lines' : /halo/.test(st) && !/hidden/.test(st) ? '4 claw prongs inside a diamond halo' : /hidden/.test(st) ? '4 claw prongs over a hidden diamond halo' : /toi/.test(st) ? 'Two stones, each in 4 claw prongs' : /three/.test(st) ? '4 claw prongs, plus 2 side stones' : '4 claw prongs';
     var rows = [
       ['Center stone', [r.carat, r.shape].filter(Boolean).join(' ') + (pre.stoneType ? ', ' + pre.stoneType.toLowerCase() : ', lab grown diamond')],
       ['Stone size', d ? d[0].toFixed(1) + ' x ' + d[1].toFixed(1) + ' mm face up' : ''],
