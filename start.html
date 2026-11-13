@@ -837,7 +837,6 @@ body.po-compact .po-wrap{padding-top:10px}
     var autoTimer = null, sending = false;
     var delays = [0, 2000, 5000, 10000, 20000, 40000];
     var lastPct = 0, lastI = -1;
-    function hgEv(ev, params, name) { try { if (window.hgPixel) window.hgPixel(ev, params, { name: name, id: state.id }); } catch (e) {} }
     // After the first answer: hide the top banner and keep the question card
     // pinned right under the header so every answer fits without scrolling.
     function compact() { document.body.classList.add('po-compact'); }
@@ -996,7 +995,7 @@ body.po-compact .po-wrap{padding-top:10px}
       barEl.style.width = pct + '%';
       backBtn.classList.toggle('show', i > 0);
       inLead(true);
-      if (i > 0) { compact(); pin(); if (!window.__hgVC) { window.__hgVC = 1; hgEv('ViewContent', { content_name: 'Start form' }); } }
+      if (i > 0) { compact(); pin(); }
       var key = vis[i].dataset.key;
       vis[i].querySelectorAll('.po-chips button').forEach(function (b) {
         var cur = state.a[key];
@@ -1127,7 +1126,7 @@ body.po-compact .po-wrap{padding-top:10px}
     }
     if (npBtn) npBtn.addEventListener('click', function () {
       if (!npCheck()) return;
-      onTypeSave(); sendPartial(); hgEv('Lead', { content_name: 'Start form' }, state.a.name);
+      onTypeSave(); sendPartial();
       var vis = visibleSteps(), idx = vis.indexOf(card.querySelector('.po-step[data-key=namephone]'));
       nameEl.blur(); phoneEl.blur(); show(idx + 1);
     });
@@ -1199,8 +1198,6 @@ body.po-compact .po-wrap{padding-top:10px}
       sending = false; state.sent = true; state.pending = false;
       state.mode = (j && j.mode) || (teamOnline === false ? 'offline' : 'online');
       if (j && j.slot) state.a.slotLabel = j.slot.label;
-      hgEv('CompleteRegistration', { content_name: 'Start form' }, state.a.name);
-      if (j && j.slot) hgEv('Schedule', { content_name: 'Consult call' }, state.a.name);
       if (emailNeeded() && state.a.email && !state.eSent) { state.eAuto = true; state.email = state.a.email; }
       save();
       if (state.eAuto && !state.eSent) sendRecap();
@@ -1519,5 +1516,4 @@ body.po-compact .po-wrap{padding-top:10px}
 </script>
 
 <script src="track.js" defer></script>
-<script src="hg-pixel.js" defer></script>
 </body></html>
