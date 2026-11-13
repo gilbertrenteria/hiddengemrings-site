@@ -59,7 +59,8 @@
     var m = /\/lead(\/partial)?$/.exec(u.split('?')[0]);
     if (m && opts && opts.method === 'POST') { try { b = JSON.parse(opts.body); } catch (e) {} }
     var p = of.apply(this, arguments);
-    if (!b || TEST.test(b.name || '')) return p;
+    // tests: a test name, a placeholder name like Xx Xxx, or our own business number
+    if (!b || TEST.test(b.name || '') || /^[x\s.]+$/i.test(b.name || '') || /8327437657/.test(String(b.phone || '').replace(/\D/g, ''))) return p;
     return p.then(function (r) {
       if (r && r.ok) {
         var val = BUDGET[b.budget];
