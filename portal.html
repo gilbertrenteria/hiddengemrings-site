@@ -728,7 +728,7 @@ textarea{min-height:96px;resize:vertical}
       '</div></div>';
   }
   function bindTalk() {
-    app.querySelectorAll('.talk .opt').forEach(function (b) { b.onclick = function () { talkAction(b.dataset.t); }; });
+    app.querySelectorAll('.talk .opt[data-t]').forEach(function (b) { b.onclick = function () { talkAction(b.dataset.t); }; });
   }
   function talkAction(t) {
     if (t === 'text') {
@@ -744,7 +744,7 @@ textarea{min-height:96px;resize:vertical}
   function sheet(html) { $('sheetIn').innerHTML = '<button class="x" id="sx" aria-label="Close">&times;</button>' + html; $('sheet').classList.add('on'); $('sx').onclick = closeSheet; }
   function closeSheet() { $('sheet').classList.remove('on'); }
   $('sheet').addEventListener('click', function (e) { if (e.target === $('sheet')) closeSheet(); });
-  $('talkTop').onclick = function () { sheet('<div style="clear:both"></div>' + talkCard('top')); $('sheetIn').querySelectorAll('.talk .opt').forEach(function (b) { b.onclick = function () { closeSheet(); talkAction(b.dataset.t); }; }); };
+  $('talkTop').onclick = function () { sheet('<div style="clear:both"></div>' + talkCard('top')); $('sheetIn').querySelectorAll('.talk .opt[data-t]').forEach(function (b) { b.onclick = function () { closeSheet(); talkAction(b.dataset.t); }; }); };
 
   function nowSheet() {
     sheet('<h2 style="font-size:28px;margin-top:6px">Talk now</h2><p class="lead" style="font-size:16px">We will call you at the number you gave us within <b>30 to 45 minutes</b>, so we can have your rings ready in front of us.</p><button class="btn mt" id="yes">Yes, call me</button><button class="link" id="no">Not now</button>');
