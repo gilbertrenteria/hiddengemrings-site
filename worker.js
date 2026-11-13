@@ -1460,11 +1460,20 @@ function cleanPick(f, p) {
   out.build = {};
   if (f.build && typeof f.build === 'object') Object.keys(BUILD_KEYS).forEach((k) => { if (f.build[k]) out.build[k] = String(f.build[k]).slice(0, 80); });
   out.notes = String(f.notes || '').slice(0, 2000);
+  out.engraving = String(f.engraving || '').slice(0, 30);
+  out.gem = String(f.gem || '').slice(0, 60);
+  if (f.alt && typeof f.alt === 'object' && /^https:\/\/ring\.gilbertrenteria\.dev\//.test(String(f.alt.img || ''))) {
+    const c = (v) => String(v || '').slice(0, 60);
+    out.alt = { shape: c(f.alt.shape), style: c(f.alt.style), carat: c(f.alt.carat), metal: c(f.alt.metal), img: String(f.alt.img).slice(0, 200) };
+  }
   return out;
 }
 function pickRows(k, p) {
   const R = p.rings || [], rows = [];
-  if (k.ring) rows.push(['Their ring', ringLabel(R[k.ring - 1], k.ring - 1)]);
+  if (k.alt) rows.push(['Their ring', 'Similar option: ' + [k.alt.shape, k.alt.style, k.alt.carat, k.alt.metal].filter(Boolean).join(' · ')]);
+  else if (k.ring) rows.push(['Their ring', ringLabel(R[k.ring - 1], k.ring - 1)]);
+  if (k.engraving) rows.push(['Engraving', '"' + k.engraving + '"']);
+  if (k.gem) rows.push(['Hidden gemstone', k.gem]);
   if (k.favs && k.favs.length) rows.push(['Favorites', k.favs.map((x) => ringLabel(R[x - 1], x - 1)).join('\n')]);
   if (k.all) rows.push(['Wants', 'Full mockups of all their favorites']);
   if (k.why && k.why.length) rows.push(['Why none fit', k.why.join(', ')]);
@@ -1473,6 +1482,7 @@ function pickRows(k, p) {
   return rows;
 }
 function ringThumbs(k, p, t) {
+  if (k.alt && k.alt.img) return `<img src="${k.alt.img}" width="150" style="border-radius:10px;margin:6px 6px 0 0">`;
   const ids = k.ring ? [k.ring] : (k.favs || []);
   return ids.map((x) => { const r = (p.rings || [])[x - 1]; if (!r || !r.img) return ''; const src = /^https:/.test(r.img) ? r.img : `https://long-bar-d49d.gilbertrenteria.workers.dev/portal/${t}/img/${r.img}`; return `<img src="${src}" width="150" style="border-radius:10px;margin:6px 6px 0 0">`; }).join('');
 }
@@ -1538,13 +1548,13 @@ async function handlePortalPick(t, fields, env, origin) {
   if (!p || !lead) return json({ ok: false }, 404, origin);
   freezeRings(p, lead);
   const k = cleanPick(fields, p);
-  if (!k.mode || (k.mode === 'one' && !k.ring) || (k.mode === 'favs' && !k.favs.length)) return json({ ok: false, error: 'Pick a ring first' }, 400, origin);
+  if (!k.mode || (k.mode === 'one' && !k.ring && !k.alt) || (k.mode === 'favs' && !k.favs.length)) return json({ ok: false, error: 'Pick a ring first' }, 400, origin);
   const sig = JSON.stringify(k);
   if (p.pick && p.pick.sig === sig && p.pick.emailed) return json({ ok: true, emailed: true, dup: true }, 200, origin);
   k.sentAt = Date.now(); k.sig = sig; p.pick = k; p.draft = null;
   stampStage(lead, k.mode === 'none' ? 'Wants new designs' : 'Picked in portal');
   const sur = /^yes/i.test(lead.surprise || '') ? ' (SURPRISE)' : '';
-  const subject = k.mode === 'one' ? `RING PICKED: ${lead.name} chose Ring ${k.ring}${sur}` : k.mode === 'favs' ? `FAVORITES SAVED: ${lead.name} (${k.favs.length})${sur}` : `NEW DESIGNS NEEDED: ${lead.name}${sur}`;
+  const subject = k.mode === 'one' ? `RING PICKED: ${lead.name} chose ${k.alt ? 'a similar option' : 'Ring ' + k.ring}${sur}` : k.mode === 'favs' ? `FAVORITES SAVED: ${lead.name} (${k.favs.length})${sur}` : `NEW DESIGNS NEEDED: ${lead.name}${sur}`;
   const intro = (k.mode === 'none' ? 'None of the 10 felt right. Here is why and what they want.' : 'They are excited right now. Reach out within the hour.') + ` Sent ${chicagoTime(k.sentAt)}. Promised: full mockup within 24 hours.`;
   const sent = await sendEmail(env, { to: leadRecipients(lead), subject, html: portalEmail(lead, subject.split(':')[0] === 'RING PICKED' ? `${lead.name} picked their ring` : subject, intro, pickRows(k, p), p, ringThumbs(k, p, t)) });
   p.pick.emailed = !!sent.ok;

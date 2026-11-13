@@ -578,8 +578,8 @@
     $('pickCard').hidden = false;
     var R = p.rings || [], lab = function (n) { var r = R[n - 1]; return r ? 'Ring ' + n + ': ' + [r.shape, r.style, r.carat, r.metal].filter(Boolean).join(' ') : 'Ring ' + n; };
     var h = '';
-    if (k) h += '<p><b>' + (k.mode === 'one' ? 'Picked ' + E(lab(k.ring)) : k.mode === 'favs' ? 'Favorites: ' + k.favs.map(lab).map(E).join(' / ') : 'None of these. Why: ' + E((k.why || []).join(', '))) + '</b></p>' +
-      (k.build && Object.keys(k.build).length ? '<p>Wants: ' + E(Object.keys(k.build).map(function (x) { return k.build[x]; }).join(' · ')) + '</p>' : '') + (k.notes ? '<p>Notes: ' + E(k.notes) + '</p>' : '') + '<p class="status">Sent ' + when(k.sentAt) + '. Promised full mockup within 24 hours.</p>';
+    if (k) h += '<p><b>' + (k.mode === 'one' ? 'Picked ' + (k.alt ? 'a similar option: ' + E([k.alt.shape, k.alt.style, k.alt.carat, k.alt.metal].join(' ')) : E(lab(k.ring))) : k.mode === 'favs' ? 'Favorites: ' + k.favs.map(lab).map(E).join(' / ') : 'None of these. Why: ' + E((k.why || []).join(', '))) + '</b></p>' +
+      (k.build && Object.keys(k.build).length ? '<p>Wants: ' + E(Object.keys(k.build).map(function (x) { return k.build[x]; }).join(' · ')) + '</p>' : '') + (k.engraving ? '<p>Engraving: "' + E(k.engraving) + '"</p>' : '') + (k.gem ? '<p>Hidden gemstone: ' + E(k.gem) + '</p>' : '') + (k.notes ? '<p>Notes: ' + E(k.notes) + '</p>' : '') + '<p class="status">Sent ' + when(k.sentAt) + '. Promised full mockup within 24 hours.</p>';
     var v = p.verdict;
     if ((p.mockups || []).length) h += '<p>Full mockup sent ' + when(p.mockups[p.mockups.length - 1].at) + '</p>';
     if (v) h += v.choice === 'love' ? '<p style="background:#eaf6ec;border:1px solid #9fd0aa;border-radius:10px;padding:8px 10px"><b>READY TO CLOSE: they said This is my ring!</b> Send their checkout link now (Orders on the admin page) and call or text while they are excited.</p>' : '<p><b>Wants changes to the mockup:</b> ' + E((v.tweaks || []).join(', ')) + (v.notes ? ' · ' + E(v.notes) : '') + '</p>';

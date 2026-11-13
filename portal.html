@@ -354,17 +354,17 @@ textarea{min-height:96px;resize:vertical}
       : { img: 'portal-intro-4.jpg', html: '<p class="kick">The reveal</p><h1 class="big">Your rings are <em>being designed now.</em></h1><p class="lead">We are creating ' + her() + ' rings by hand right now. You will get a text the moment they are ready to see.</p>' + talkCard('wait') }; }
   ];
   var ii = 0;
-  function intro(i) {
-    view = 'intro'; ii = Math.max(0, Math.min(3, i)); hideDock();
-    var s = INTRO[ii]();
+  function intro() {
+    view = 'intro'; hideDock();
+    var said = saidLines(), n = (P.rings || []).length;
     app.className = 'wrap story-w';
-    app.innerHTML = '<div class="card pg"><div class="head"><button class="back' + (ii ? ' show' : '') + '" id="bk">&lsaquo; Back</button><span class="count">' + (ii + 1) + ' of 4</span></div><div class="bar"><span style="width:' + ((ii + 1) * 25) + '%"></span></div>' +
-      '<div class="story"><div class="hero"><img src="' + s.img + '" alt=""></div><div>' + s.html + (ii < 3 ? '<button class="btn mt" id="nx">Continue</button>' : '') + '</div></div>' +
-      ((P.rings || []).length && ii < 3 ? '<button class="link" id="sk">Skip to ' + her() + ' rings</button>' : '') + '</div>' + foot();
+    app.innerHTML = '<div class="card pg"><div class="story"><div class="hero"><img src="portal-intro-1.jpg" alt=""></div><div>' +
+      '<p class="kick">Made only for ' + E(first() || 'you') + '</p><h1 class="big">Every forever begins with <em>a single moment.</em></h1>' +
+      '<p class="lead">' + (first() ? E(first()) + ', this' : 'This') + ' one is yours. We listened to every word you shared and created ' + (n ? (n === 10 ? 'ten rings' : 'these rings') : 'rings') + ' with one person in mind.</p>' +
+      (said.length ? '<ul class="said">' + said.slice(0, 4).map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>' : '') +
+      (n ? '<button class="btn gold mt" id="reveal">Reveal ' + her() + ' rings</button>' : '<p class="lead">' + (you() ? 'Your' : 'Her') + ' rings are being designed right now. We will text you the moment they are ready.</p>' + talkCard('wait')) +
+      '</div></div></div>' + foot();
     window.scrollTo(0, 0); animIn();
-    var b = $('bk'); if (b) b.onclick = function () { intro(ii - 1); };
-    var n = $('nx'); if (n) n.onclick = function () { intro(ii + 1); };
-    var k = $('sk'); if (k) k.onclick = rings;
     var r = $('reveal'); if (r) r.onclick = rings;
     bindTalk();
   }
@@ -399,7 +399,7 @@ textarea{min-height:96px;resize:vertical}
     window.scrollTo(0, 0); animIn();
     var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 }) : null;
     app.querySelectorAll('.ring').forEach(function (el, i) { if (io) { el.style.transitionDelay = (i % 3) * .08 + 's'; io.observe(el); } else el.classList.add('in'); });
-    app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; save(); pickPage(); }; });
+    app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; K.alt = null; save(); pickPage(); }; });
     app.querySelectorAll('.save').forEach(function (b) { b.onclick = function () { toggleFav(+b.dataset.n); }; });
     bindNone();
     bindTalk(); updDock(); centerRings();
@@ -417,7 +417,7 @@ textarea{min-height:96px;resize:vertical}
     if (view !== 'rings' || !K.favs.length) { d.classList.remove('show'); return; }
     $('dockTxt').innerHTML = '&#9829; ' + K.favs.length + ' saved';
     $('dockGo').textContent = K.favs.length === 1 ? 'Choose it' : 'Choose one';
-    $('dockGo').onclick = function () { if (K.favs.length === 1) { K.mode = 'one'; K.ring = K.favs[0]; save(); pickPage(); } else favsPage(); };
+    $('dockGo').onclick = function () { if (K.favs.length === 1) { K.mode = 'one'; K.ring = K.favs[0]; K.alt = null; save(); pickPage(); } else favsPage(); };
     d.classList.add('show');
   }
   function hideDock() { $('dock').classList.remove('show'); }
@@ -425,21 +425,87 @@ textarea{min-height:96px;resize:vertical}
   var TWEAKS = ['Love it exactly as is', 'A little bigger stone', 'A little smaller stone', 'Thinner band', 'Add sparkle to the band', 'Different metal color', 'Let us talk it through'];
   function tweakChips() { return '<div class="chips">' + TWEAKS.map(function (t) { return '<button type="button" class="tw' + (K.tweaks.indexOf(t) > -1 ? ' sel' : '') + '">' + t + '</button>'; }).join('') + '</div>'; }
   function bindTweaks() { app.querySelectorAll('.tw').forEach(function (b) { b.onclick = function () { var t = b.textContent, i = K.tweaks.indexOf(t); if (i > -1) K.tweaks.splice(i, 1); else K.tweaks.push(t); b.classList.toggle('sel'); save(); }; }); }
-  function notesVal() { var t = $('notes'); return [K.tweaks.join(', '), t ? t.value.trim() : ''].filter(Boolean).join('. '); }
+  function notesVal() { var t = $('notes'); return [K.tweaks.join(', '), t ? t.value.trim() : (K.notes || '').trim()].filter(Boolean).join('. '); }
 
+  function chosen() { return K.alt || R(K.ring); }
+  var LIBB = 'https://ring.gilbertrenteria.dev/img/ring/';
+  var LIBHAS = { asscher: 'solitaire hidden halo side three five bezel', cushion: 'solitaire hidden halo side three five bezel toi', elcushion: 'solitaire hidden halo side three five bezel toi', emerald: 'solitaire hidden halo side three five bezel toi', marquise: 'solitaire hidden halo side three bezel toi', oval: 'solitaire hidden halo side three five bezel toi', pear: 'solitaire hidden halo side three bezel toi', princess: 'solitaire hidden halo side three five bezel', radiant: 'solitaire hidden halo side three five bezel toi', round: 'solitaire hidden halo side three five bezel' };
+  var STNAME = { solitaire: 'Solitaire', hidden: 'Hidden Halo', halo: 'Halo', side: 'Pavé Band', three: 'Three Stone', five: 'Five Stone', bezel: 'Bezel', toi: 'Toi et Moi' };
+  var MTNAME = { yellow: 'Yellow gold', white: 'White gold', rose: 'Rose gold' };
+  function similar(r) {
+    var sh = shapeId(r.shape), mt = /rose/i.test(r.metal) ? 'rose' : /white|platinum/i.test(r.metal) ? 'white' : 'yellow';
+    var have = {}; (P.rings || []).forEach(function (x) { have[x.img] = 1; }); have[r.img] = 1;
+    var out = [], sts = (LIBHAS[sh] || '').split(' ');
+    [mt].concat(['yellow', 'white', 'rose'].filter(function (m) { return m !== mt; })).forEach(function (m) {
+      sts.forEach(function (st) { var u = LIBB + sh + '-' + st + '-' + m + '.webp'; if (!have[u] && out.length < 8) { have[u] = 1; out.push({ shape: r.shape, style: STNAME[st], carat: r.carat, metal: MTNAME[m], img: u }); } });
+    });
+    return out;
+  }
   function pickPage() {
     view = 'pick'; hideDock();
-    var r = R(K.ring); if (!r) return rings();
+    var r = chosen(); if (!r) return rings();
     app.className = 'wrap';
-    app.innerHTML = '<div class="card pg center"><div class="head"><button class="back show" id="bk">&lsaquo; All rings</button><span class="count">Your pick</span></div><div class="bar"><span style="width:80%"></span></div>' +
-      '<p class="kick">Ring ' + K.ring + '</p><h1 class="big">' + (first() ? E(first()) + ', ' : '') + (you() ? 'this one is <em>so you.</em>' : 'she is going to <em>love this.</em>') + '</h1>' +
+    app.innerHTML = '<div class="card pg center"><div class="head"><button class="back show" id="bk">&lsaquo; All rings</button><span class="count">Your ring</span></div>' +
+      '<p class="kick">' + (K.alt ? 'Your new pick' : 'Ring ' + K.ring) + '</p><h1 class="big">' + (first() ? E(first()) + ', ' : '') + (you() ? 'this one is <em>so you.</em>' : 'she is going to <em>love this.</em>') + '</h1>' +
       '<div class="pickimg">' + (img(r) ? '<img src="' + E(img(r)) + '" alt="">' : '') + '</div><h3 style="margin-top:14px;font-size:26px">' + E(title(r)) + '</h3><div style="max-width:420px;margin:0 auto;text-align:left">' + specs(r) + '</div>' +
-      '<div style="text-align:left"><label class="fl">Anything to change? Tap any (optional)</label>' + tweakChips() + '<label class="fl" for="notes">Or tell us in your words (optional)</label><textarea id="notes" placeholder="Anything else we should know">' + E(K.notes) + '</textarea></div>' +
+      '<h2 style="font-size:24px;margin-top:26px">Do you want to change or add anything to this ring?</h2>' +
+      '<div class="talk" style="background:none;border:0;padding:0;margin-top:14px"><div class="opts">' +
+        '<button class="opt" id="cLove"><span class="ic">&#9825;</span><span><b>I love it as it is</b><small>Add a personal touch next, if you like.</small></span></button>' +
+        '<button class="opt" id="cChange"><span class="ic">&#9998;</span><span><b>Change something</b><small>Stone size, band, metal and more.</small></span></button>' +
+        '<button class="opt" id="cSim"><span class="ic">&#10022;</span><span><b>See similar options</b><small>More ' + E(String(r.shape || '').toLowerCase()) + ' styles like this one.</small></span></button>' +
+      '</div></div></div>' + foot();
+    window.scrollTo(0, 0); animIn();
+    $('bk').onclick = function () { K.alt = null; save(); rings(); }; centerRings();
+    $('cLove').onclick = function () { K.tweaks = []; save(); personalPage(); };
+    $('cChange').onclick = changeRingPage;
+    $('cSim').onclick = similarPage;
+  }
+  function changeRingPage() {
+    view = 'pickchange';
+    app.innerHTML = '<div class="card pg"><div class="head"><button class="back show" id="bk">&lsaquo; Back</button><span class="count">Your ring</span></div><div class="center"><p class="kick">Make it yours</p><h1 class="big">What should <em>we change?</em></h1><p class="lead">Tap anything. We will design it exactly that way.</p></div>' +
+      '<label class="fl">Tap any</label>' + tweakChips() + '<label class="fl" for="notes">Or tell us in your words (optional)</label><textarea id="notes" placeholder="For example: a little thinner band">' + E(K.notes) + '</textarea><button class="btn mt" id="nx">Continue</button></div>' + foot();
+    window.scrollTo(0, 0); animIn(); bindTweaks();
+    $('notes').oninput = function () { K.notes = this.value; save(); };
+    $('bk').onclick = pickPage; $('nx').onclick = personalPage;
+  }
+  function similarPage() {
+    view = 'similar';
+    var L = similar(chosen() || R(K.ring));
+    app.className = 'wrap wide';
+    app.innerHTML = '<div class="rhead pg"><p class="kick">Similar styles</p><h1 class="big">More like <em>this one.</em></h1><p class="lead">Same stone and size, different settings and metals. Tap the one you love.</p></div>' +
+      '<div class="rings">' + L.map(function (r, i) { return '<article class="ring in" data-i="' + i + '"><div class="ph"><img loading="lazy" src="' + E(r.img) + '" alt=""><span class="stl">Style photo · stone not to scale</span></div><div class="body"><h3>' + E(title(r)) + '</h3>' + specs(r) + '<div class="acts" style="grid-template-columns:1fr"><button class="btn one" data-i="' + i + '">This is the one</button></div></div></article>'; }).join('') + '</div>' +
+      '<div class="center"><button class="link" id="bk">Back to my ring</button></div>' + foot();
+    window.scrollTo(0, 0); animIn(); centerRings();
+    $('bk').onclick = pickPage;
+    app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.alt = L[+b.dataset.i]; save(); pickPage(); }; });
+  }
+  var GEMS = [['None', ''], ['Diamond', '#f4f6f8'], ['Blue sapphire', '#2a4fa3'], ['Pink sapphire', '#e58fb0'], ['Ruby', '#a3152a'], ['Emerald', '#1f7a4d'], ['Her birthstone', 'linear-gradient(135deg,#a3152a,#2a4fa3,#1f7a4d)']];
+  var MONTHS = ['January garnet', 'February amethyst', 'March aquamarine', 'April diamond', 'May emerald', 'June alexandrite', 'July ruby', 'August peridot', 'September sapphire', 'October tourmaline', 'November citrine', 'December blue topaz'];
+  function personalPage() {
+    view = 'personal';
+    K.eng = K.eng || ''; K.gem = K.gem || '';
+    var r = chosen();
+    app.className = 'wrap';
+    app.innerHTML = '<div class="card pg"><div class="head"><button class="back show" id="bk">&lsaquo; Back</button><span class="count">The final touch</span></div><div class="center"><p class="kick">Only the two of you will know</p><h1 class="big">Make it <em>' + (you() ? 'yours' : 'hers') + ' alone.</em></h1><p class="lead">Add a secret only you two share. Both are optional.</p></div>' +
+      '<label class="fl" for="eng">A hidden engraving inside the band</label><input id="eng" maxlength="24" value="' + E(K.eng) + '" placeholder="Initials, a date or a word" style="width:100%;font:16px Work Sans,sans-serif;background:var(--cream);border:1.5px solid rgba(92,77,64,.18);border-radius:14px;padding:14px">' +
+      '<div class="chips" style="grid-template-columns:repeat(3,1fr)">' + ['Forever', 'Always', 'My person'].map(function (w) { return '<button type="button" class="engw">' + w + '</button>'; }).join('') + '</div>' +
+      '<div id="engPrev" style="margin-top:12px;text-align:center;background:linear-gradient(135deg,#efe3c4,#d9b45f);border-radius:999px;padding:14px;font-family:Newsreader,serif;font-style:italic;font-size:20px;color:#5a4320;letter-spacing:.06em;min-height:52px"></div>' +
+      '<label class="fl">A hidden gemstone, tucked under the center stone</label><div class="nopts">' + GEMS.map(function (g) { return '<button type="button" class="nopt gem' + (K.gem === g[0] || (!K.gem && g[0] === 'None') ? ' sel' : '') + '" data-g="' + g[0] + '"><span style="width:20px;height:20px;border-radius:50%;flex:none;background:' + (g[1] || 'transparent') + ';box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)"></span>' + g[0] + '</button>'; }).join('') + '</div>' +
+      '<div id="monthWrap" style="margin-top:10px' + (K.gem === 'Her birthstone' ? '' : ';display:none') + '"><select id="month"><option value="">Which month?</option>' + MONTHS.map(function (m) { return '<option' + (K.month === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></div>' +
       '<button class="btn gold mt" id="send">Send my ring</button><p class="note">No payment and no commitment. Your full custom mockup arrives within 24 hours.</p></div>' + foot();
     window.scrollTo(0, 0); animIn();
-    $('bk').onclick = rings; bindTweaks(); centerRings();
-    $('notes').oninput = function () { K.notes = this.value; save(); };
-    $('send').onclick = function () { send({ mode: 'one', ring: K.ring }); };
+    function prev() { var v = $('eng').value.trim(); $('engPrev').textContent = v || 'Your words appear here'; $('engPrev').style.opacity = v ? 1 : .55; K.eng = v; save(); }
+    prev(); $('eng').oninput = prev;
+    app.querySelectorAll('.engw').forEach(function (b) { b.onclick = function () { $('eng').value = b.textContent; prev(); }; });
+    app.querySelectorAll('.gem').forEach(function (b) { b.onclick = function () { app.querySelectorAll('.gem').forEach(function (x) { x.classList.remove('sel'); }); b.classList.add('sel'); K.gem = b.dataset.g === 'None' ? '' : b.dataset.g; $('monthWrap').style.display = K.gem === 'Her birthstone' ? '' : 'none'; save(); }; });
+    $('month').onchange = function () { K.month = this.value; save(); };
+    $('bk').onclick = pickPage;
+    $('send').onclick = function () {
+      var gem = K.gem === 'Her birthstone' ? (K.month ? 'Birthstone: ' + K.month : 'Her birthstone (month to confirm)') : K.gem;
+      var body = { mode: 'one', ring: K.alt ? 0 : K.ring, engraving: K.eng, gem: gem };
+      if (K.alt) body.alt = K.alt;
+      send(body);
+    };
   }
   function favsPage() {
     view = 'favs'; hideDock();
@@ -450,7 +516,7 @@ textarea{min-height:96px;resize:vertical}
       '<button class="btn ghost mt" id="all">I can\'t decide. Create all of them</button></div>' + foot();
     window.scrollTo(0, 0); animIn();
     $('bk').onclick = rings; centerRings();
-    app.querySelectorAll('.fav').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; save(); pickPage(); }; });
+    app.querySelectorAll('.fav').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; K.alt = null; save(); pickPage(); }; });
     $('all').onclick = allPage;
   }
   function allPage() {
@@ -541,7 +607,7 @@ textarea{min-height:96px;resize:vertical}
   function sentPage(mode) {
     view = 'sent'; hideDock();
     app.className = 'wrap';
-    var r = mode === 'one' ? R(K.ring) : null;
+    var r = mode === 'one' ? chosen() : null;
     app.innerHTML = '<div class="card pg center"><p class="kick">' + (mode === 'none' ? 'Received' : 'It is happening') + '</p>' +
       '<h1 class="big">' + (mode === 'none' ? 'We are creating <em>new designs.</em>' : mode === 'favs' ? 'Your favorites are <em>on the bench.</em>' : 'Your ring is <em>coming to life.</em>') + '</h1>' +
       (r && img(r) ? '<div class="pickimg" style="max-width:300px">' + '<img src="' + E(img(r)) + '" alt=""></div>' : '') +
@@ -679,7 +745,7 @@ textarea{min-height:96px;resize:vertical}
     }
     draw();
   }
-  function rerender() { if (view === 'love') return lovePage(); if (view === 'rings') rings(); else if (view === 'sent') sentPage(K.mode); else if (view === 'intro') intro(ii); }
+  function rerender() { if (view === 'love') return lovePage(); if (view === 'rings') rings(); else if (view === 'sent') sentPage(K.mode); else if (view === 'intro') intro(); }
 
   /* ---------- messages ---------- */
   function chat() {
@@ -717,7 +783,7 @@ textarea{min-height:96px;resize:vertical}
       if ((P.mockups || []).length) { if (P.verdict && P.verdict.choice === 'love') lovePage(); else if (P.verdict && P.verdict.choice === 'change') changedPage(); else mockupPage(); }
       else if (picked) { K.mode = P.pick.mode; K.ring = P.pick.ring || K.ring; sent = true; sentPage(P.pick.mode); }
       else if (started || /[?&]rings=1/.test(location.search)) rings();
-      else intro(0);
+      else intro();
     }).catch(function () { app.innerHTML = '<div class="card center"><h2>One moment.</h2><p class="lead">We could not connect. Check your signal and refresh.</p></div>'; });
   }
   boot();
