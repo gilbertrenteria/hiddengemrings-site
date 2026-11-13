@@ -1602,6 +1602,14 @@ async function handleAdminList(url, env, origin) {
 }
 
 // Admin: delete a lead for good (lead, its portal, portal photos, and the index entry)
+// Old ring picks links (/rings?id=ORDER) forward to the customer's Ring Portal when they have one.
+async function handleOrderPortal(id, env, origin) {
+  const o = await env.IG_KV.get(`order:${id}`, 'json');
+  if (!o || !o.leadId || !o.options || o.paidAt || o.approvedAt) return json({ ok: true, link: '' }, 200, origin);
+  const lead = await env.IG_KV.get(`lead:${o.leadId}`, 'json');
+  return json({ ok: true, link: lead && lead.portalToken ? portalLink(lead.portalToken) : '' }, 200, origin);
+}
+
 async function handleLeadDelete(fields, url, env, origin) {
   if (!isAdmin(fields, url, env)) return json({ ok: false, error: 'Wrong admin key' }, 403, origin);
   const id = String(fields.id || '').replace(/[^a-z0-9-]/gi, '').slice(0, 48);
@@ -1659,6 +1667,8 @@ const app = {
       if (m) return handleOptionImage(m[1], m[2], env);
       m = path.match(/^\/order\/([a-z0-9]{6,32})\/image$/);
       if (m) return handleOrderImage(m[1], env);
+      m = path.match(/^\/order\/([a-z0-9]{6,32})\/portal$/);
+      if (m) return handleOrderPortal(m[1], env, origin);
       m = path.match(/^\/order\/([a-z0-9]{6,32})$/);
       if (m) return handleOrderGet(m[1], env, origin);
       m = path.match(/^\/portal\/([a-z0-9]{10,32})\/img\/(\d{1,4})$/);

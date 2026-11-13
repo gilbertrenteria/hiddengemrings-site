@@ -95,6 +95,8 @@
 
   if (!id) { app.innerHTML = '<p class="msg">This link is missing its order number. Please use the link we texted you.</p>'; return; }
 
+  // this page was replaced by the Ring Portal: forward to it when the customer has one (?old=1 shows this page)
+  if (id && !/[?&]old=1/.test(location.search)) fetch(API + '/order/' + id + '/portal').then(function (r) { return r.json(); }).then(function (j) { if (j && j.link) location.replace(j.link + (/[?&]preview=1/.test(location.search) ? '&preview=1' : '')); }).catch(function () {});
   function load(tries) {
     fetch(API + '/order/' + id).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.ok || !j.order.options) { app.innerHTML = '<p class="msg">We could not find your ring options. Please call or text (832) 743-7657.</p>'; return; }
