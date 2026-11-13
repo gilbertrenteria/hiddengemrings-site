@@ -403,11 +403,11 @@ textarea{min-height:96px;resize:vertical}
           '<div class="acts"><button class="btn one" data-n="' + n + '">This is the one</button><button class="save' + (sv ? ' on' : '') + '" data-n="' + n + '" aria-pressed="' + sv + '">' + (sv ? '&#9829; Saved' : '&#9825; Save') + '</button></div>' +
           '<button class="pers" data-n="' + n + '">&#9830; Add an engraving or hidden gem</button></div></article>';
       }).join('') + '</div>' +
-      '<section class="notq next3"><p class="kick" style="margin:0 0 8px">What is next?</p><h2>Want to see more, or <em>talk it through?</em></h2><p>Pick whatever is easiest for you.</p><div class="talk" style="background:none;border:0;padding:0;margin-top:14px"><div class="opts">' +
-        '<button class="opt" id="nSim"><span class="ic">&#10022;</span><span><b>See other options</b><small>More styles like ' + her() + ' favorites.</small></span></button>' +
-        '<button class="opt" id="nSch"><span class="ic">&#128197;</span><span><b>Schedule a call</b><small>Pick a day and time that works for you.</small></span></button>' +
-        '<button class="opt" id="nTxt"><span class="ic">&#9993;</span><span><b>Text us</b><small>The easiest way. We reply fast.</small></span></button>' +
-        '</div></div></section>' + noneCard() +
+      '<section class="notq next3"><p class="kick" style="margin:0 0 8px">Still deciding?</p><h2>Want to see <em>more options?</em></h2><p>Every ring above uses the ' + E(String((R(1) || {}).shape || 'stone').toLowerCase()) + ' shape you chose. Explore more, or tell us what to change.</p><div class="talk" style="background:none;border:0;padding:0;margin-top:14px"><div class="opts">' +
+        '<button class="opt" id="nShp"><span class="ic">&#9671;</span><span><b>See other stone shapes</b><small>The same looks with a different diamond shape.</small></span></button>' +
+        '<button class="opt" id="nSet"><span class="ic">&#10022;</span><span><b>See other settings</b><small>The same stone in more settings and metals.</small></span></button>' +
+        '<button class="opt" id="nChg"><span class="ic">&#9998;</span><span><b>Change something</b><small>Size, metal, band, style. Tap what you want.</small></span></button>' +
+        '</div></div><p style="margin-top:16px">Rather talk it through? <a href="#" id="nSch">Schedule a call</a> or <a href="#" id="nTxt">text us</a>.</p></section>' + noneCard() +
       '<div style="max-width:640px;margin:0 auto">' + talkCard('rings') + '</div>' + foot();
     window.scrollTo(0, 0); animIn();
     var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 }) : null;
@@ -416,9 +416,11 @@ textarea{min-height:96px;resize:vertical}
     app.querySelectorAll('.save').forEach(function (b) { b.onclick = function () { toggleFav(+b.dataset.n); }; });
     bindNone();
     app.querySelectorAll('.pers').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.ring = +b.dataset.n; K.alt = null; K.tweaks = []; save(); personalPage(); }; });
-    $('nSim').onclick = function () { K.mode = 'one'; K.ring = K.favs[0] || 1; K.alt = null; save(); similarPage(); };
-    $('nSch').onclick = function () { schedSheet(); };
-    $('nTxt').onclick = function () { talkAction('text'); };
+    $('nShp').onclick = function () { K.ring = K.favs[0] || 1; K.alt = null; save(); altPage('shapes'); };
+    $('nSet').onclick = function () { K.ring = K.favs[0] || 1; K.alt = null; save(); altPage('settings'); };
+    $('nChg').onclick = function () { document.querySelector('.notq:not(.next3)').scrollIntoView({ behavior: 'smooth' }); };
+    $('nSch').onclick = function (e) { e.preventDefault(); schedSheet(); };
+    $('nTxt').onclick = function (e) { e.preventDefault(); talkAction('text'); };
     bindTalk(); updDock(); centerRings();
   }
   function toggleFav(n) {
@@ -469,14 +471,16 @@ textarea{min-height:96px;resize:vertical}
       '<div class="talk" style="background:none;border:0;padding:0;margin-top:14px"><div class="opts">' +
         '<button class="opt" id="cLove"><span class="ic">&#9825;</span><span><b>I love it as it is</b><small>Add a personal touch next, if you like.</small></span></button>' +
         '<button class="opt" id="cChange"><span class="ic">&#9998;</span><span><b>Change something</b><small>Stone size, band, metal and more.</small></span></button>' +
-        '<button class="opt" id="cSim"><span class="ic">&#10022;</span><span><b>See similar options</b><small>More ' + E(String(r.shape || '').toLowerCase()) + ' styles like this one.</small></span></button>' +
+        '<button class="opt" id="cSim"><span class="ic">&#10022;</span><span><b>See other settings</b><small>This ' + E(String(r.shape || '').toLowerCase()) + ' stone in more settings and metals.</small></span></button>' +
+        '<button class="opt" id="cShp"><span class="ic">&#9671;</span><span><b>See other stone shapes</b><small>This look with a different diamond shape.</small></span></button>' +
         '<button class="opt" id="cGem" style="border-color:var(--gold);background:var(--goldsoft)"><span class="ic">&#9830;</span><span><b>Add an engraving or hidden gem</b><small>A secret only you two will know.</small></span></button>' +
       '</div></div>' + talkCard('pick') + '</div>' + foot();
     window.scrollTo(0, 0); animIn();
     $('bk').onclick = function () { K.alt = null; save(); rings(); }; centerRings();
     $('cLove').onclick = function () { K.tweaks = []; save(); personalPage(); };
     $('cChange').onclick = changeRingPage;
-    $('cSim').onclick = similarPage;
+    $('cSim').onclick = function () { altPage('settings'); };
+    $('cShp').onclick = function () { altPage('shapes'); };
     $('cGem').onclick = function () { K.tweaks = []; save(); personalPage(); };
     bindTalk();
   }
@@ -487,6 +491,24 @@ textarea{min-height:96px;resize:vertical}
     window.scrollTo(0, 0); animIn(); bindTweaks();
     $('notes').oninput = function () { K.notes = this.value; save(); };
     $('bk').onclick = pickPage; $('nx').onclick = personalPage;
+  }
+  var SHNAME = { oval: 'Oval', round: 'Round', pear: 'Pear', emerald: 'Emerald', radiant: 'Radiant', cushion: 'Cushion', elcushion: 'Elongated Cushion', princess: 'Princess', marquise: 'Marquise', asscher: 'Asscher' };
+  var STID = { 'Solitaire': 'solitaire', 'Hidden Halo': 'hidden', 'Halo': 'halo', 'Pavé Band': 'side', 'Three Stone': 'three', 'Five Stone': 'five', 'Bezel': 'bezel', 'Toi et Moi': 'toi' };
+  function otherShapes(r) {
+    var sh = shapeId(r.shape), st = STID[r.style] || 'solitaire', mt = /rose/i.test(r.metal) ? 'rose' : /white|platinum/i.test(r.metal) ? 'white' : 'yellow', out = [];
+    Object.keys(SHNAME).forEach(function (k) { if (k === sh) return; var s2 = (LIBHAS[k] || '').split(' ').indexOf(st) > -1 ? st : 'solitaire'; out.push({ shape: SHNAME[k], style: STNAME[s2], carat: r.carat, metal: MTNAME[mt], img: LIBB + k + '-' + s2 + '-' + mt + '.webp' }); });
+    return out;
+  }
+  function altPage(kind) {
+    view = 'similar';
+    var base = (K.alt || R(K.ring) || R(1)), L = kind === 'shapes' ? otherShapes(base) : similar(base);
+    app.className = 'wrap wide';
+    app.innerHTML = '<div class="rhead pg"><p class="kick">' + (kind === 'shapes' ? 'Other stone shapes' : 'Other settings') + '</p><h1 class="big">' + (kind === 'shapes' ? 'The same look, <em>a new shape.</em>' : 'The same stone, <em>a new setting.</em>') + '</h1><p class="lead">' + (kind === 'shapes' ? 'Same setting, size and metal in every other stone shape.' : 'Same ' + E(String(base.shape || '').toLowerCase()) + ' stone and size in other settings and metals.') + ' Tap the one you love.</p></div>' +
+      '<div class="rings">' + L.map(function (r, i) { return '<article class="ring in" data-i="' + i + '"><div class="ph"><img loading="lazy" src="' + E(r.img) + '" alt=""><span class="stl">Style photo · stone not to scale</span></div><div class="body"><h3>' + E(title(r)) + '</h3>' + specs(r) + '<div class="acts" style="grid-template-columns:1fr"><button class="btn one" data-i="' + i + '">This is the one</button></div></div></article>'; }).join('') + '</div>' +
+      '<div class="center"><button class="link" id="bk">Back to ' + her() + ' rings</button></div>' + foot();
+    window.scrollTo(0, 0); animIn(); centerRings();
+    $('bk').onclick = function () { rings(); };
+    app.querySelectorAll('.btn.one').forEach(function (b) { b.onclick = function () { K.mode = 'one'; K.alt = L[+b.dataset.i]; save(); pickPage(); }; });
   }
   function similarPage() {
     view = 'similar';
