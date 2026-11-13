@@ -307,6 +307,12 @@ textarea{min-height:96px;resize:vertical}
           src = P; left += pad; top += pad;
         }
         ox.drawImage(src, left, top, side, side, 0, 0, OUT, OUT);
+        try { // gentle unsharp mask so library photos look crisp on phones
+          var id = ox.getImageData(0, 0, OUT, OUT), a = id.data, b = new Uint8ClampedArray(a), W4 = OUT * 4, amt = 0.55;
+          for (var yy = 1; yy < OUT - 1; yy++) for (var xx2 = 1; xx2 < OUT - 1; xx2++) { var p = yy * W4 + xx2 * 4;
+            for (var c = 0; c < 3; c++) { var blur = (b[p + c] * 4 + b[p - 4 + c] + b[p + 4 + c] + b[p - W4 + c] + b[p + W4 + c]) / 8; a[p + c] = b[p + c] + (b[p + c] - blur) * amt * 2; } }
+          ox.putImageData(id, 0, 0);
+        } catch (e) {}
         var url = o.toDataURL('image/jpeg', 0.92);
         centerCache[src0] = url; img.src = url; img.style.opacity = '';
       }).catch(function () { img.style.opacity = ''; });
@@ -358,7 +364,7 @@ textarea{min-height:96px;resize:vertical}
     view = 'intro'; hideDock();
     var said = saidLines(), n = (P.rings || []).length;
     app.className = 'wrap story-w';
-    app.innerHTML = '<div class="card pg"><div class="story"><div class="hero"><img src="portal-intro-1.jpg" alt=""></div><div>' +
+    app.innerHTML = '<div class="card pg"><div class="story"><div class="hero"><img src="hero-bg.jpg" alt="Hidden Gem engagement rings" style="object-position:74% 50%"></div><div>' +
       '<p class="kick">Made only for ' + E(first() || 'you') + '</p><h1 class="big">Every forever begins with <em>a single moment.</em></h1>' +
       '<p class="lead">' + (first() ? E(first()) + ', this' : 'This') + ' one is yours. We listened to every word you shared and created ' + (n ? (n === 10 ? 'ten rings' : 'these rings') : 'rings') + ' with one person in mind.</p>' +
       (said.length ? '<ul class="said">' + said.slice(0, 4).map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>' : '') +
@@ -453,12 +459,14 @@ textarea{min-height:96px;resize:vertical}
         '<button class="opt" id="cLove"><span class="ic">&#9825;</span><span><b>I love it as it is</b><small>Add a personal touch next, if you like.</small></span></button>' +
         '<button class="opt" id="cChange"><span class="ic">&#9998;</span><span><b>Change something</b><small>Stone size, band, metal and more.</small></span></button>' +
         '<button class="opt" id="cSim"><span class="ic">&#10022;</span><span><b>See similar options</b><small>More ' + E(String(r.shape || '').toLowerCase()) + ' styles like this one.</small></span></button>' +
+        '<button class="opt" id="cGem" style="border-color:var(--gold);background:var(--goldsoft)"><span class="ic">&#9830;</span><span><b>Add an engraving or hidden gem</b><small>A secret only you two will know.</small></span></button>' +
       '</div></div></div>' + foot();
     window.scrollTo(0, 0); animIn();
     $('bk').onclick = function () { K.alt = null; save(); rings(); }; centerRings();
     $('cLove').onclick = function () { K.tweaks = []; save(); personalPage(); };
     $('cChange').onclick = changeRingPage;
     $('cSim').onclick = similarPage;
+    $('cGem').onclick = function () { K.tweaks = []; save(); personalPage(); };
   }
   function changeRingPage() {
     view = 'pickchange';
