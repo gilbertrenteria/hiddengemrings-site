@@ -859,6 +859,7 @@ body.po-compact .po-wrap{padding-top:10px}
     }
     var state = load() || { id: uid(), a: {}, step: 0, sent: false, pending: false };
     state.d = state.d || {}; state.dstep = state.dstep || 0;
+    if (!Array.isArray(state.a.reach) || !state.a.reach.length) state.a.reach = ['Call', 'Text'];
 
     // CALLS ONLY FOR NOW. Set to true to bring back the Text me choices
     // (online: Call me / Text me, offline: Book a call / Text me later).
@@ -924,6 +925,7 @@ body.po-compact .po-wrap{padding-top:10px}
       return steps.filter(function (s) {
         var k = s.dataset.key;
         if (k === 'credit') return false; // removed: asking about credit scared people off
+        if (k === 'pay' || k === 'monthly' || k === 'reach') return false; // shorter form: payment is covered on the call, we reach out by call or text
         if (k === 'monthly' && skipMonthly()) return false;
         if (k === 'contactPref' && !TEXT_ENABLED) return false;
         if (k === 'slot' && state.a.contactPref !== 'Book a call') return false;
