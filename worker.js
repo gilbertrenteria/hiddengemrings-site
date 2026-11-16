@@ -1248,7 +1248,7 @@ function libMetal(m) { m = String(m || '').toLowerCase(); return m.includes('ros
 const METAL_LABEL = { yellow: 'Yellow gold', white: 'White gold', rose: 'Rose gold' };
 function budgetCarat(b) {
   b = String(b || '');
-  if (/under \$2/i.test(b)) return '1 ct'; if (/\$2,000 to/i.test(b)) return '1.5 ct'; if (/\$4,000 to/i.test(b)) return '2 ct';
+  if (/\$2,400 to/i.test(b)) return '1.5 ct'; if (/\$4,000 to/i.test(b)) return '2 ct';
   if (/\$7,000 to/i.test(b)) return '2.5 ct'; if (/\$10,000/i.test(b)) return '3 ct'; return '1.5 ct';
 }
 function suggestRings(lead) {
