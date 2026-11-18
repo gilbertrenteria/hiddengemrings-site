@@ -1957,7 +1957,7 @@ const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|meta-external
 const TRACK_EVENTS = {
   view: null,
   quiz_start: 'Someone started the quiz',
-  step_budget: null, step_namephone: null, step_pay: null, step_contact: null,
+  step_budget: null, step_namephone: null, step_pay: null, step_contact: null, step_surprise: null, step_timeline: null,
   quiz_abandon: 'Someone left the quiz before finishing',
   rings_open: 'opened their Pick Your Ring link',
   approve_open: 'opened their design approval link',
@@ -2113,7 +2113,9 @@ async function handleLeadPartial(fields, env, origin) {
   const name = capName(fields.name).slice(0, 120), phone = fmtPhone(String(fields.phone || '').trim().slice(0, 40));
   if (!id || name.length < 2 || !phoneOkServer(phone)) return json({ ok: false, error: 'Please check your name and phone.' }, 400, origin);
   if (await env.IG_KV.get(`lead:${id}`)) return json({ ok: true, duplicate: true }, 200, origin);
-  const p = { id, name, phone, shape: String(fields.shape || '').slice(0, 40), budget: String(fields.budget || '').slice(0, 40), page: String(fields.page || '').slice(0, 120), at: Date.now() };
+  const prev = (await env.IG_KV.get(`partial:${id}`, 'json')) || {};
+  const p = { id, name, phone, shape: String(fields.shape || '').slice(0, 40), budget: String(fields.budget || '').slice(0, 40), surprise: String(fields.surprise || '').slice(0, 60), timeline: String(fields.timeline || '').slice(0, 60), windows: String(fields.windows || '').slice(0, 160), page: String(fields.page || '').slice(0, 120), at: Date.now() };
+  if (prev.alerted) p.alerted = prev.alerted; // updates after the alert never send a second alert
   await env.IG_KV.put(`partial:${id}`, JSON.stringify(p), { expirationTtl: 86400 * 3 });
   return json({ ok: true }, 200, origin);
 }
@@ -2127,7 +2129,10 @@ async function alertPartials(env) {
       const html = `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="margin:0 0 6px">${escapeHtml(p.name)} left the form partway</h2>` +
         `<p style="font-size:18px;margin:0 0 10px"><a href="tel:${escapeHtml(p.phone.replace(/\D/g, ''))}">${escapeHtml(p.phone)}</a></p>` +
         `<p>Shape: ${escapeHtml(p.shape || 'n/a')} · Budget: ${escapeHtml(p.budget || 'n/a')} · Came from: ${escapeHtml(p.page || '/start')}</p>` +
-        `<p><b>They did not say if it is a surprise or when to reach them.</b> Text first and keep the first line neutral, no ring words.</p></div>`;
+        (p.timeline ? `<p>Proposing: ${escapeHtml(p.timeline)}</p>` : '') +
+        (/^Yes/.test(p.surprise || '') ? `<p><b>SURPRISE: text only, do not call.</b>${p.windows ? ' Best time: ' + escapeHtml(p.windows) + '.' : ''} Keep the first line neutral, no ring words.</p>`
+          : p.surprise ? `<p><b>Not a surprise (${escapeHtml(p.surprise)}): call first, then text if no answer.</b></p>`
+          : `<p><b>They did not say if it is a surprise or when to reach them.</b> Text first and keep the first line neutral, no ring words.</p>`) + `</div>`;
       const sent = await sendEmail(env, { to: [PUBLIC_EMAIL], subject: `LEFT PARTWAY (has phone): ${p.name}`, html });
       if (sent.ok) { p.alerted = Date.now(); await env.IG_KV.put(k.name, JSON.stringify(p), { expirationTtl: 86400 * 3 }); }
     }
