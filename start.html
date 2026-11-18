@@ -8,6 +8,7 @@
 .v2-head h1 .script{display:block}
 .v2-line{font-size:13px!important;margin:8px 0 0!important;color:#6B5B4C!important;max-width:none!important}
 .hg-holiday{padding:7px 12px!important;font-size:.82rem!important;margin-bottom:8px!important;border-radius:999px!important}
+.hg-talk{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px auto 4px;font-size:14px;color:#6B5B4C}.hg-talk a{display:inline-block;padding:9px 18px;border:1px solid #c9b8a3;border-radius:999px;color:#4a3f36;text-decoration:none;background:#fffdf9;font-weight:500;min-width:96px;text-align:center}.hg-talk a:hover{border-color:#8A7F6E;background:#f6efe6}
 .v2-trust{text-align:center;font-size:12px;letter-spacing:.04em;color:#6B5B4C;margin:0 0 10px}
 @media(max-width:520px){.v2-head h1{text-align:left}.v2-head .eyebrow{display:none}.v2-head{text-align:left}.v2-line{text-align:left}.v2-trust{font-size:11px}
 .po-card .po-icon{width:34px!important;height:34px!important;margin-bottom:4px!important}
@@ -748,6 +749,7 @@ body.po-compact .po-wrap{padding-top:10px}
       <button type="button" class="po-restart" id="poRestart">Start over</button>
     </div>
   </div>
+  <div class="hg-talk"><span>Prefer to talk?</span><a href="tel:+18327437657" data-talk="call">Call us</a><a href="sms:+18327437657" data-talk="text">Text us</a></div>
   <p class="hg-holiday"><span class="tg-off">Planning a holiday proposal? Book your private design consult this week to start your ring in time.</span><span class="tg-only">Thankful for her? Start her ring in time for the holidays.</span></p>
   <p class="po-trust" id="poTrust">Free private consult &middot; Won't affect your credit</p>
   <p class="po-note">Business hours: Mon to Sat, 9 AM to 9 PM.</p>
@@ -985,6 +987,7 @@ body.po-compact .po-wrap{padding-top:10px}
       setTimeout(function () { show(idx + 1); }, 260);
     });
 
+    document.querySelectorAll('[data-talk]').forEach(function (a) { a.addEventListener('click', function () { try { if (window.HGTrack) HGTrack('step_' + a.dataset.talk); } catch (e) {} }); });
     function show(i) {
       // keep the partial lead up to date as they answer more, so a lead who stops early still shows surprise and timing
       try { if (partialSent && !state.sent) sendPartial(true); } catch (e) {}

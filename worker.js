@@ -1957,7 +1957,7 @@ const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|meta-external
 const TRACK_EVENTS = {
   view: null,
   quiz_start: 'Someone started the quiz',
-  step_budget: null, step_namephone: null, step_pay: null, step_contact: null, step_surprise: null, step_timeline: null,
+  step_budget: null, step_namephone: null, step_pay: null, step_contact: null, step_surprise: null, step_timeline: null, step_call: null, step_text: null,
   quiz_abandon: 'Someone left the quiz before finishing',
   rings_open: 'opened their Pick Your Ring link',
   approve_open: 'opened their design approval link',
