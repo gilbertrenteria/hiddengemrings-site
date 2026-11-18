@@ -5,6 +5,10 @@
   // Meta Pixel (pixel.js decides when it may run)
   try { var px = document.createElement('script'); px.src = 'pixel.js?v=3'; px.async = true; document.head.appendChild(px); } catch (e) {}
   var API = 'https://long-bar-d49d.gilbertrenteria.workers.dev/track';
+  // Practice visits: any visit opened with ?preview=1 (or ?nopixel=1) never counts, for the rest of that browser session
+  var testMode = false;
+  try { var tq = new URLSearchParams(location.search); if (tq.get('preview') === '1' || tq.get('nopixel') === '1') sessionStorage.setItem('hgTest', '1'); testMode = sessionStorage.getItem('hgTest') === '1'; } catch (e) {}
+  if (testMode) { window.HGTrack = function () {}; window.HGTrack.isHuman = function () { return true; }; return; }
   var sid;
   try { sid = sessionStorage.getItem('hgSid'); if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('hgSid', sid); } }
   catch (e) { sid = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
