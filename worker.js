@@ -1998,7 +1998,12 @@ async function handleTrack(request, env, origin) {
   if (cf.asn === 32934 || cf.asn === 63293 || cf.asn === 54115) { await trackDiag(env, 'meta_asn', cf, ua); return ok(); } // Meta crawler and ad review networks (Prineville, Oregon)
   // one alert per network address every 6 hours, so repeat hits never flood the inbox
   const ip = request.headers.get('CF-Connecting-IP') || '';
-  if (ip) {
+  let raw = '';
+  try { raw = await request.text(); } catch (e) {}
+  let pre = {}; try { pre = JSON.parse(raw); } catch (e) {}
+  // silent count-only events (form steps) never send alerts, so they skip the per-address cap
+  const countOnly = String(pre.ev || '').startsWith('step_');
+  if (ip && !countOnly) {
     const ik = `ipseen:${ip}`;
     const n = Number(await env.IG_KV.get(ik) || 0);
     if (n >= 3) { await trackDiag(env, 'ip_cap', cf, ua); return ok(); }
@@ -2007,8 +2012,8 @@ async function handleTrack(request, env, origin) {
   await trackDiag(env, 'passed_filters', cf, ua);
   const city = [cf.city, cf.regionCode || cf.region].filter(Boolean).join(', ');
   const place = city ? `${city}${cf.postalCode ? ' (near ' + cf.postalCode + ')' : ''}${cf.country && cf.country !== 'US' ? ' ' + cf.country : ''}` : 'Unknown';
-  let t;
-  try { t = JSON.parse(await request.text()); } catch (e) { return ok(); }
+  const t = pre;
+  if (!t || typeof t !== 'object') return ok();
   const ev = String(t.ev || '');
   if (!(ev in TRACK_EVENTS) || !t.sid) return ok();
   const sid = String(t.sid).replace(/[^a-z0-9]/gi, '').slice(0, 40);
