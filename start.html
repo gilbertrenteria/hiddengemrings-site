@@ -808,7 +808,7 @@ body.po-compact .po-wrap{padding-top:10px}
     // keep the address bar clean: drop ?src=bio after reading it (other params like fbclid stay for Meta)
     if (QS.get('src') && history.replaceState) { try { var u = new URL(location.href); u.searchParams.delete('src'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) {} }
     if (fromBio) { var h1 = document.querySelector('.v2-head h1'); if (h1) h1.innerHTML = 'Let\'s design <span class="script">her ring.</span>'; }
-    // Name and phone come right after the budget question, so a lead who leaves
+    // Name and phone come right after the shape question (before budget), so a lead who leaves
     // partway still leaves a way to reach them. The full lead is sent at the end of step 1.
     (function () {
       var contact = card.querySelector('.po-step[data-key=contact]'), budget = card.querySelector('.po-step[data-key=budget]');
@@ -820,7 +820,7 @@ body.po-compact .po-wrap{padding-top:10px}
       var nb = document.createElement('button'); nb.type = 'button'; nb.className = 'btn po-send'; nb.id = 'poNpNext'; nb.disabled = true; nb.textContent = 'Continue'; np.appendChild(nb);
       var ns = document.createElement('p'); ns.className = 'po-status'; ns.id = 'poNpStatus'; ns.setAttribute('aria-live', 'polite'); np.appendChild(ns);
       var fine = contact.querySelector('.po-fine'); if (fine) np.appendChild(fine);
-      budget.parentNode.insertBefore(np, budget.nextSibling);
+      budget.parentNode.insertBefore(np, budget); // name and phone now come right after the shape, before budget
     })();
     var steps = Array.prototype.slice.call(card.querySelectorAll('.po-step:not(.po-dstep)'));
     var dsteps = Array.prototype.slice.call(card.querySelectorAll('.po-dstep'));
