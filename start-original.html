@@ -408,7 +408,7 @@
     <div class="po-step" data-key="contact">
       <img class="po-icon" src="icon-personal.png" alt="">
       <h2>Where can we reach you?</h2>
-      <p class="po-sub" id="poContactSub">We'll reach out to talk through your options. No spam, ever.</p>
+      <p class="po-sub" id="poContactSub">We'll reach out to talk through your options.</p>
       <label class="po-field"><span>First and last name</span>
         <input id="poName" type="text" autocomplete="name" placeholder="Your name" maxlength="120">
       </label>
@@ -754,7 +754,7 @@
         var sub = document.getElementById('poContactSub');
         if (state.a.contactPref === 'Book a call' && state.a.slotLabel) sub.textContent = 'Your call: ' + state.a.slotLabel + '. Where should we call you?';
         else if (teamOnline === false) sub.textContent = 'Our ring specialists are away right now. We\'ll call you during business hours.';
-        else sub.textContent = 'We\'ll call you to talk through your options. No spam, ever.';
+        else sub.textContent = 'We\'ll call you to talk through your options.';
       }
       if (key === 'slot') loadSlots();
     }

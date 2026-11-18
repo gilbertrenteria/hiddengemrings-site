@@ -561,7 +561,7 @@ body.po-compact .po-wrap{padding-top:10px}
     <div class="po-step" data-key="contact">
       <img loading="lazy" decoding="async" class="po-icon" src="icon-personal.webp" alt="">
       <h2>Where can we reach you?</h2>
-      <p class="po-sub" id="poContactSub">We'll reach out to talk through your options. No spam, ever.</p>
+      <p class="po-sub" id="poContactSub">We'll reach out to talk through your options.</p>
       <label class="po-field"><span>First and last name</span>
         <input id="poName" type="text" autocomplete="name" placeholder="Your name" maxlength="120">
       </label>
@@ -816,7 +816,7 @@ body.po-compact .po-wrap{padding-top:10px}
       var contact = card.querySelector('.po-step[data-key=contact]'), budget = card.querySelector('.po-step[data-key=budget]');
       if (!contact || !budget) return;
       var np = document.createElement('div'); np.className = 'po-step'; np.dataset.key = 'namephone';
-      np.innerHTML = '<img loading="lazy" decoding="async" class="po-icon" src="icon-personal.webp" alt=""><h2>Who should we send your options to?</h2><p class="po-sub">Get a free custom design and price for her ring. Just your name and mobile number. No spam, ever.</p>';
+      np.innerHTML = '<img loading="lazy" decoding="async" class="po-icon" src="icon-personal.webp" alt=""><h2>Who should we send your options to?</h2><p class="po-sub">Get a free custom design and price for her ring. Just your name and mobile number.</p>';
       np.appendChild(document.getElementById('poName').closest('label'));
       np.appendChild(document.getElementById('poPhone').closest('label'));
       var nb = document.createElement('button'); nb.type = 'button'; nb.className = 'btn po-send'; nb.id = 'poNpNext'; nb.disabled = true; nb.textContent = 'Continue'; np.appendChild(nb);
@@ -1030,7 +1030,7 @@ body.po-compact .po-wrap{padding-top:10px}
         var sub = document.getElementById('poContactSub');
         if (state.a.contactPref === 'Book a call' && state.a.slotDate) sub.textContent = 'Your call: ' + slotLocal() + '. Where should we call you?';
         else if (teamOnline === false) sub.textContent = 'Our ring specialists are away right now. We\'ll reach out during business hours.';
-        else sub.textContent = 'We\'ll reach out by ' + (reachText() || 'phone').toLowerCase().replace(/, ([^,]*)$/, ' or $1') + ' to talk through your options.' + (isSurprise() ? '' : ' No spam, ever.');
+        else sub.textContent = 'We\'ll reach out by ' + (reachText() || 'phone').toLowerCase().replace(/, ([^,]*)$/, ' or $1') + ' to talk through your options.' + '';
       }
       if (key === 'slot') loadSlots();
     }
