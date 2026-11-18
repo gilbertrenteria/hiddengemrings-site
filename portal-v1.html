@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Ring Portal | Hidden Gem</title>
-<meta property="og:title" content="Your private Ring Portal">
+<meta property="og:title" content="Your Ring Portal">
 <meta property="og:description" content="Create something special, one step at a time.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -104,7 +104,7 @@
   <div class="wrap">
     <div class="bar">
       <img src="logo-brown.png" alt="Hidden Gem">
-      <div class="who"><b>Ring Portal</b><span id="whoSub">Private</span></div>
+      <div class="who"><b>Ring Portal</b><span id="whoSub">Your link</span></div>
     </div>
     <div class="meta"><span id="plab">Let's begin</span><span id="pcnt"></span></div>
     <div class="prog"><i id="pbar"></i></div>
@@ -253,10 +253,10 @@
   function welcome() {
     bar(0, 1, 'Welcome');
     var name = first() ? E(first()) + ', ' : '';
-    app.innerHTML = '<section class="pg on"><span class="kick">Your private Ring Portal</span><h1>' + name + 'let\'s create <span class="script">' + her() + ' ring</span></h1>' +
+    app.innerHTML = '<section class="pg on"><span class="kick">Your Ring Portal</span><h1>' + name + 'let\'s create <span class="script">' + her() + ' ring</span></h1>' +
       '<div class="herohero"><img src="portal-hero.jpg" alt="A ring sketch becoming a finished diamond ring"></div>' +
       '<p class="lead">This is your space to design a ring as one of a kind as ' + (her() === 'your' ? 'your love story' : 'she is') + '. Tap through at your own pace, add ideas, and message ' + E(P.rep) + ' anytime. No pressure, no payment, just the fun part.</p>' +
-      (P.surprise ? '<div class="promise">&#128274;<span>Everything here stays private. We only reach out the way you asked.</span></div>' : '') +
+      (P.surprise ? '<div class="promise">&#128274;<span>We only reach out the way you asked.</span></div>' : '') +
       '<h3 style="margin-top:28px">How it works</h3><div class="how">' +
       [['icon-design.png', 'Step 1', 'Design ' + her() + ' ring', 'Tap through a few fun choices. Takes about 3 minutes.'],
        ['icon-inspiration.png', 'Step 2', 'Share your ideas', 'Add notes, photos or links of rings you love.'],
@@ -375,7 +375,7 @@
   }
   function done() {
     bar(1, 1, 'Saved');
-    app.innerHTML = '<section class="pg on" style="text-align:center"><div class="confetti">&#128141;&#10024;</div><h1>' + Her() + ' ring is <span class="script">saved</span></h1><p class="lead" style="margin:0 auto">' + E(P.rep) + ' has your design and will reach out ' + (P.surprise ? 'privately ' : '') + 'to bring it to life. You can come back to this link anytime to change anything or send a message.</p>' +
+    app.innerHTML = '<section class="pg on" style="text-align:center"><div class="confetti">&#128141;&#10024;</div><h1>' + Her() + ' ring is <span class="script">saved</span></h1><p class="lead" style="margin:0 auto">' + E(P.rep) + ' has your design and will reach out ' + 'to bring it to life. You can come back to this link anytime to change anything or send a message.</p>' +
       '<div class="btns" style="justify-content:center"><button class="btn" type="button" id="seeIt">See ' + her() + ' ring</button><button class="btn ghost" type="button" id="msg">Message ' + E(P.rep) + '</button></div></section>';
     document.getElementById('seeIt').onclick = reveal; document.getElementById('msg').onclick = openChat;
   }
@@ -498,7 +498,7 @@
     if (!j.ok) throw 0;
     P = j.portal; A = P.answers || {}; pre = P.prefill || {};
     if (pre.inspiredBy) delete pre.inspiredBy;
-    document.getElementById('whoSub').textContent = 'Private · ' + (P.first || '');
+    document.getElementById('whoSub').textContent = 'Your link · ' + (P.first || '');
     document.getElementById('chatLab').textContent = 'Message ' + P.rep;
     document.getElementById('chatTitle').textContent = P.rep + ' at Hidden Gem';
     document.getElementById('chatBtn').hidden = false;

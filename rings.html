@@ -64,7 +64,7 @@
   <div class="wrap">
     <div class="bar">
       <img src="logo-brown.png" alt="Hidden Gem">
-      <div class="who"><b>Pick Your Ring</b>Private link</div>
+      <div class="who"><b>Pick Your Ring</b>Your link</div>
       <nav class="seg" aria-label="Steps">
         <button type="button" data-step="0">Pick</button>
         <button type="button" data-step="1">Size</button>
@@ -229,7 +229,7 @@
 
   /* ---------- Step 1: pick ---------- */
   function pagePick() {
-    return '<span class="eyebrow">Your Private Ring Options</span>' +
+    return '<span class="eyebrow">Your Ring Options</span>' +
       '<h1 class="fx" id="h1">' + (first() ? E(first()) + ', ' : '') + 'Your Rings <span class="script">Are Here</span></h1>' +
       '<p class="lead fxlead" id="lead">We chose these rings from everything you told us. Take your time, compare them, and pick the one you can already see on her hand.</p>' +
       (o.brief && o.brief.length ? '<div class="card" style="margin-top:18px"><b style="font-family:Newsreader,serif;font-size:1.15rem;color:var(--deep)">Built from what you told us</b><div class="opts" style="margin-top:10px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">' + o.brief.map(function (b) { return '<div style="background:var(--cream);border-radius:12px;padding:10px 12px"><span class="fine" style="display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase">' + E(b[0]) + '</span><b style="color:var(--deep)">' + E(b[1]) + '</b></div>'; }).join('') + '</div></div>' : '') +

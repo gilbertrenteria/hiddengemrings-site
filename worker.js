@@ -426,7 +426,7 @@ function windowsForRep(w) {
   return `${w} (${conv} Central)`;
 }
 function contactLine(l) {
-  if (isSurprise(l) && l.contact !== 'Book a call') return `SURPRISE: keep it private. Reach by ${l.reach || 'text'}${l.windows ? ', only ' + windowsForRep(l.windows) : ''}. Keep the first line neutral, no ring words.`;
+  if (isSurprise(l) && l.contact !== 'Book a call') return `SURPRISE: keep it a secret. Reach by ${l.reach || 'text'}${l.windows ? ', only ' + windowsForRep(l.windows) : ''}. Keep the first line neutral, no ring words.`;
   if (l.contact === 'Book a call') return `BOOKED CALL: ${labelDate(l.slotDate)} at ${labelTime(l.slotTime)} (Central). Call them at that time.`;
   if (l.routeMode === 'offline') return `Everyone was offline. ${l.contact === 'Text me' ? 'Text' : 'Call'} them first thing during business hours (9 AM to 9 PM).`;
   if (l.contact === 'Call me') return 'CALL NOW. Text first, then call within 15 minutes.';
@@ -1307,7 +1307,7 @@ function portalEmail(lead, title, intro, rows, p, extra) {
     `<h2 style="margin:14px 0 6px">${escapeHtml(title)}</h2><p style="margin:0 0 14px;color:#333">${intro}</p>` +
     (rows && rows.length ? `<table cellpadding="7" style="border-collapse:collapse">` + rows.map(([k, v]) => `<tr><td style="font-weight:600;color:#6B5B4C;vertical-align:top">${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join('') + `</table>` : '') +
     (extra || '') +
-    `<p style="margin-top:16px">Phone: ${escapeHtml(fmtPhone(lead.phone))}${/^yes/i.test(lead.surprise || '') ? ' · <b>SURPRISE, keep it private</b>' : ''}${lead.windowsCentral ? ' · Best times: ' + escapeHtml(lead.windowsCentral) : ''}</p>` +
+    `<p style="margin-top:16px">Phone: ${escapeHtml(fmtPhone(lead.phone))}${/^yes/i.test(lead.surprise || '') ? ' · <b>SURPRISE, keep it a secret</b>' : ''}${lead.windowsCentral ? ' · Best times: ' + escapeHtml(lead.windowsCentral) : ''}</p>` +
     `<p><a href="https://hiddengemrings.com/call?lead=${encodeURIComponent(lead.id)}" style="background:#54453A;color:#fff;padding:11px 20px;border-radius:999px;text-decoration:none;font-weight:700">Open their call page to reply</a></p></div>`;
 }
 
@@ -1535,7 +1535,7 @@ async function handlePortalVerdict(t, fields, env, origin) {
   await env.IG_KV.put(`lead:${p.leadId}`, JSON.stringify(lead));
   const sur = /^yes/i.test(lead.surprise || '') ? ' (SURPRISE)' : '';
   const subject = choice === 'love' ? `READY TO CLOSE: ${lead.name} said This is my ring${sur}` : `MOCKUP CHANGES: ${lead.name}${sur}`;
-  const intro = choice === 'love' ? `<b>They love it. Send their private checkout link now (financing or pay in full) and call or text while they are excited.</b> Budget: ${escapeHtml(lead.budget || 'n/a')} · Pay: ${escapeHtml(lead.pay || 'n/a')}${lead.monthly ? ' · Monthly: ' + escapeHtml(lead.monthly) : ''}.` : 'They want changes to the mockup. Make them and send the new mockup from their call page.';
+  const intro = choice === 'love' ? `<b>They love it. Send their checkout link now (financing or pay in full) and call or text while they are excited.</b> Budget: ${escapeHtml(lead.budget || 'n/a')} · Pay: ${escapeHtml(lead.pay || 'n/a')}${lead.monthly ? ' · Monthly: ' + escapeHtml(lead.monthly) : ''}.` : 'They want changes to the mockup. Make them and send the new mockup from their call page.';
   const rows = [['Changes', tweaks.join(', ')], ['Notes', notes]].filter((r) => r[1]);
   const last = p.mockups[p.mockups.length - 1];
   const sent = await sendEmail(env, { to: leadRecipients(lead), subject, html: portalEmail(lead, subject, intro, rows, p, `<img src="https://long-bar-d49d.gilbertrenteria.workers.dev/portal/${t}/img/${last.img}" width="240" style="border-radius:12px;margin-top:8px">`) });
@@ -1877,7 +1877,7 @@ function emailType(subject) {
     [/Someone is on your site/i, 'Visit alert'], [/started the quiz/i, 'Quiz started'], [/left the quiz/i, 'Quiz left unfinished'],
     [/browsing rings/i, 'Browsing rings'], [/Pick Your Ring link/i, 'Ring picks link opened'], [/design approval link/i, 'Approval link opened'],
     [/daily summary/i, 'Daily summary'], [/^LEFT PARTWAY \(has phone\)/i, 'Left partway (has phone)'], [/RING STYLE/i, 'Ring style details'], [/ABOUT THE BUYER/i, 'About the buyer'], [/RING PORTAL OPENED/i, 'Ring Portal opened'], [/RING PORTAL STARTED/i, 'Ring Portal started'], [/RING PORTAL PAUSED/i, 'Ring Portal left partway'], [/RING PORTAL MESSAGE/i, 'Ring Portal message'], [/DESIGN (CREATED|UPDATED)/i, 'Ring Portal design'], [/update from Hidden Gem/i, 'Portal update to customer'], [/RESENT: /i, 'NEW LEAD (resent by safety check)'], [/ lead, /i, 'NEW LEAD (form filled)'],
-    [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'], [/Your Hidden Gem request/i, 'Recap sent to customer (private)'],
+    [/paid /i, 'Payment received'], [/APPROVED design/i, 'Design approved'], [/Your Hidden Gem ring picks/i, 'Ring picks sent to customer'], [/Your Hidden Gem request/i, 'Recap sent to customer (surprise)'],
     [/Your Hidden Gem design approval/i, 'Approval sent to customer'], [/newsletter/i, 'Newsletter signup'], [/consultation inquiry/i, 'Consultation inquiry'],
   ];
   for (const [re, label] of map) if (re.test(s)) return label;

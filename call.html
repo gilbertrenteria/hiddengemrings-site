@@ -542,8 +542,8 @@
     $('portalOut').hidden = false; $('portalLink').textContent = link; $('portalOpen').href = link + '&preview=1';
     var surprise = /^yes/i.test(lead.surprise || '');
     $('portalText').href = sms(lead.phone, surprise
-      ? 'Hi ' + first() + ' this is Hidden Gem. Your private link is ready whenever you have a quiet minute ' + link
-      : 'Hi ' + first() + ' we are so excited to begin this journey with you. We already started on everything you shared and your private Ring Portal is ready. Tap here to see the rings we designed just for you ' + link);
+      ? 'Hi ' + first() + ' this is Hidden Gem. Your link is ready whenever you have a quiet minute ' + link
+      : 'Hi ' + first() + ' we are so excited to begin this journey with you. We already started on everything you shared and your Ring Portal is ready. Tap here to see the rings we designed just for you ' + link);
   }
   function portalLoad() {
     if (!lead || !lead.portalToken) return;
