@@ -111,6 +111,106 @@ async function handleSetToken(url, env) {
   );
 }
 
+
+// ===== Meta instant form leads (Facebook / Instagram lead ads) =====
+// Leads from the Meta instant form go through the same handleLead path as the
+// website form, so they email the same alerts, show on the dashboard and get a
+// Ring Portal link. A Page token is saved once via /meta/set-token (admin key),
+// then every minute the cron pulls new leads from the Page's lead forms.
+const META_GRAPH = 'https://graph.facebook.com/v21.0';
+const META_PAGE_ID = '1110943948773945'; // Hidden Gem Engagement Rings
+
+async function handleMetaSetToken(url, env) {
+  const key = url.searchParams.get('key');
+  const token = (url.searchParams.get('token') || '').trim();
+  if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) return new Response('Forbidden', { status: 403 });
+  if (!token) return new Response('Missing ?token param', { status: 400 });
+  // Accept a user token (find the Page token from it) or a Page token directly.
+  let pageToken = '', pageName = '';
+  try {
+    const r = await fetch(`${META_GRAPH}/me/accounts?fields=id,name,access_token&limit=50&access_token=${encodeURIComponent(token)}`);
+    const j = await r.json();
+    const pg = (j.data || []).find((p) => p.id === META_PAGE_ID) || (j.data || []).find((p) => /hidden gem/i.test(p.name || ''));
+    if (pg) { pageToken = pg.access_token; pageName = pg.name; }
+  } catch (e) {}
+  if (!pageToken) {
+    try {
+      const r = await fetch(`${META_GRAPH}/me?fields=id,name&access_token=${encodeURIComponent(token)}`);
+      const j = await r.json();
+      if (j.id === META_PAGE_ID) { pageToken = token; pageName = j.name; }
+    } catch (e) {}
+  }
+  if (!pageToken) return new Response('Could not find the Hidden Gem Page with that token. Make sure you picked the Hidden Gem page and added leads_retrieval, pages_show_list, pages_read_engagement and pages_manage_ads.', { status: 400, headers: { 'Content-Type': 'text/plain' } });
+  await env.IG_KV.put('meta:page_token', pageToken);
+  await env.IG_KV.put('meta:token_saved_at', String(Date.now()));
+  // Start from now so old leads are not re-sent, unless a start time is already set.
+  if (!(await env.IG_KV.get('meta:since'))) await env.IG_KV.put('meta:since', String(Math.floor(Date.now() / 1000) - 3600));
+  const res = await pollMetaLeads(env);
+  return new Response(`Connected to ${pageName}. Lead forms found: ${res.forms}. New leads pulled now: ${res.added}. ${res.error ? 'Note: ' + res.error : 'Instant form leads will now email you within about a minute.'}`, { headers: { 'Content-Type': 'text/plain' } });
+}
+
+function metaAnswer(fd, test) {
+  const f = (fd || []).find((x) => test(String(x.name || '').toLowerCase()));
+  const v = f && f.values && f.values[0] ? String(f.values[0]) : '';
+  return v.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function pollMetaLeads(env) {
+  const out = { forms: 0, added: 0, error: '' };
+  const token = await env.IG_KV.get('meta:page_token');
+  if (!token) return out;
+  const since = Number(await env.IG_KV.get('meta:since')) || Math.floor(Date.now() / 1000) - 3600;
+  let newest = since;
+  try {
+    const fr = await fetch(`${META_GRAPH}/${META_PAGE_ID}/leadgen_forms?fields=id,name,status&limit=50&access_token=${encodeURIComponent(token)}`);
+    const fj = await fr.json();
+    if (fj.error) { out.error = fj.error.message || 'form list failed'; await env.IG_KV.put('meta:last_error', JSON.stringify({ at: Date.now(), msg: out.error })); return out; }
+    const forms = fj.data || [];
+    out.forms = forms.length;
+    for (const form of forms) {
+      const filt = encodeURIComponent(JSON.stringify([{ field: 'time_created', operator: 'GREATER_THAN', value: since - 120 }]));
+      const lr = await fetch(`${META_GRAPH}/${form.id}/leads?fields=id,created_time,field_data,ad_name,campaign_name,platform,is_organic&limit=100&filtering=${filt}&access_token=${encodeURIComponent(token)}`);
+      const lj = await lr.json();
+      if (lj.error) { out.error = lj.error.message || 'lead read failed'; continue; }
+      for (const ld of lj.data || []) {
+        const seenKey = `meta:seen:${ld.id}`;
+        if (await env.IG_KV.get(seenKey)) continue;
+        const fd = ld.field_data || [];
+        const surpriseRaw = metaAnswer(fd, (n) => n.includes('surprise'));
+        const timeline = metaAnswer(fd, (n) => n.includes('propose') || n.includes('when'));
+        const surprise = /^yes/i.test(surpriseRaw) ? "Yes, it's a surprise" : /together/i.test(surpriseRaw) ? "We're shopping together" : surpriseRaw ? "No, we've talked about it" : '';
+        const fields = {
+          id: 'meta-' + ld.id,
+          name: metaAnswer(fd, (n) => n === 'full_name' || n.includes('full name') || n === 'name'),
+          phone: metaAnswer(fd, (n) => n.includes('phone')),
+          email: metaAnswer(fd, (n) => n.includes('email')),
+          surprise, timeline,
+          reach: /^yes/i.test(surprise) ? 'Text' : 'Call, Text',
+          contact: 'Call me',
+          page: 'Meta instant form' + (ld.platform ? ' (' + ld.platform + ')' : ''),
+        };
+        const req = new Request('https://hiddengemrings.com/meta-instant-form', { headers: { 'User-Agent': 'Meta instant form' } });
+        let ok = false;
+        try { const r = await handleLead(fields, req, env, ''); ok = r.status < 500; if (r.status >= 400) { const b = await r.text(); await env.IG_KV.put(`meta:bad:${ld.id}`, JSON.stringify({ at: Date.now(), fields, resp: b.slice(0, 300) }), { expirationTtl: 86400 * 30 }); } } catch (e) { out.error = String(e).slice(0, 200); }
+        if (ok) { await env.IG_KV.put(seenKey, '1', { expirationTtl: 86400 * 120 }); out.added++; }
+        const ct = Math.floor(Date.parse(ld.created_time) / 1000);
+        if (ct > newest) newest = ct;
+      }
+    }
+  } catch (e) { out.error = String(e).slice(0, 200); }
+  if (newest > since) await env.IG_KV.put('meta:since', String(newest));
+  await env.IG_KV.put('meta:last_poll', JSON.stringify({ at: Date.now(), forms: out.forms, added: out.added, error: out.error }));
+  return out;
+}
+
+async function handleMetaStatus(url, env, origin) {
+  const key = url.searchParams.get('key');
+  if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) return new Response('Forbidden', { status: 403 });
+  const has = !!(await env.IG_KV.get('meta:page_token'));
+  const last = await env.IG_KV.get('meta:last_poll', 'json');
+  return json({ ok: true, connected: has, savedAt: Number(await env.IG_KV.get('meta:token_saved_at')) || null, lastPoll: last }, 200, origin);
+}
+
 async function handleInstagramCallback(url, env) {
   const code = url.searchParams.get('code');
   if (!code) return new Response('Missing ?code param', { status: 400 });
@@ -1652,6 +1752,8 @@ const app = {
     if (request.method === 'GET') {
       if (path === '/instagram/callback') return handleInstagramCallback(url, env);
       if (path === '/instagram/set-token') return handleSetToken(url, env);
+      if (path === '/meta/set-token') return handleMetaSetToken(url, env);
+      if (path === '/meta/status') return handleMetaStatus(url, env, origin);
       if (path === '/instagram/feed') return handleInstagramFeed(env, origin);
       if (path === '/track/stats') return handleTrackStats(url, env, origin);
       if (path === '/email/log') return handleEmailLog(url, env, origin);
@@ -1777,6 +1879,12 @@ const app = {
 
   // Cron Trigger: keeps the cached Instagram feed fresh.
   async scheduled(event, env, ctx) {
+    if (event.cron === '* * * * *') {
+      // every minute: pull new Meta instant form leads; every 10 minutes: the old checks
+      try { await pollMetaLeads(env); } catch (e) {}
+      if (new Date(event.scheduledTime || Date.now()).getUTCMinutes() % 10 === 0) { await resendUnsentLeads(env); await alertPartials(env); }
+      return;
+    }
     if (event.cron === '*/10 * * * *') { await resendUnsentLeads(env); await alertPartials(env); return; }
     if (event.cron === '0 14 * * *') { await sendDailySummary(env); return; }
     await refreshMediaCache(env);
