@@ -189,6 +189,8 @@ async function pollMetaLeads(env) {
           contact: 'Call me',
           page: 'Meta instant form' + (ld.platform ? ' (' + ld.platform + ')' : ''),
         };
+        // Meta's Lead Ads Testing Tool fills dummy text; use the standard test identity so it flows through.
+        if (/test lead|dummy data/i.test(fields.name + ' ' + fields.phone)) { fields.name = 'Test Check'; fields.phone = '(832) 454-4655'; if (!fields.surprise) fields.surprise = "No, we've talked about it"; if (!fields.timeline) fields.timeline = 'As soon as possible'; fields.page += ' TEST'; }
         const req = new Request('https://hiddengemrings.com/meta-instant-form', { headers: { 'User-Agent': 'Meta instant form' } });
         let ok = false;
         try { const r = await handleLead(fields, req, env, ''); ok = r.status < 500; if (r.status >= 400) { const b = await r.text(); await env.IG_KV.put(`meta:bad:${ld.id}`, JSON.stringify({ at: Date.now(), fields, resp: b.slice(0, 300) }), { expirationTtl: 86400 * 30 }); } } catch (e) { out.error = String(e).slice(0, 200); }
