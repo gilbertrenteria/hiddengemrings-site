@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Connect Meta leads | Hidden Gem</title>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F6F3EC;color:#3E342C}
+.box{max-width:560px;margin:40px auto;padding:28px;background:#fff;border:1px solid #E6DED2;border-radius:16px}
+h1{font-size:22px;margin:0 0 6px}p{color:#6B5B4C;line-height:1.5;margin:0 0 14px}
+textarea{width:100%;box-sizing:border-box;height:120px;padding:12px;border:1px solid #c9b8a3;border-radius:10px;font:13px monospace}
+button{margin-top:14px;width:100%;padding:14px;border:0;border-radius:999px;background:#4a3f36;color:#fff;font-size:16px;cursor:pointer}
+.err{color:#a32d2d;margin-top:12px}
+</style></head><body>
+<div class="box">
+  <h1>Connect Meta instant form leads</h1>
+  <p>Paste the token from Meta's Graph API Explorer, then tap Connect. Your admin key is used automatically from this browser.</p>
+  <textarea id="tok" placeholder="Paste the token here"></textarea>
+  <button id="go" type="button">Connect</button>
+  <p id="msg" class="err"></p>
+</div>
+<script>
+document.getElementById('go').addEventListener('click', function () {
+  var t = document.getElementById('tok').value.replace(/\s+/g, '');
+  var k = ''; try { k = localStorage.getItem('hg_admin_key') || ''; } catch (e) {}
+  var m = document.getElementById('msg');
+  if (!t) { m.textContent = 'Paste the token first.'; return; }
+  if (!k) { m.textContent = 'Open hiddengemrings.com/admin.html in this browser and sign in first, then come back here.'; return; }
+  location.href = 'https://long-bar-d49d.gilbertrenteria.workers.dev/meta/set-token?key=' + encodeURIComponent(k) + '&token=' + encodeURIComponent(t);
+});
+</script>
+</body></html>
