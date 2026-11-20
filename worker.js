@@ -164,7 +164,8 @@ async function pollMetaLeads(env) {
   try {
     const fr = await fetch(`${META_GRAPH}/${META_PAGE_ID}/leadgen_forms?fields=id,name,status&limit=50&access_token=${encodeURIComponent(token)}`);
     const fj = await fr.json();
-    if (fj.error) { out.error = fj.error.message || 'form list failed'; await env.IG_KV.put('meta:last_error', JSON.stringify({ at: Date.now(), msg: out.error })); return out; }
+    if (fj.error) { out.error = fj.error.message || 'form list failed'; }
+    if (fj.error) throw new Error(out.error);
     const forms = fj.data || [];
     out.forms = forms.length;
     for (const form of forms) {
@@ -195,13 +196,17 @@ async function pollMetaLeads(env) {
         let ok = false;
         try { const r = await handleLead(fields, req, env, ''); ok = r.status < 500; if (r.status >= 400) { const b = await r.text(); await env.IG_KV.put(`meta:bad:${ld.id}`, JSON.stringify({ at: Date.now(), fields, resp: b.slice(0, 300) }), { expirationTtl: 86400 * 30 }); } } catch (e) { out.error = String(e).slice(0, 200); }
         if (ok) { await env.IG_KV.put(seenKey, '1', { expirationTtl: 86400 * 120 }); out.added++; }
+        // only move the "since" marker past leads that were saved, so a failed save is retried next poll
         const ct = Math.floor(Date.parse(ld.created_time) / 1000);
-        if (ct > newest) newest = ct;
+        if (ok && ct > newest) newest = ct;
       }
     }
-  } catch (e) { out.error = String(e).slice(0, 200); }
+  } catch (e) { out.error = out.error || String(e).slice(0, 200); }
+  // KV free plan allows ~1,000 writes a day, so only write when something changed
+  // (new leads or an error) or once every 30 minutes as a heartbeat.
   if (newest > since) await env.IG_KV.put('meta:since', String(newest));
-  await env.IG_KV.put('meta:last_poll', JSON.stringify({ at: Date.now(), forms: out.forms, added: out.added, error: out.error }));
+  const beat = new Date().getUTCMinutes() % 30 === 0;
+  if (out.added || out.error || beat) await env.IG_KV.put('meta:last_poll', JSON.stringify({ at: Date.now(), forms: out.forms, added: out.added, error: out.error }));
   return out;
 }
 
