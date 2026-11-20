@@ -179,11 +179,8 @@ async function pollMetaLeads(env) {
         const surpriseRaw = metaAnswer(fd, (n) => n.includes('surprise'));
         const timeline = metaAnswer(fd, (n) => n.includes('propose') || n.includes('when'));
         const surprise = /^yes/i.test(surpriseRaw) ? "Yes, it's a surprise" : /together/i.test(surpriseRaw) ? "We're shopping together" : surpriseRaw ? "No, we've talked about it" : '';
-        const budgetRaw = metaAnswer(fd, (n) => n.includes('budget') || n.includes('2,400') || n.includes('2400'));
-        const budget = !budgetRaw ? '' : /monthly/i.test(budgetRaw) ? '$2,400+ with monthly payments' : /^yes/i.test(budgetRaw) ? '$2,400+ fits budget' : /not/i.test(budgetRaw) ? 'Not right now (below $2,400)' : budgetRaw;
         const fields = {
           id: 'meta-' + ld.id,
-          budget, pay: /monthly/i.test(budgetRaw) ? 'Monthly payments' : '',
           name: metaAnswer(fd, (n) => n === 'full_name' || n.includes('full name') || n === 'name'),
           phone: metaAnswer(fd, (n) => n.includes('phone')),
           email: metaAnswer(fd, (n) => n.includes('email')),
