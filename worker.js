@@ -203,10 +203,10 @@ async function pollMetaLeads(env) {
     }
   } catch (e) { out.error = out.error || String(e).slice(0, 200); }
   // KV free plan allows ~1,000 writes a day, so only write when something changed
-  // (new leads or an error) or once every 30 minutes as a heartbeat.
+  // (new leads) or once every 30 minutes as a heartbeat (errors are recorded then too).
   if (newest > since) await env.IG_KV.put('meta:since', String(newest));
   const beat = new Date().getUTCMinutes() % 30 === 0;
-  if (out.added || out.error || beat) await env.IG_KV.put('meta:last_poll', JSON.stringify({ at: Date.now(), forms: out.forms, added: out.added, error: out.error }));
+  if (out.added || beat) await env.IG_KV.put('meta:last_poll', JSON.stringify({ at: Date.now(), forms: out.forms, added: out.added, error: out.error }));
   return out;
 }
 
